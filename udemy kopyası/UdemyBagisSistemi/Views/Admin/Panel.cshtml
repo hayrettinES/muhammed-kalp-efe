@@ -1,0 +1,154 @@
+@* Bu dosya admin panelini cizer. *@
+@model AdminPanelViewModel
+
+<section class="panel-baslik">
+    @* Bu alan admin panelinin ust basligini gosterir. *@
+    <div>
+        <span class="etiket">Admin Paneli</span>
+        <h1>Kategorileri ve genel sistemi buradan yonet</h1>
+    </div>
+    <div class="istatistik-panelleri tek-satir">
+        <article class="istatistik-kart">
+            <span>Havuz Bakiyesi</span>
+            <strong>@Model.HavuzBakiyesi.ToString("N2") TL</strong>
+        </article>
+        <article class="istatistik-kart">
+            <span>Kullanici</span>
+            <strong>@Model.Kullanicilar.Count</strong>
+        </article>
+        <article class="istatistik-kart">
+            <span>Kurs</span>
+            <strong>@Model.Kurslar.Count</strong>
+        </article>
+        <article class="istatistik-kart">
+            <span>Yorum</span>
+            <strong>@Model.ToplamYorumSayisi</strong>
+        </article>
+    </div>
+</section>
+
+@* Bu blok bilgi ve hata mesajlarini gosterir. *@
+@if (TempData["Mesaj"] is string mesaj)
+{
+    <div class="uyari basari">@mesaj</div>
+}
+@if (TempData["Hata"] is string hata)
+{
+    <div class="uyari hata">@hata</div>
+}
+
+<section class="iki-sutun">
+    <div class="kart-form">
+        @* Bu alan kategori ekleme veya guncelleme formunu gosterir. *@
+        <h2>@(Model.DuzenlenenKategori is null ? "Kategori Ekle" : "Kategori Guncelle")</h2>
+        <form asp-action="@(Model.DuzenlenenKategori is null ? "KategoriEkle" : "KategoriGuncelle")" method="post">
+            @Html.AntiForgeryToken()
+
+            @if (Model.DuzenlenenKategori is not null)
+            {
+                <input type="hidden" name="id" value="@Model.DuzenlenenKategori.Id" />
+            }
+
+            <label class="alan">
+                <span>Kategori Adi</span>
+                <input class="girdi" name="ad" value="@Model.DuzenlenenKategori?.Ad" required />
+            </label>
+
+            <label class="alan">
+                <span>Aciklama</span>
+                <textarea class="girdi" name="aciklama" rows="4" required>@Model.DuzenlenenKategori?.Aciklama</textarea>
+            </label>
+
+            <button type="submit" class="buton birincil tam">Kaydet</button>
+        </form>
+    </div>
+
+    <div class="liste-karti">
+        @* Bu alan mevcut kategorileri listeler. *@
+        <h2>Kategoriler</h2>
+        <div class="tablo-kapsayici">
+            <table class="tablo">
+                <thead>
+                    <tr>
+                        <th>Ad</th>
+                        <th>Aciklama</th>
+                        <th>Islem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var kategori in Model.Kategoriler)
+                    {
+                        <tr>
+                            <td>@kategori.Ad</td>
+                            <td>@kategori.Aciklama</td>
+                            <td class="islem-alani">
+                                <a class="buton kucuk ikincil" asp-action="Panel" asp-route-kategoriId="@kategori.Id">Duzenle</a>
+                                <form asp-action="KategoriSil" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@kategori.Id" />
+                                    <button type="submit" class="buton kucuk tehlike">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="iki-sutun">
+    <div class="liste-karti">
+        @* Bu alan sistemdeki kullanicilari listeler. *@
+        <h2>Kullanicilar</h2>
+        <div class="tablo-kapsayici">
+            <table class="tablo">
+                <thead>
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Eposta</th>
+                        <th>Rol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var kullanici in Model.Kullanicilar)
+                    {
+                        <tr>
+                            <td>@kullanici.AdSoyad</td>
+                            <td>@kullanici.Eposta</td>
+                            <td>@kullanici.Rol</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="liste-karti">
+        @* Bu alan kurslarin genel durumunu listeler. *@
+        <h2>Kurslar</h2>
+        <div class="tablo-kapsayici">
+            <table class="tablo">
+                <thead>
+                    <tr>
+                        <th>Kurs</th>
+                        <th>Kategori</th>
+                        <th>Egitmen</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var kursKart in Model.Kurslar)
+                    {
+                        <tr>
+                            <td>@kursKart.Kurs.Baslik</td>
+                            <td>@kursKart.KategoriAdi</td>
+                            <td>@kursKart.EgitmenAdi</td>
+                            <td>@(kursKart.Kurs.YayinlandiMi ? "Yayinda" : "Taslak")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

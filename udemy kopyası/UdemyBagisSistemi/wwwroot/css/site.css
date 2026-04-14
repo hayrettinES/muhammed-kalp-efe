@@ -1,0 +1,398 @@
+/* Bu dosya uygulamanin tum sayfalarina ortak tasarimi verir. */
+:root {
+    /* Bu alan renk paletini tanimlar. */
+    --zemin: #f4efe6;
+    --kart: #fffaf3;
+    --yazi: #1f2937;
+    --vurgu: #125b50;
+    --vurgu-ikinci: #f0a04b;
+    --kenar: #dfd0b8;
+    --tehlike: #a63d40;
+    --basari: #2e7d32;
+}
+
+/* Bu satir temel govde stilini belirler. */
+body {
+    background:
+        radial-gradient(circle at top left, rgba(240, 160, 75, 0.18), transparent 30%),
+        linear-gradient(180deg, #fcf8f2 0%, var(--zemin) 100%);
+    color: var(--yazi);
+    font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+    margin: 0;
+}
+
+/* Bu sinif ortak genislik sinirini belirler. */
+.sayfa-genislik {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Bu alan ust menuyu stillendirir. */
+.ust-bar {
+    background: rgba(255, 250, 243, 0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--kenar);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+/* Bu sinif menu elemanlarini yatay dizer. */
+.menu-icerik {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 72px;
+    gap: 16px;
+}
+
+/* Bu sinif logoyu vurgular. */
+.logo {
+    color: var(--vurgu);
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+/* Bu sinif menu linklerini yatay dizer. */
+.menu-linkleri {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+/* Bu alan menu linklerinin gorunumunu ayarlar. */
+.menu-linkleri a,
+.kullanici-bilgi {
+    color: var(--yazi);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Bu alan ana icerik boslugunu ayarlar. */
+.ana-icerik {
+    padding-top: 34px;
+    padding-bottom: 48px;
+}
+
+/* Bu alan alt bilgi stilini ayarlar. */
+.alt-bilgi {
+    padding: 22px 0;
+    border-top: 1px solid var(--kenar);
+    background: rgba(18, 91, 80, 0.05);
+}
+
+/* Bu sinif hero alanini kart gibi gosterir. */
+.hero-kart {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 24px;
+    padding: 32px;
+    border: 1px solid var(--kenar);
+    border-radius: 28px;
+    background: linear-gradient(135deg, rgba(255, 250, 243, 0.98), rgba(255, 243, 224, 0.96));
+    box-shadow: 0 18px 40px rgba(18, 91, 80, 0.08);
+}
+
+/* Bu sinif panel basliklarinda duzen saglar. */
+.panel-baslik,
+.blok-baslik {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+/* Bu alan etiket rozetini tanimlar. */
+.etiket,
+.rozet {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(18, 91, 80, 0.1);
+    color: var(--vurgu);
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
+/* Bu sinif yesil rozet varyantini tanimlar. */
+.rozet.yesil {
+    background: rgba(46, 125, 50, 0.12);
+    color: var(--basari);
+}
+
+/* Bu sinif ozet kartlarini grid olarak dizer. */
+.istatistik-panelleri {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+/* Bu sinif tek satir panel kartlarini tanimlar. */
+.tek-satir {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Bu sinif ozet kartini stillendirir. */
+.istatistik-kart {
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px solid var(--kenar);
+    background: var(--kart);
+}
+
+/* Bu satir istatistik metin hiyerarsisini guclendirir. */
+.istatistik-kart strong {
+    display: block;
+    margin-top: 10px;
+    font-size: 1.3rem;
+}
+
+/* Bu sinif icerik bloklarina ust bosluk verir. */
+.icerik-blok {
+    margin-top: 34px;
+}
+
+/* Bu sinif kartlari izgarada dizer. */
+.kart-izgara {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 18px;
+}
+
+/* Bu sinif tek kolon liste gorunumunu tanimlar. */
+.tek-kolon {
+    grid-template-columns: 1fr;
+}
+
+/* Bu sinif uc kolon varyantini tanimlar. */
+.uc-kolon {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* Bu sinif kurs kartlarini stillendirir. */
+.kurs-kart,
+.bilgi-kart,
+.kart-form,
+.liste-karti {
+    background: var(--kart);
+    border: 1px solid var(--kenar);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 0 12px 28px rgba(31, 41, 55, 0.05);
+}
+
+/* Bu sinif kurs kartinin ust bolumunu hizalar. */
+.kurs-kart-ust {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+/* Bu alan fiyat bilgisini vurgular. */
+.fiyat {
+    color: var(--vurgu-ikinci);
+    font-weight: 800;
+}
+
+/* Bu sinif liste noktalarina yatay bosluk verir. */
+.detay-listesi {
+    padding-left: 18px;
+}
+
+/* Bu sinif video oynaticilarin genisligini sinirlar. */
+.onizleme-video {
+    width: 100%;
+    max-height: 280px;
+    border-radius: 18px;
+    background: #000;
+    margin: 10px 0;
+}
+
+/* Bu sinif profil fotografini duzenler. */
+.profil-foto {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 16px;
+    border: 3px solid var(--kenar);
+}
+
+/* Bu sinif yorum yanitlarini gruplayarak iceride gosterir. */
+.yanit-kapsayici {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+/* Bu sinif yorum altindaki yanit kartini gosterir. */
+.yanit-kart {
+    background: rgba(18, 91, 80, 0.05);
+    border: 1px solid rgba(18, 91, 80, 0.12);
+    border-radius: 16px;
+    padding: 12px;
+}
+
+/* Bu sinif yanit formuna ust bosluk verir. */
+.yanit-form {
+    margin-top: 16px;
+}
+
+/* Bu sinif iki sutunlu bolumler olusturur. */
+.iki-sutun {
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: 20px;
+    margin-top: 28px;
+}
+
+/* Bu sinif form sayfalarini merkezler. */
+.form-sayfa {
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+/* Bu sinif alan etiketleri ve girdileri alt alta dizer. */
+.alan {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-weight: 600;
+}
+
+/* Bu sinif checkbox satirini hizalar. */
+.satir-ici {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+/* Bu alan input ve textarea gorunumunu ayarlar. */
+.girdi {
+    width: 100%;
+    border: 1px solid var(--kenar);
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: #fff;
+}
+
+/* Bu sinif butonlari ayni cizgide tutar. */
+.buton-grup {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Bu sinif genel buton stilini tanimlar. */
+.buton {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    border-radius: 14px;
+    padding: 11px 16px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Bu varyant birincil butonu tanimlar. */
+.buton.birincil {
+    background: var(--vurgu);
+    color: #fff;
+}
+
+/* Bu varyant ikincil butonu tanimlar. */
+.buton.ikincil {
+    background: rgba(18, 91, 80, 0.08);
+    color: var(--vurgu);
+    border-color: rgba(18, 91, 80, 0.18);
+}
+
+/* Bu varyant tehlike butonunu tanimlar. */
+.buton.tehlike {
+    background: rgba(166, 61, 64, 0.09);
+    color: var(--tehlike);
+    border-color: rgba(166, 61, 64, 0.2);
+}
+
+/* Bu sinif kucuk buton olcusunu tanimlar. */
+.buton.kucuk {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+
+/* Bu sinif tam genislikte buton olusturur. */
+.buton.tam {
+    width: 100%;
+}
+
+/* Bu sinif bilgi ve hata kutularini stillendirir. */
+.uyari {
+    margin: 16px 0;
+    padding: 14px 16px;
+    border-radius: 16px;
+    font-weight: 600;
+}
+
+/* Bu sinif basari kutusunu renklendirir. */
+.uyari.basari {
+    background: rgba(46, 125, 50, 0.12);
+    color: var(--basari);
+}
+
+/* Bu sinif hata kutusunu renklendirir. */
+.uyari.hata {
+    background: rgba(166, 61, 64, 0.12);
+    color: var(--tehlike);
+}
+
+/* Bu alan dogrulama mesajinin rengini ayarlar. */
+.dogrulama {
+    color: var(--tehlike);
+    font-size: 0.9rem;
+}
+
+/* Bu sinif tablo tasarimini duzenler. */
+.tablo-kapsayici {
+    overflow-x: auto;
+}
+
+/* Bu sinif tabloyu tam genislikte yapar. */
+.tablo {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Bu satir tablo hucrelerinin bosluklarini ayarlar. */
+.tablo th,
+.tablo td {
+    padding: 12px 10px;
+    border-bottom: 1px solid rgba(223, 208, 184, 0.8);
+    text-align: left;
+}
+
+/* Bu sinif islem butonlarini yatay dizer. */
+.islem-alani {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Bu medya sorgusu mobil duzende kolonlari tek satira indirir. */
+@media (max-width: 900px) {
+    .hero-kart,
+    .iki-sutun,
+    .istatistik-panelleri,
+    .tek-satir {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,52 @@
+@* Bu dosya kullanici kayit ekranini cizer. *@
+@model KayitViewModel
+
+<section class="form-sayfa">
+    @* Bu alan kayit formu basligini gosterir. *@
+    <div class="blok-baslik">
+        <h1>Kayit Ol</h1>
+        <p>Ogrenci veya egitmen olarak hesap olusturabilirsin.</p>
+    </div>
+
+    <form asp-action="Kayit" method="post" class="kart-form">
+        @* Bu satir CSRF korumasi icin token uretir. *@
+        @Html.AntiForgeryToken()
+
+        @* Bu alan form genel dogrulama hatalarini gosterir. *@
+        <div asp-validation-summary="ModelOnly" class="uyari hata"></div>
+
+        <label class="alan">
+            <span>Ad Soyad</span>
+            <input asp-for="AdSoyad" class="girdi" />
+            <span asp-validation-for="AdSoyad" class="dogrulama"></span>
+        </label>
+
+        <label class="alan">
+            <span>Eposta</span>
+            <input asp-for="Eposta" class="girdi" />
+            <span asp-validation-for="Eposta" class="dogrulama"></span>
+        </label>
+
+        <label class="alan">
+            <span>Sifre</span>
+            <input asp-for="Sifre" class="girdi" />
+            <span asp-validation-for="Sifre" class="dogrulama"></span>
+        </label>
+
+        <label class="alan">
+            <span>Rol</span>
+            <select asp-for="Rol" class="girdi">
+                <option value="Ogrenci">Ogrenci</option>
+                <option value="Egitmen">Egitmen</option>
+            </select>
+            <span asp-validation-for="Rol" class="dogrulama"></span>
+        </label>
+
+        <button type="submit" class="buton birincil tam">Kayit Ol</button>
+    </form>
+</section>
+
+@section Scripts {
+    @* Bu satir client tarafli dogrulama scriptlerini ekler. *@
+    <partial name="_ValidationScriptsPartial" />
+}

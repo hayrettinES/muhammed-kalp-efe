@@ -1,0 +1,21 @@
+@* Bu dosya uygulamanin genel hata ekranini cizer. *@
+@model HataGorunumModeli
+@{
+    @* Bu satir sayfa basligini belirler. *@
+    ViewData["Title"] = "Hata";
+}
+
+<section class="icerik-blok">
+    @* Bu alan kullaniciya genel hata bilgisini gosterir. *@
+    <div class="liste-karti">
+        <h1>Bir hata olustu</h1>
+        <p>Istek islenirken beklenmeyen bir sorun meydana geldi.</p>
+
+        @if (Model.IstekKimligiGoster)
+        {
+            <p><strong>Istek Kimligi:</strong> <code>@Model.IstekKimligi</code></p>
+        }
+
+        <p>Gelisim ortaminda daha detayli hata bilgisini inceleyebilirsin.</p>
+    </div>
+</section>

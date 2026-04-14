@@ -1,0 +1,140 @@
+@* Bu dosya ogrenci panelini cizer. *@
+@model OgrenciPanelViewModel
+
+<section class="panel-baslik">
+    @* Bu alan ogrenci paneli basligini gosterir. *@
+    <div>
+        <span class="etiket">Ogrenci Paneli</span>
+        <h1>Kurslari incele, onizleme videosuna bak, sonra satin al ve yorum yap</h1>
+    </div>
+    <div class="istatistik-panelleri tek-satir">
+        <article class="istatistik-kart">
+            <span>Guncel Havuz</span>
+            <strong>@Model.HavuzBakiyesi.ToString("N2") TL</strong>
+        </article>
+        <article class="istatistik-kart">
+            <span>Kendi Bakiyem</span>
+            <strong>@Model.OgrenciBakiyesi.ToString("N2") TL</strong>
+        </article>
+        <article class="istatistik-kart">
+            <span>Aldigim Kurs</span>
+            <strong>@Model.AldigiKurslar.Count</strong>
+        </article>
+    </div>
+</section>
+
+@if (TempData["Mesaj"] is string mesaj)
+{
+    <div class="uyari basari">@mesaj</div>
+}
+@if (TempData["Hata"] is string hata)
+{
+    <div class="uyari hata">@hata</div>
+}
+
+<section class="iki-sutun">
+    <div class="kart-form">
+        @* Bu alan ogrencinin kendi hesabina para yuklemesini saglar. *@
+        <h2>Bakiyeme Para Yukle</h2>
+        <form asp-action="BakiyeYukle" method="post">
+            @Html.AntiForgeryToken()
+
+            <label class="alan">
+                <span>Yuklenecek Tutar</span>
+                <input class="girdi" type="number" min="1" step="0.01" name="tutar" required />
+            </label>
+
+            <button type="submit" class="buton birincil tam">Bakiyeye Ekle</button>
+        </form>
+    </div>
+
+    <div class="kart-form">
+        @* Bu alan bagis havuzuna yeni bagis ekleme formudur. *@
+        <h2>Bagis Yap</h2>
+        <form asp-action="BagisYap" method="post">
+            @Html.AntiForgeryToken()
+
+            <label class="alan">
+                <span>Bagisci Adi</span>
+                <input class="girdi" name="bagisciAdSoyad" required />
+            </label>
+
+            <label class="alan">
+                <span>Tutar</span>
+                <input class="girdi" type="number" min="1" step="0.01" name="tutar" required />
+            </label>
+
+            <button type="submit" class="buton birincil tam">Bagisi Ekle</button>
+        </form>
+    </div>
+</section>
+
+<section class="icerik-blok">
+    <div class="liste-karti">
+        @* Bu alan ogrencinin aldigi kurslari listeler. *@
+        <h2>Aldigim Kurslar</h2>
+        <div class="kart-izgara tek-kolon">
+            @if (Model.AldigiKurslar.Count == 0)
+            {
+                <p>Henuz aldigin kurs yok.</p>
+            }
+            else
+            {
+                @foreach (var kursKart in Model.AldigiKurslar)
+                {
+                    var ilerleme = Model.Ilerlemeler.FirstOrDefault(x => x.KursId == kursKart.Kurs.Id);
+                    <article class="bilgi-kart">
+                        <h3>@kursKart.Kurs.Baslik</h3>
+                        <p>Kategori: @kursKart.KategoriAdi</p>
+                        <p>Egitmen: @kursKart.EgitmenAdi</p>
+                        <p>Ilerleme: @((ilerleme?.TamamlanmaYuzdesi ?? 0))%</p>
+                        <p>Son Kalinan Yer: @(string.IsNullOrWhiteSpace(ilerleme?.SonKalinanBolumBasligi) ? "Henuz baslanmadi" : ilerleme?.SonKalinanBolumBasligi)</p>
+                        <a class="buton ikincil" asp-controller="Home" asp-action="KursDetay" asp-route-kursId="@kursKart.Kurs.Id">Kursa Gir</a>
+                    </article>
+                }
+            }
+        </div>
+    </div>
+</section>
+
+<section class="icerik-blok">
+    @* Bu alan satin alinabilir kurslari listeler. *@
+    <div class="blok-baslik">
+        <h2>Yayinli Kurslar</h2>
+        <p>Kurslarin onizleme videosu, puani ve yorum sayisi satin almadan once gorulebilir.</p>
+    </div>
+
+    <div class="kart-izgara">
+        @foreach (var kursKart in Model.Kurslar)
+        {
+            <article class="kurs-kart">
+                <div class="kurs-kart-ust">
+                    <span class="rozet">@kursKart.KategoriAdi</span>
+                    <span class="fiyat">@kursKart.Kurs.Fiyat.ToString("N2") TL</span>
+                </div>
+                <h3>@kursKart.Kurs.Baslik</h3>
+                <p>@kursKart.Kurs.Aciklama</p>
+                <p>Bolum: @kursKart.BolumSayisi</p>
+                <p>Puan: @kursKart.OrtalamaPuan.ToString("0.0") / 5 (@kursKart.YorumSayisi yorum)</p>
+                <video class="onizleme-video" controls src="@kursKart.Kurs.OnizlemeVideoUrl"></video>
+
+                <div class="buton-grup">
+                    <a class="buton ikincil" asp-controller="Home" asp-action="KursDetay" asp-route-kursId="@kursKart.Kurs.Id">Detaya Git</a>
+
+                    @if (kursKart.SahipMi)
+                    {
+                        <span class="rozet yesil">Bu kurs sende var</span>
+                    }
+                    else
+                    {
+                        <form asp-action="KursAl" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="kursId" value="@kursKart.Kurs.Id" />
+                            <button type="submit" class="buton birincil">Kursu Al</button>
+                        </form>
+                    }
+                </div>
+            </article>
+        }
+    </div>
+</section>

@@ -1,0 +1,79 @@
+is_global = true
+build_property.TargetFramework = net10.0
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v10.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = UdemyBagisSistemi
+build_property.RootNamespace = UdemyBagisSistemi
+build_property.ProjectDir = /Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = /Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 10.0
+build_property.EnableCodeStyleSeverity = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Admin/Panel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vUGFuZWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Egitmen/Panel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRWdpdG1lbi9QYW5lbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Hesap/Giris.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSGVzYXAvR2lyaXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Hesap/Kayit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSGVzYXAvS2F5aXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Home/Bagis.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9CYWdpcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Home/KursDetay.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9LdXJzRGV0YXkuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Ogrenci/Panel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT2dyZW5jaS9QYW5lbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Profil/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvZmlsL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-gogkusy85t

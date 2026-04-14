@@ -1,0 +1,211 @@
+@* Bu dosya herkese acik kurs detay sayfasini cizer. *@
+@model KursDetayViewModel
+
+<section class="hero-kart">
+    <div>
+        <span class="etiket">@Model.KursKart.KategoriAdi</span>
+        <h1>@Model.KursKart.Kurs.Baslik</h1>
+        <p>@Model.KursKart.Kurs.Aciklama</p>
+        <p>Egitmen: @Model.KursKart.EgitmenAdi</p>
+        <p>Puan: @Model.KursKart.OrtalamaPuan.ToString("0.0") / 5 (@Model.KursKart.YorumSayisi yorum)</p>
+        <p>Video Bolumu: @Model.KursKart.BolumSayisi</p>
+        <p>Fiyat: @Model.KursKart.Kurs.Fiyat.ToString("N2") TL</p>
+
+        @if (Model.IlerlemeOzeti is not null && Model.SahipMi)
+        {
+            <div class="uyari basari">
+                Ilerleme: @Model.IlerlemeOzeti.TamamlanmaYuzdesi%
+                <br />
+                Son Kalinan Yer: @(string.IsNullOrWhiteSpace(Model.IlerlemeOzeti.SonKalinanBolumBasligi) ? "Henuz baslanmadi" : Model.IlerlemeOzeti.SonKalinanBolumBasligi)
+            </div>
+        }
+
+        <div class="buton-grup">
+            @if (User.Identity?.IsAuthenticated != true)
+            {
+                <a class="buton birincil" asp-controller="Hesap" asp-action="Giris">Giris Yapip Satin Al</a>
+            }
+            else if (User.IsInRole("Ogrenci"))
+            {
+                @if (Model.SahipMi)
+                {
+                    <span class="rozet yesil">Bu kurs sende var</span>
+                }
+                else
+                {
+                    <form asp-controller="Ogrenci" asp-action="KursAl" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="kursId" value="@Model.KursKart.Kurs.Id" />
+                        <button type="submit" class="buton birincil">Kursu Satin Al</button>
+                    </form>
+                }
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.KursKart.Kurs.DokumanUrl))
+            {
+                <a class="buton ikincil" href="@Model.KursKart.Kurs.DokumanUrl" target="_blank">Genel Dokuman</a>
+            }
+        </div>
+    </div>
+
+    <div>
+        <h2>Onizleme Videosu</h2>
+        <video class="onizleme-video" controls src="@Model.KursKart.Kurs.OnizlemeVideoUrl"></video>
+    </div>
+</section>
+
+@if (TempData["Mesaj"] is string mesaj)
+{
+    <div class="uyari basari">@mesaj</div>
+}
+@if (TempData["Hata"] is string hata)
+{
+    <div class="uyari hata">@hata</div>
+}
+
+<section class="iki-sutun">
+    <div class="liste-karti">
+        <h2>Kurs Icerigi</h2>
+        @if (!Model.SahipMi)
+        {
+            <p>Bu kursun tam video listesi satin alma sonrasinda acilir. Su an onizleme deneyimi gosteriliyor.</p>
+        }
+
+        <div class="kart-izgara tek-kolon">
+            @if (!Model.SahipMi)
+            {
+                <p>Bolum basliklari ve tam videolar satin alma sonrasinda acilacak.</p>
+            }
+            else if (Model.Bolumler.Count == 0)
+            {
+                <p>Bu kursa henuz bolum eklenmedi.</p>
+            }
+            else
+            {
+                @foreach (var bolum in Model.Bolumler)
+                {
+                    <article class="bilgi-kart">
+                        <h3>@bolum.SiraNo. @bolum.Baslik</h3>
+                        <p>@bolum.Aciklama</p>
+
+                        @if (Model.SahipMi)
+                        {
+                            <video class="onizleme-video" controls src="@bolum.VideoUrl"></video>
+
+                            <div class="buton-grup">
+                                <form asp-controller="Ogrenci" asp-action="BolumDurumuKaydet" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="kursId" value="@Model.KursKart.Kurs.Id" />
+                                    <input type="hidden" name="kursBolumuId" value="@bolum.Id" />
+                                    <input type="hidden" name="tamamlandiMi" value="false" />
+                                    <button type="submit" class="buton ikincil">Son Kalinan Yer Olarak Kaydet</button>
+                                </form>
+
+                                <form asp-controller="Ogrenci" asp-action="BolumDurumuKaydet" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="kursId" value="@Model.KursKart.Kurs.Id" />
+                                    <input type="hidden" name="kursBolumuId" value="@bolum.Id" />
+                                    <input type="hidden" name="tamamlandiMi" value="true" />
+                                    <button type="submit" class="buton birincil">Tamamlandi Olarak Isaretle</button>
+                                </form>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(bolum.DokumanUrl))
+                            {
+                                <a class="buton ikincil" href="@bolum.DokumanUrl" target="_blank">Bu Videonun Dokumani</a>
+                            }
+                        }
+                    </article>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="kart-form">
+        <h2>Puan ve Yorum</h2>
+        @if (Model.YorumYapabilirMi)
+        {
+            <form asp-controller="Ogrenci" asp-action="YorumYap" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="kursId" value="@Model.KursKart.Kurs.Id" />
+
+                <label class="alan">
+                    <span>Puan</span>
+                    <select class="girdi" name="puan" required>
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                    </select>
+                </label>
+
+                <label class="alan">
+                    <span>Yorum</span>
+                    <textarea class="girdi" name="yorum" rows="5" required></textarea>
+                </label>
+
+                <button type="submit" class="buton birincil tam">Yorum Gonder</button>
+            </form>
+        }
+        else
+        {
+            <p>Yorum yapmak icin kursu satin alip ogrenci olarak oturum acman gerekir.</p>
+        }
+    </div>
+</section>
+
+<section class="icerik-blok">
+    <div class="blok-baslik">
+        <h2>Yorumlar ve Yanitlar</h2>
+        <p>Bu kursu alan ogrenciler yorum yapabilir; diger kullanicilar yorumlara yanit verebilir.</p>
+    </div>
+
+    <div class="kart-izgara tek-kolon">
+        @if (Model.Yorumlar.Count == 0)
+        {
+            <p>Bu kursa henuz yorum gelmedi.</p>
+        }
+        else
+        {
+            @foreach (var yorum in Model.Yorumlar)
+            {
+                <article class="bilgi-kart">
+                    <h3>@yorum.OgrenciAdi</h3>
+                    <p>Puan: @yorum.Puan / 5</p>
+                    <p>@yorum.Yorum</p>
+                    <small>@yorum.Tarih</small>
+
+                    @if (yorum.Yanitlar.Count > 0)
+                    {
+                        <div class="yanit-kapsayici">
+                            @foreach (var yanit in yorum.Yanitlar)
+                            {
+                                <div class="yanit-kart">
+                                    <strong>@yanit.KullaniciAdi</strong>
+                                    <span class="rozet">@yanit.KullaniciRol</span>
+                                    <p>@yanit.Yanit</p>
+                                    <small>@yanit.Tarih</small>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-controller="Yorum" asp-action="YanitEkle" method="post" class="yanit-form">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="kursId" value="@Model.KursKart.Kurs.Id" />
+                            <input type="hidden" name="kursYorumuId" value="@yorum.Id" />
+                            <label class="alan">
+                                <span>Yanit Yaz</span>
+                                <textarea class="girdi" name="yanit" rows="3" required></textarea>
+                            </label>
+                            <button type="submit" class="buton ikincil">Yaniti Gonder</button>
+                        </form>
+                    }
+                </article>
+            }
+        }
+    </div>
+</section>

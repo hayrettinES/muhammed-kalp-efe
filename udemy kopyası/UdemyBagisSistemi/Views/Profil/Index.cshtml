@@ -1,0 +1,55 @@
+@* Bu dosya kullanici profil ekranini cizer. *@
+@model ProfilViewModel
+
+<section class="form-sayfa">
+    <div class="blok-baslik">
+        <h1>Profilimi Duzenle</h1>
+        <p>Kendi bilgilerini, unvanini ve hakkinda yazini buradan guncelleyebilirsin.</p>
+    </div>
+
+    @if (TempData["Mesaj"] is string mesaj)
+    {
+        <div class="uyari basari">@mesaj</div>
+    }
+    @if (TempData["Hata"] is string hata)
+    {
+        <div class="uyari hata">@hata</div>
+    }
+
+    <form asp-action="Kaydet" method="post" enctype="multipart/form-data" class="kart-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="mevcutProfilFotoUrl" value="@Model.ProfilFotoUrl" />
+
+        @if (!string.IsNullOrWhiteSpace(Model.ProfilFotoUrl))
+        {
+            <img class="profil-foto" src="@Model.ProfilFotoUrl" alt="Profil fotografi" />
+        }
+
+        <label class="alan">
+            <span>Ad Soyad</span>
+            <input class="girdi" name="adSoyad" value="@Model.AdSoyad" required />
+        </label>
+
+        <label class="alan">
+            <span>Eposta</span>
+            <input class="girdi" name="eposta" value="@Model.Eposta" required />
+        </label>
+
+        <label class="alan">
+            <span>Unvan</span>
+            <input class="girdi" name="unvan" value="@Model.Unvan" />
+        </label>
+
+        <label class="alan">
+            <span>Hakkinda</span>
+            <textarea class="girdi" name="hakkinda" rows="5">@Model.Hakkinda</textarea>
+        </label>
+
+        <label class="alan">
+            <span>Profil Fotografı</span>
+            <input class="girdi" type="file" name="profilFotoDosyasi" accept="image/*" />
+        </label>
+
+        <button type="submit" class="buton birincil tam">Profili Kaydet</button>
+    </form>
+</section>

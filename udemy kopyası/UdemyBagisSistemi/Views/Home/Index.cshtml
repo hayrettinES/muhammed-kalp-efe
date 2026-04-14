@@ -1,0 +1,99 @@
+@* Bu dosya ziyaretciler icin anasayfa ekranini cizer. *@
+@model AnasayfaViewModel
+
+<section class="hero-kart">
+    @* Bu alan projenin ana tanitim basligini gosterir. *@
+    <div>
+        <span class="etiket">Bagis destekli egitim platformu</span>
+        <h1>Egitmen kursunu yayinlar, ogrenci kursu alir, havuz varsa ucret otomatik karsilanir.</h1>
+        <p>
+            Bu demo projede admin kategorileri yonetir, egitmen kurs ekler, ogrenci kurs alir
+            ve bagiscilar istedigi tutarda sisteme katkida bulunur.
+        </p>
+        <div class="buton-grup">
+            @* Bu buton kullaniciyi kayit sayfasina goturur. *@
+            <a class="buton birincil" asp-controller="Hesap" asp-action="Kayit">Kayit Ol</a>
+
+            @* Bu buton kullaniciyi giris sayfasina goturur. *@
+            <a class="buton ikincil" asp-controller="Hesap" asp-action="Giris">Giris Yap</a>
+        </div>
+    </div>
+
+    @* Bu alan sayisal ozetleri kartlar halinde gosterir. *@
+    <div class="istatistik-panelleri">
+        <article class="istatistik-kart">
+            <span>Havuz Bakiyesi</span>
+            <strong>@Model.HavuzBakiyesi.ToString("N2") TL</strong>
+        </article>
+        <article class="istatistik-kart">
+            <span>Yayinli Kurs</span>
+            <strong>@Model.ToplamKursSayisi</strong>
+        </article>
+        <article class="istatistik-kart">
+            <span>Kategori</span>
+            <strong>@Model.ToplamKategoriSayisi</strong>
+        </article>
+        <article class="istatistik-kart">
+            <span>Toplam Bagis</span>
+            <strong>@Model.ToplamBagisSayisi</strong>
+        </article>
+    </div>
+</section>
+
+<section class="icerik-blok">
+    @* Bu alan yayindaki kurslari kartlar halinde listeler. *@
+    <div class="blok-baslik">
+        <h2>Yayindaki Kurslar</h2>
+        <p>Ogrenci girisi yaptiginda bu kurslari alabilir.</p>
+    </div>
+
+    <div class="kart-izgara">
+        @foreach (var kursKart in Model.YayinliKurslar)
+        {
+            <article class="kurs-kart">
+                @* Bu alan kurs ust bilgisini gosterir. *@
+                <div class="kurs-kart-ust">
+                    <span class="rozet">@kursKart.KategoriAdi</span>
+                    <span class="fiyat">@kursKart.Kurs.Fiyat.ToString("N2") TL</span>
+                </div>
+                <h3>@kursKart.Kurs.Baslik</h3>
+                <p>@kursKart.Kurs.Aciklama</p>
+                <p>Bolum: @kursKart.BolumSayisi</p>
+                <p>Puan: @kursKart.OrtalamaPuan.ToString("0.0") / 5</p>
+                <video class="onizleme-video" controls src="@kursKart.Kurs.OnizlemeVideoUrl"></video>
+                <ul class="detay-listesi">
+                    <li>Egitmen: @kursKart.EgitmenAdi</li>
+                    <li>Onizleme videosu satin alma oncesi izlenebilir</li>
+                    <li>Dokuman: @kursKart.Kurs.DokumanUrl</li>
+                </ul>
+                <a class="buton ikincil" asp-controller="Home" asp-action="KursDetay" asp-route-kursId="@kursKart.Kurs.Id">Detayi Incele</a>
+            </article>
+        }
+    </div>
+</section>
+
+<section class="icerik-blok">
+    @* Bu alan test icin hazir demo hesaplarini ekrana basar. *@
+    <div class="blok-baslik">
+        <h2>Hazir Test Hesaplari</h2>
+        <p>Uygulamayi acinca bu hesaplarla dogrudan deneyebilirsin.</p>
+    </div>
+
+    <div class="kart-izgara uc-kolon">
+        <article class="bilgi-kart">
+            <h3>Admin</h3>
+            <p>Eposta: admin@udemybagis.com</p>
+            <p>Sifre: Admin123!</p>
+        </article>
+        <article class="bilgi-kart">
+            <h3>Egitmen</h3>
+            <p>Eposta: egitmen@udemybagis.com</p>
+            <p>Sifre: Egitmen123!</p>
+        </article>
+        <article class="bilgi-kart">
+            <h3>Ogrenci</h3>
+            <p>Eposta: ogrenci@udemybagis.com</p>
+            <p>Sifre: Ogrenci123!</p>
+        </article>
+    </div>
+</section>

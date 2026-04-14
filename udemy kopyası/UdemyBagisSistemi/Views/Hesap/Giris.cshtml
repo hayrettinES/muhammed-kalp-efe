@@ -1,0 +1,43 @@
+@* Bu dosya kullanici giris ekranini cizer. *@
+@model GirisViewModel
+
+<section class="form-sayfa">
+    @* Bu alan giris formu basligini gosterir. *@
+    <div class="blok-baslik">
+        <h1>Giris Yap</h1>
+        <p>Admin, egitmen veya ogrenci hesabiyla sisteme giris yapabilirsin.</p>
+    </div>
+
+    @* Bu blok TempData ile gelen basari mesajini gosterir. *@
+    @if (TempData["Mesaj"] is string mesaj)
+    {
+        <div class="uyari basari">@mesaj</div>
+    }
+
+    <form asp-action="Giris" method="post" class="kart-form">
+        @* Bu satir CSRF korumasi icin token uretir. *@
+        @Html.AntiForgeryToken()
+
+        @* Bu alan form genel dogrulama hatalarini gosterir. *@
+        <div asp-validation-summary="ModelOnly" class="uyari hata"></div>
+
+        <label class="alan">
+            <span>Eposta</span>
+            <input asp-for="Eposta" class="girdi" />
+            <span asp-validation-for="Eposta" class="dogrulama"></span>
+        </label>
+
+        <label class="alan">
+            <span>Sifre</span>
+            <input asp-for="Sifre" class="girdi" />
+            <span asp-validation-for="Sifre" class="dogrulama"></span>
+        </label>
+
+        <button type="submit" class="buton birincil tam">Giris Yap</button>
+    </form>
+</section>
+
+@section Scripts {
+    @* Bu satir client tarafli dogrulama scriptlerini ekler. *@
+    <partial name="_ValidationScriptsPartial" />
+}

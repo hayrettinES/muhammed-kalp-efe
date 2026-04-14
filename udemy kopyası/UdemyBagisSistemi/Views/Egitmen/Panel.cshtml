@@ -1,0 +1,183 @@
+@* Bu dosya egitmen panelini cizer. *@
+@model EgitmenPanelViewModel
+
+<section class="panel-baslik">
+    @* Bu alan egitmen paneli basligini gosterir. *@
+    <div>
+        <span class="etiket">Egitmen Paneli</span>
+        <h1>Kursunu olustur, onizleme videosu koy ve video bolumlerini tek tek yukle</h1>
+    </div>
+</section>
+
+@* Bu blok bilgi ve hata mesajlarini gosterir. *@
+@if (TempData["Mesaj"] is string mesaj)
+{
+    <div class="uyari basari">@mesaj</div>
+}
+@if (TempData["Hata"] is string hata)
+{
+    <div class="uyari hata">@hata</div>
+}
+
+<section class="iki-sutun">
+    <div class="kart-form">
+        @* Bu alan kurs ekleme ve guncelleme formunu gosterir. *@
+        <h2>@(Model.DuzenlenenKurs is null ? "Kurs Ekle" : "Kurs Guncelle")</h2>
+        <form asp-action="KursKaydet" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="id" value="@Model.DuzenlenenKurs?.Id" />
+            <input type="hidden" name="mevcutOnizlemeVideoUrl" value="@Model.DuzenlenenKurs?.OnizlemeVideoUrl" />
+            <input type="hidden" name="mevcutDokumanUrl" value="@Model.DuzenlenenKurs?.DokumanUrl" />
+
+            <label class="alan">
+                <span>Kurs Basligi</span>
+                <input class="girdi" name="baslik" value="@Model.DuzenlenenKurs?.Baslik" required />
+            </label>
+
+            <label class="alan">
+                <span>Aciklama</span>
+                <textarea class="girdi" name="aciklama" rows="4" required>@Model.DuzenlenenKurs?.Aciklama</textarea>
+            </label>
+
+            <label class="alan">
+                <span>Kategori</span>
+                <select class="girdi" name="kategoriId" required>
+                    @foreach (var kategori in Model.Kategoriler)
+                    {
+                        @if (Model.DuzenlenenKurs?.KategoriId == kategori.Id)
+                        {
+                            <option value="@kategori.Id" selected>@kategori.Ad</option>
+                        }
+                        else
+                        {
+                            <option value="@kategori.Id">@kategori.Ad</option>
+                        }
+                    }
+                </select>
+            </label>
+
+            <label class="alan">
+                <span>Onizleme Videosu</span>
+                <input class="girdi" type="file" name="onizlemeVideoDosyasi" accept="video/*" @(Model.DuzenlenenKurs is null ? "required" : "") />
+            </label>
+
+            @if (!string.IsNullOrWhiteSpace(Model.DuzenlenenKurs?.OnizlemeVideoUrl))
+            {
+                <video class="onizleme-video" controls src="@Model.DuzenlenenKurs.OnizlemeVideoUrl"></video>
+            }
+
+            <label class="alan">
+                <span>Genel Dokuman</span>
+                <input class="girdi" type="file" name="dokumanDosyasi" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" />
+            </label>
+
+            @if (!string.IsNullOrWhiteSpace(Model.DuzenlenenKurs?.DokumanUrl))
+            {
+                <a class="buton ikincil" href="@Model.DuzenlenenKurs.DokumanUrl" target="_blank">Mevcut Dokumani Ac</a>
+            }
+
+            <label class="alan">
+                <span>Fiyat</span>
+                <input class="girdi" type="number" step="0.01" min="0" name="fiyat" value="@Model.DuzenlenenKurs?.Fiyat.ToString("0.##")" required />
+            </label>
+
+            <label class="satir-ici">
+                <input type="checkbox" name="yayinlandiMi" value="true" @(Model.DuzenlenenKurs?.YayinlandiMi == true ? "checked" : "") />
+                <span>Kaydeder kaydetmez yayina al</span>
+            </label>
+
+            <button type="submit" class="buton birincil tam">Kursu Kaydet</button>
+        </form>
+    </div>
+
+    <div class="liste-karti">
+        @* Bu alan egitmenin kurslarini listeler. *@
+        <h2>Kurslarim</h2>
+        <div class="kart-izgara tek-kolon">
+            @foreach (var kursKart in Model.Kurslar)
+            {
+                <article class="kurs-kart">
+                    <div class="kurs-kart-ust">
+                        <span class="rozet">@kursKart.KategoriAdi</span>
+                        <span class="fiyat">@kursKart.Kurs.Fiyat.ToString("N2") TL</span>
+                    </div>
+                    <h3>@kursKart.Kurs.Baslik</h3>
+                    <p>@kursKart.Kurs.Aciklama</p>
+                    <p>Bolum Sayisi: @kursKart.BolumSayisi</p>
+                    <p>Durum: @(kursKart.Kurs.YayinlandiMi ? "Yayinda" : "Taslak")</p>
+                    <div class="buton-grup">
+                        <a class="buton ikincil" asp-action="Panel" asp-route-kursId="@kursKart.Kurs.Id">Duzenle</a>
+                        <form asp-action="YayinDurumuDegistir" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="kursId" value="@kursKart.Kurs.Id" />
+                            <button type="submit" class="buton kucuk birincil">Yayin Durumunu Degistir</button>
+                        </form>
+                    </div>
+                </article>
+            }
+        </div>
+    </div>
+</section>
+
+@if (Model.DuzenlenenKurs is not null)
+{
+    <section class="iki-sutun">
+        <div class="kart-form">
+            @* Bu alan secili kursa yeni video bolumu ekler. *@
+            <h2>Video Bolumu Ekle</h2>
+            <form asp-action="BolumEkle" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="kursId" value="@Model.DuzenlenenKurs.Id" />
+
+                <label class="alan">
+                    <span>Bolum Basligi</span>
+                    <input class="girdi" name="baslik" required />
+                </label>
+
+                <label class="alan">
+                    <span>Bolum Aciklamasi</span>
+                    <textarea class="girdi" name="aciklama" rows="3" required></textarea>
+                </label>
+
+                <label class="alan">
+                    <span>Video Dosyasi</span>
+                    <input class="girdi" type="file" name="videoDosyasi" accept="video/*" required />
+                </label>
+
+                <label class="alan">
+                    <span>Bu Videonun Dokumani</span>
+                    <input class="girdi" type="file" name="dokumanDosyasi" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" />
+                </label>
+
+                <button type="submit" class="buton birincil tam">Bolum Yukle</button>
+            </form>
+        </div>
+
+        <div class="liste-karti">
+            @* Bu alan secili kursun video bolumlerini listeler. *@
+            <h2>Yuklenen Bolumler</h2>
+            <div class="kart-izgara tek-kolon">
+                @if (Model.Bolumler.Count == 0)
+                {
+                    <p>Bu kursa henuz video bolumu eklenmedi.</p>
+                }
+                else
+                {
+                    @foreach (var bolum in Model.Bolumler)
+                    {
+                        <article class="bilgi-kart">
+                            <h3>@bolum.SiraNo. @bolum.Baslik</h3>
+                            <p>@bolum.Aciklama</p>
+                            <video class="onizleme-video" controls src="@bolum.VideoUrl"></video>
+                            @if (!string.IsNullOrWhiteSpace(bolum.DokumanUrl))
+                            {
+                                <a class="buton ikincil" href="@bolum.DokumanUrl" target="_blank">Bolum Dokumani</a>
+                            }
+                        </article>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+}

@@ -1,0 +1,48 @@
+@* Bu dosya herkese acik bagis sayfasini cizer. *@
+@model BagisSayfasiViewModel
+
+<section class="hero-kart">
+    <div>
+        <span class="etiket">Bagis Havuzu</span>
+        <h1>Bir ogrencinin kursa ucretsiz erismesine dogrudan katki sagla</h1>
+        <p>Burada biriken bagislar, havuz bakiyesi yeterliyse ogrencilerin kurs ucretlerini otomatik olarak karsilar.</p>
+    </div>
+
+    <div class="istatistik-panelleri">
+        <article class="istatistik-kart">
+            <span>Guncel Havuz</span>
+            <strong>@Model.HavuzBakiyesi.ToString("N2") TL</strong>
+        </article>
+        <article class="istatistik-kart">
+            <span>Toplam Bagis</span>
+            <strong>@Model.ToplamBagisSayisi</strong>
+        </article>
+    </div>
+</section>
+
+@if (TempData["Mesaj"] is string mesaj)
+{
+    <div class="uyari basari">@mesaj</div>
+}
+@if (TempData["Hata"] is string hata)
+{
+    <div class="uyari hata">@hata</div>
+}
+
+<section class="form-sayfa">
+    <form asp-action="Bagis" method="post" class="kart-form">
+        @Html.AntiForgeryToken()
+
+        <label class="alan">
+            <span>Ad Soyad</span>
+            <input class="girdi" name="bagisciAdSoyad" required />
+        </label>
+
+        <label class="alan">
+            <span>Bagis Tutari</span>
+            <input class="girdi" type="number" name="tutar" step="0.01" min="1" required />
+        </label>
+
+        <button type="submit" class="buton birincil tam">Bagis Yap</button>
+    </form>
+</section>

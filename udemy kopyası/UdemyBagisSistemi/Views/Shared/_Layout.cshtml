@@ -1,0 +1,75 @@
+@* Bu dosya uygulamanin ortak sayfa iskeletini cizer. *@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    @* Bu alan sayfanin temel meta bilgilerini tanimlar. *@
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Udemy Bagis Sistemi</title>
+
+    @* Bu satir Bootstrap stil dosyasini ekler. *@
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    @* Bu satir uygulamaya ozel stil dosyasini ekler. *@
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @* Bu alan ust menuyu cizer. *@
+    <header class="ust-bar">
+        <div class="sayfa-genislik menu-icerik">
+            <a asp-controller="Home" asp-action="Index" class="logo">UdemyBagis</a>
+
+            <nav class="menu-linkleri">
+                <a asp-controller="Home" asp-action="Index">Anasayfa</a>
+                <a asp-controller="Home" asp-action="Bagis">Bagis Yap</a>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @* Bu blok rola gore ilgili panele giden baglantiyi gosterir. *@
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Admin" asp-action="Panel">Admin Paneli</a>
+                    }
+                    @if (User.IsInRole("Egitmen"))
+                    {
+                        <a asp-controller="Egitmen" asp-action="Panel">Egitmen Paneli</a>
+                    }
+                    @if (User.IsInRole("Ogrenci"))
+                    {
+                        <a asp-controller="Ogrenci" asp-action="Panel">Ogrenci Paneli</a>
+                    }
+
+                    <a asp-controller="Profil" asp-action="Index">Profilim</a>
+                    <span class="kullanici-bilgi">@User.Identity.Name</span>
+                    <a asp-controller="Hesap" asp-action="Cikis">Cikis</a>
+                }
+                else
+                {
+                    <a asp-controller="Hesap" asp-action="Giris">Giris</a>
+                    <a asp-controller="Hesap" asp-action="Kayit">Kayit</a>
+                }
+            </nav>
+        </div>
+    </header>
+
+    @* Bu alan sayfanin asil icerigini cizer. *@
+    <main class="sayfa-genislik ana-icerik">
+        @RenderBody()
+    </main>
+
+    @* Bu alan sayfa alt bilgisini cizer. *@
+    <footer class="alt-bilgi">
+        <div class="sayfa-genislik">
+            <span>ASP.NET Core MVC + SQLite demo proje</span>
+        </div>
+    </footer>
+
+    @* Bu satir ortak javascript kutuphanelerini ekler. *@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @* Bu satir sayfaya ozel script alanina izin verir. *@
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
