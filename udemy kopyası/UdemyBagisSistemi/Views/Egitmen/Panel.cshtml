@@ -1,183 +1,727 @@
-@* Bu dosya egitmen panelini cizer. *@
-@model EgitmenPanelViewModel
-
-<section class="panel-baslik">
-    @* Bu alan egitmen paneli basligini gosterir. *@
-    <div>
-        <span class="etiket">Egitmen Paneli</span>
-        <h1>Kursunu olustur, onizleme videosu koy ve video bolumlerini tek tek yukle</h1>
-    </div>
-</section>
-
-@* Bu blok bilgi ve hata mesajlarini gosterir. *@
-@if (TempData["Mesaj"] is string mesaj)
-{
-    <div class="uyari basari">@mesaj</div>
+@{
+    Layout = null;
 }
-@if (TempData["Hata"] is string hata)
-{
-    <div class="uyari hata">@hata</div>
-}
+@model UdemyBagisSistemi.ViewModels.EgitmenPanelViewModel
 
-<section class="iki-sutun">
-    <div class="kart-form">
-        @* Bu alan kurs ekleme ve guncelleme formunu gosterir. *@
-        <h2>@(Model.DuzenlenenKurs is null ? "Kurs Ekle" : "Kurs Guncelle")</h2>
-        <form asp-action="KursKaydet" method="post" enctype="multipart/form-data">
-            @Html.AntiForgeryToken()
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Eğitmen Paneli — EduVerse</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-            <input type="hidden" name="id" value="@Model.DuzenlenenKurs?.Id" />
-            <input type="hidden" name="mevcutOnizlemeVideoUrl" value="@Model.DuzenlenenKurs?.OnizlemeVideoUrl" />
-            <input type="hidden" name="mevcutDokumanUrl" value="@Model.DuzenlenenKurs?.DokumanUrl" />
+  :root {
+    --bg:        #141c2e;
+    --bg2:       #111827;
+    --surface:   rgba(255,255,255,.03);
+    --surfaceH:  rgba(255,255,255,.07);
+    --border:    rgba(255,255,255,.09);
+    --borderH:   rgba(255,255,255,.18);
+    --copper:    #e8924a;
+    --mint:      #3dffc0;
+    --mint2:     rgba(61,255,192,.1);
+    --text:      #e2e8f4;
+    --text2:     #8898b8;
+    --fh:        'Cormorant Garamond', serif;
+    --fs:        'Plus Jakarta Sans', sans-serif;
+    --fm:        'JetBrains Mono', monospace;
+  }
 
-            <label class="alan">
-                <span>Kurs Basligi</span>
-                <input class="girdi" name="baslik" value="@Model.DuzenlenenKurs?.Baslik" required />
-            </label>
+  body {
+    font-family: var(--fs);
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    cursor: none; /* Hide default cursor */
+  }
 
-            <label class="alan">
-                <span>Aciklama</span>
-                <textarea class="girdi" name="aciklama" rows="4" required>@Model.DuzenlenenKurs?.Aciklama</textarea>
-            </label>
+  /* ══ CUSTOM SCROLLBAR ══ */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--mint); }
 
-            <label class="alan">
-                <span>Kategori</span>
-                <select class="girdi" name="kategoriId" required>
-                    @foreach (var kategori in Model.Kategoriler)
-                    {
-                        @if (Model.DuzenlenenKurs?.KategoriId == kategori.Id)
+  /* ══ GLOBAl CURSOR ══ */
+  #cur {
+    position: fixed;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--mint);
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: width .2s, height .2s, opacity .2s;
+    mix-blend-mode: screen;
+  }
+  #cur.grow { width: 32px; height: 32px; opacity: 0.6; }
+
+  /* ══ SIDEBAR ══ */
+  .sidebar {
+    width: 270px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+  }
+  .sidebar.collapsed {
+    width: 0;
+    padding: 0;
+    border: none;
+    opacity: 0;
+  }
+  .logo {
+    font-family: var(--fh);
+    font-size: 2rem;
+    color: var(--mint);
+    text-decoration: none;
+    font-weight: 700;
+    margin-bottom: 3.5rem;
+    display: inline-block;
+  }
+  .nav-menu {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+  }
+  .nav-item {
+    color: var(--text2);
+    text-decoration: none;
+    padding: .85rem 1.2rem;
+    border-radius: 10px;
+    transition: all .3s ease;
+    font-weight: 600;
+    font-size: .9rem;
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    cursor: none; /* Let custom cursor handle it */
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface); }
+  .nav-item.active { background: var(--mint2); color: var(--mint); position: relative; }
+  .nav-item.active::before {
+    content: ''; position: absolute; left: -2rem; top: 50%;
+    transform: translateY(-50%); height: 60%; width: 4px;
+    background: var(--mint); border-radius: 0 4px 4px 0;
+  }
+
+  /* ══ MAIN LAYOUT ══ */
+  .main-content {
+    flex: 1;
+    position: relative;
+    overflow-x: hidden;
+    background: radial-gradient(circle at top right, rgba(61,255,192,0.03), transparent 400px);
+  }
+  .content-wrap { padding: 4rem; max-width: 1300px; margin: 0 auto; }
+
+  .header { margin-bottom: 3rem; }
+  .header h1 { font-family: var(--fh); font-size: 2.8rem; color: var(--text); font-weight: 700; line-height: 1.1; }
+  .header h1 em { font-style: italic; color: var(--mint); }
+  .header p { color: var(--text2); margin-top: .8rem; font-size: 1.05rem; }
+
+  /* ══ SPA TABS ══ */
+  .tab-pane { display: none; animation: fadeIn .4s ease forwards; opacity: 0; }
+  .tab-pane.active { display: block; }
+  @@keyframes fadeIn { to { opacity: 1; } }
+
+  /* ══ DASHBOARD WIDGETS ══ */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  .stat-card {
+    background: rgba(255,255,255,.02);
+    border: 1px solid var(--border);
+    padding: 1.8rem;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s, border-color .2s;
+  }
+  .stat-card:hover { transform: translateY(-3px); border-color: rgba(61,255,192,.3); background: rgba(61,255,192,.02); }
+  .stat-card::after {
+    content: ''; position: absolute; top: 0; right: 0;
+    width: 80px; height: 80px; background: var(--mint);
+    filter: blur(50px); opacity: 0.1;
+  }
+  .st-label { display: block; color: var(--text2); font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .8rem; font-weight: 600; }
+  .st-val { font-family: var(--fm); font-size: 2.2rem; color: var(--text); font-weight: 400; }
+  .st-sub { display: inline-block; margin-top:.5rem; font-size: .8rem; color: var(--mint); background: var(--mint2); padding: 2px 8px; border-radius: 4px; }
+
+  /* Bottom Row Dashboard */
+  .dash-row-2 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+  }
+  .panel-box {
+    background: rgba(255,255,255,.015);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+  }
+  .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .panel-title { font-family: var(--fh); font-size: 1.6rem; font-weight: 600; color: var(--mint); }
+  
+  .activity-list { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+  .activity-item { display: flex; gap: 1rem; align-items: flex-start; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+  .activity-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .act-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--mint); margin-top: 5px; box-shadow: 0 0 10px rgba(61,255,192,.4); }
+  .act-dot.copper { background: var(--copper); box-shadow: 0 0 10px rgba(232,146,74,.4); }
+  .act-content p { font-size: .95rem; color: var(--text); margin-bottom: .2rem; }
+  .act-content span { font-size: .8rem; color: var(--text2); font-family: var(--fm); }
+
+  /* ══ BUTTONS & FORMS ══ */
+  .btn-mint {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .85rem 1.6rem; border-radius: 100px;
+    background: var(--mint); color: #000;
+    font-weight: 700; font-size: .9rem; text-decoration: none;
+    border: none; cursor: none;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-mint:hover { box-shadow: 0 4px 20px rgba(61,255,192,.3); transform: translateY(-2px); }
+
+  .empty-state { text-align: center; padding: 4rem 2rem; }
+  .empty-state img { opacity: 0.5; margin-bottom: 1.5rem; width: 64px; }
+  .empty-state h3 { font-family: var(--fh); font-size: 2rem; color: var(--text2); margin-bottom: 1rem; }
+
+  /* ══ MODAL ══ */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(10px);
+    z-index: 1000; display: none; justify-content: center; align-items: center;
+    opacity: 0; transition: opacity .3s ease;
+  }
+  .modal-overlay.show { display: flex; opacity: 1; }
+  .modal-content {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 20px;
+    width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto;
+    padding: 3rem; position: relative; transform: translateY(30px); transition: transform .3s ease;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .modal-overlay.show .modal-content { transform: translateY(0); }
+  .modal-close {
+    position: absolute; top: 1.5rem; right: 1.5rem;
+    background: var(--surface); color: var(--text2); border: none; font-size: 1.2rem;
+    width: 36px; height: 36px; border-radius: 50%;
+    cursor: none; display:flex; align-items:center; justify-content:center;
+    transition: all .2s;
+  }
+  .modal-close:hover { background: var(--surfaceH); color: var(--mint); transform: rotate(90deg); }
+  
+  /* Form Elements in Modal */
+  .form-group { margin-bottom: 1.5rem; }
+  .form-label { display: block; margin-bottom: .6rem; font-weight: 600; color: var(--text2); font-size: .9rem; letter-spacing: .02em; }
+  .form-control {
+    width: 100%; padding: .9rem 1.2rem; border-radius: 10px; border: 1px solid var(--border);
+    background: rgba(0,0,0,0.2); color: var(--text); font-family: var(--fs); font-size: .95rem;
+    transition: all .2s;
+  }
+  .form-control:focus { outline: none; border-color: var(--mint); background: rgba(0,0,0,0.4); box-shadow: 0 0 0 3px var(--mint2); }
+  textarea.form-control { resize: vertical; min-height: 120px; }
+  
+  .file-drop-area {
+    border: 2px dashed var(--borderH); border-radius: 12px; padding: 2rem;
+    text-align: center; color: var(--text2); cursor: none; transition: all .3s;
+    background: rgba(255,255,255,0.015); display: block;
+  }
+  .file-drop-area:hover { border-color: var(--mint); background: var(--mint2); color: var(--mint); transform: translateY(-2px); }
+  .file-drop-area input[type="file"] { display: none; }
+  .file-drop-area i { font-size: 2rem; margin-bottom: .5rem; display: block; opacity: 0.7; }
+</style>
+</head>
+<body>
+
+  <!-- GLOBAL CURSOR -->
+  <div id="cur"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="/" class="logo">Edu<em>Verse</em></a>
+    <ul class="nav-menu">
+      <li><a class="nav-item active" data-tab="tab-dashboard">Dashboard</a></li>
+      <li><a class="nav-item" data-tab="tab-kurslar">Kurs Yönetimi</a></li>
+      <li><a class="nav-item" data-tab="tab-ogrenciler">Öğrencilerim</a></li>
+      <li><a class="nav-item" data-tab="tab-profil">Profil Ayarları</a></li>
+      <li style="margin-top:auto;">
+        <a href="/Hesap/Cikis" class="nav-item" style="color:var(--copper)">← Çıkış Yap</a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <div class="content-wrap">
+      
+      <div style="margin-bottom: 2rem;">
+          <button id="sidebarToggle" class="btn-mint" style="background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 12px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+      </div>
+
+      <header class="header">
+        <h1>Hoş geldin, <em>Eğitmen</em></h1>
+        <p>Kurslarını yönet, gelirlerini takip et ve öğrencilerinle bağ kur.</p>
+      </header>
+
+      @if (TempData["Mesaj"] != null)
+      {
+          <div style="background:var(--mint2); border:1px solid rgba(61,255,192,.3); padding:1.2rem; border-radius:12px; color:var(--mint); margin-bottom:2.5rem; font-weight:500;">
+              ✓ @TempData["Mesaj"]
+          </div>
+      }
+
+      <!-- ══ TAB 1: DASHBOARD ══ -->
+      <div id="tab-dashboard" class="tab-pane active">
+        <!-- İstatistikler -->
+        <div class="dash-grid">
+          <div class="stat-card">
+            <span class="st-label">Toplam Kurs Sayısı</span>
+            <strong class="st-val">@Model.Kurslar.Count</strong>
+            <span class="st-sub">@(Model.Kurslar.Count(k => k.Kurs.YayinlandiMi)) Yayında</span>
+          </div>
+          <div class="stat-card">
+            <span class="st-label">Aktif Öğrenciler</span>
+            <strong class="st-val">@Model.ToplamOgrenciSayisi</strong>
+            <span class="st-sub" style="color:var(--text2); background:transparent;">Bu ay katılan: @Model.BuAyKatilanOgrenciSayisi</span>
+          </div>
+          <div class="stat-card">
+            <span class="st-label">Toplam Gelir</span>
+            <strong class="st-val">₺@Model.ToplamGelir.ToString("N2")</strong>
+            <span class="st-sub">@Model.Kurslar.Count(k => k.Kurs.YayinlandiMi) Aktif Kurs</span>
+          </div>
+          <div class="stat-card" style="border-color: rgba(232,146,74,.3);">
+            <span class="st-label" style="color:var(--copper);">Gelen Yorumlar</span>
+            <strong class="st-val">@Model.ToplamYorumSayisi</strong>
+            <span class="st-sub" style="color:var(--copper); background:rgba(232,146,74,.1);">
+              @(Model.ToplamYorumSayisi > 0 ? "Yorum Var" : "Henüz Yorum Yok")
+            </span>
+          </div>
+        </div>
+
+        <!-- İkinci Satır -->
+        <div class="dash-row-2">
+          <!-- Son Aktiviteler -->
+          <div class="panel-box">
+            <div class="panel-head">
+              <h2 class="panel-title">Son Aktiviteler</h2>
+              <span style="font-size:.8rem; color:var(--text2); padding:.4rem .9rem; background:var(--surface); border-radius:8px;">Son 15 Hareket</span>
+            </div>
+            @if (Model.SonAktiviteler.Count == 0)
+            {
+                <div style="text-align:center; padding:3rem 1rem; color:var(--text2);">
+                    <div style="font-size:2.5rem; margin-bottom:1rem; opacity:.4;">📋</div>
+                    <p style="font-size:.95rem;">Henüz kaydedilmiş bir aktivite yok.<br/>İlk kursunuzu oluşturarak başlayın!</p>
+                </div>
+            }
+            else
+            {
+                <ul class="activity-list">
+                @foreach (var aktivite in Model.SonAktiviteler)
+                {
+                    <li class="activity-item">
+                        <div class="act-dot @aktivite.IkonRengi"></div>
+                        <div class="act-content">
+                            <p>@Html.Raw(aktivite.Metin)</p>
+                            <span>@aktivite.Tarih</span>
+                        </div>
+                    </li>
+                }
+                </ul>
+            }
+          </div>
+
+          <!-- Yönlendirme -->
+          <div class="panel-box" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+            <div style="font-size:3rem; margin-bottom:1rem;">🚀</div>
+            <h3 style="color:var(--text); margin-bottom:.5rem;">Yeni Bir Fikrin Mi Var?</h3>
+            <p style="color:var(--text2); font-size:.9rem; margin-bottom:1.5rem;">Sıradaki eğitim setini oluşturmaya hemen başla ve kitleni büyüt!</p>
+            <a href="javascript:void(0)" onclick="openKursModal()" class="btn-mint">Kurs Oluştur →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TAB 2: KURS YÖNETİMİ ══ -->
+      <div id="tab-kurslar" class="tab-pane">
+        <div class="panel-box">
+           <div class="panel-head">
+               <h2 class="panel-title">Mevcut Kurslarınız</h2>
+               <button class="btn-mint" onclick="openKursModal()">+ Yeni Kurs</button>
+           </div>
+           @if (Model.Kurslar.Count == 0)
+           {
+               <div class="empty-state">
+                   <h3 style="color:var(--text2); font-size:1.4rem;">Henüz bir kursunuz yok</h3>
+                   <p style="color:var(--muted); margin-bottom:1.5rem;">Öğrencileriniz sizinle buluşmak için sabırsızlanıyor. İlk kursunuzu şimdi oluşturun.</p>
+                   <button class="btn-mint" onclick="openKursModal()">Hemen Eğitime Başla</button>
+               </div>
+           }
+           else
+           {
+               <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                   @foreach (var kursObj in Model.Kurslar)
+                   {
+                       var kurs = kursObj.Kurs;
+                       <div class="stat-card" style="padding: 0; display:flex; flex-direction:column;">
+                           <div style="background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); padding: 1.5rem; position: relative;">
+                               @if(kurs.YayinlandiMi) {
+                                   <span style="position: absolute; top: 1rem; right: 1rem; background: var(--mint2); color: var(--mint); padding: 0.3rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">Yayında</span>
+                               } else {
+                                   <span style="position: absolute; top: 1rem; right: 1rem; background: rgba(232,146,74,0.1); color: var(--copper); padding: 0.3rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">Taslak</span>
+                               }
+                               <h3 style="color: var(--mint); font-family: var(--fh); font-size: 1.6rem; margin-bottom: 1rem; padding-right: 4.5rem; line-height: 1.2;">@kurs.Baslik</h3>
+                               <p style="color: var(--text2); font-size: 0.9rem; margin-bottom: 0;">
+                                  ⭐ @kursObj.OrtalamaPuan.ToString("N1") / 5.0 • @kursObj.YorumSayisi Yorum
+                               </p>
+                           </div>
+                           <div style="padding: 1.5rem; flex: 1; display:flex; flex-direction:column;">
+                               <div style="display:flex; justify-content:space-between; margin-bottom: 1.5rem;">
+                                   <span style="color: var(--text); font-family: var(--fm); font-size: 1.2rem;">₺@kurs.Fiyat.ToString("N2")</span>
+                                   <span style="color: var(--text2); font-size: 0.9rem;">@kursObj.BolumSayisi Bölüm</span>
+                               </div>
+                               <button class="btn-mint" style="width: 100%; justify-content: center;" onclick="location.href='/Egitmen/KursDetay?kursId=@kurs.Id'">✏️ Yönet ve Düzenle</button>
+                           </div>
+                       </div>
+                   }
+               </div>
+           }
+        </div>
+      </div>
+
+      <!-- ══ TAB 3: ÖĞRENCİLERİM ══ -->
+      <div id="tab-ogrenciler" class="tab-pane">
+        <div class="sec-head" style="margin-bottom: 2rem;">
+            <h2 style="font-family: var(--fh); font-size: 2rem;">Kitle <em style="color:var(--mint); font-style:italic;">Analizi</em></h2>
+            <p style="color:var(--text2); font-size:.9rem;">Kurslarınıza kayıtlı öğrencilerin ilerleme durumları</p>
+        </div>
+
+        @if (!Model.KursOgrencileri.Any())
+        {
+            <div class="panel-box empty-state">
+               <h3 style="font-size:1.8rem; color:var(--text2);">Öğrenci Yok</h3>
+               <p style="color:var(--muted);">Henüz hiçbir öğrenci kursunuza kayıt olmadı. Kursları yayınladıktan sonra buradan analiz edebilirsiniz.</p>
+            </div>
+        }
+        else
+        {
+            <div style="display:flex; flex-direction:column; gap: 2rem;">
+            @foreach (var kurs in Model.KursOgrencileri)
+            {
+                <div class="panel-box" style="padding: 0; overflow: hidden;">
+                    <!-- KURS BAŞLIĞI -->
+                    <div style="background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); padding: 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h3 style="color:var(--text); font-family:var(--fh); font-size:1.4rem; margin-bottom: .2rem;">@kurs.KursBaslik</h3>
+                            <span style="font-size:.8rem; color:var(--text2);">
+                                Toplam @kurs.Ogrenciler.Count Öğrenci
+                            </span>
+                        </div>
+                        @if (kurs.YayinlandiMi)
                         {
-                            <option value="@kategori.Id" selected>@kategori.Ad</option>
+                            <span class="badge badge-green" style="background: var(--mint2); color: var(--mint); padding:.3rem .8rem; border-radius:20px; font-size:.75rem; font-weight:700;">Yayında</span>
                         }
                         else
                         {
-                            <option value="@kategori.Id">@kategori.Ad</option>
+                            <span class="badge badge-copper" style="background: rgba(232,146,74,.1); color: var(--copper); padding:.3rem .8rem; border-radius:20px; font-size:.75rem; font-weight:700;">Taslak</span>
                         }
+                    </div>
+
+                    <!-- ÖĞRENCİ LİSTESİ -->
+                    @if (!kurs.Ogrenciler.Any())
+                    {
+                        <div style="padding: 2rem; text-align:center; color:var(--text2); font-size:.9rem;">Bu kursa henüz kayıtlı öğrenci yok.</div>
                     }
-                </select>
-            </label>
-
-            <label class="alan">
-                <span>Onizleme Videosu</span>
-                <input class="girdi" type="file" name="onizlemeVideoDosyasi" accept="video/*" @(Model.DuzenlenenKurs is null ? "required" : "") />
-            </label>
-
-            @if (!string.IsNullOrWhiteSpace(Model.DuzenlenenKurs?.OnizlemeVideoUrl))
-            {
-                <video class="onizleme-video" controls src="@Model.DuzenlenenKurs.OnizlemeVideoUrl"></video>
+                    else
+                    {
+                        <div style="padding: 0;">
+                            <table style="width:100%; border-collapse:collapse; text-align:left;">
+                                <thead style="background: var(--surfaceH); font-size:.8rem; color:var(--text2);">
+                                    <tr>
+                                        <th style="padding: 1rem 1.5rem; font-weight:600;">Öğrenci</th>
+                                        <th style="padding: 1rem 1.5rem; font-weight:600;">Kayıt Tarihi</th>
+                                        <th style="padding: 1rem 1.5rem; font-weight:600;">İlerleme Durumu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ogr in kurs.Ogrenciler)
+                                    {
+                                        <tr style="border-bottom: 1px solid var(--border); transition: background .2s;">
+                                            <td style="padding: 1.2rem 1.5rem;">
+                                                <div style="font-weight:600; color:var(--text);">@ogr.AdSoyad</div>
+                                                <div style="font-size:.8rem; color:var(--text2); font-family:var(--fm);">@ogr.Eposta</div>
+                                            </td>
+                                            <td style="padding: 1.2rem 1.5rem; font-size:.85rem; color:var(--text2);">
+                                                @(ogr.KayitTarihi.Length > 10 ? ogr.KayitTarihi.Substring(0,10) : ogr.KayitTarihi)
+                                            </td>
+                                            <td style="padding: 1.2rem 1.5rem;">
+                                                <!-- İlerleme Çubuğu -->
+                                                <div style="display:flex; align-items:center; gap: 1rem;">
+                                                    <div style="flex:1; height:6px; background:var(--surfaceH); border-radius:3px; overflow:hidden;">
+                                                        <div style="height:100%; width:@(ogr.IlerlemeYuzdesi)%; background:var(--mint); transition:width .5s ease-out;"></div>
+                                                    </div>
+                                                    <div style="width:40px; text-align:right; font-family:var(--fm); font-size:.85rem; color:var(--text2);">
+                                                        %@ogr.IlerlemeYuzdesi
+                                                    </div>
+                                                </div>
+                                                <div style="font-size:.75rem; color:var(--muted); margin-top:.3rem;">
+                                                    @ogr.TamamlananBolum / @ogr.ToplamBolum Bölüm Tamamlandı
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
             }
+            </div>
+        }
+      </div>
 
-            <label class="alan">
-                <span>Genel Dokuman</span>
-                <input class="girdi" type="file" name="dokumanDosyasi" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" />
-            </label>
-
-            @if (!string.IsNullOrWhiteSpace(Model.DuzenlenenKurs?.DokumanUrl))
-            {
-                <a class="buton ikincil" href="@Model.DuzenlenenKurs.DokumanUrl" target="_blank">Mevcut Dokumani Ac</a>
-            }
-
-            <label class="alan">
-                <span>Fiyat</span>
-                <input class="girdi" type="number" step="0.01" min="0" name="fiyat" value="@Model.DuzenlenenKurs?.Fiyat.ToString("0.##")" required />
-            </label>
-
-            <label class="satir-ici">
-                <input type="checkbox" name="yayinlandiMi" value="true" @(Model.DuzenlenenKurs?.YayinlandiMi == true ? "checked" : "") />
-                <span>Kaydeder kaydetmez yayina al</span>
-            </label>
-
-            <button type="submit" class="buton birincil tam">Kursu Kaydet</button>
-        </form>
-    </div>
-
-    <div class="liste-karti">
-        @* Bu alan egitmenin kurslarini listeler. *@
-        <h2>Kurslarim</h2>
-        <div class="kart-izgara tek-kolon">
-            @foreach (var kursKart in Model.Kurslar)
-            {
-                <article class="kurs-kart">
-                    <div class="kurs-kart-ust">
-                        <span class="rozet">@kursKart.KategoriAdi</span>
-                        <span class="fiyat">@kursKart.Kurs.Fiyat.ToString("N2") TL</span>
-                    </div>
-                    <h3>@kursKart.Kurs.Baslik</h3>
-                    <p>@kursKart.Kurs.Aciklama</p>
-                    <p>Bolum Sayisi: @kursKart.BolumSayisi</p>
-                    <p>Durum: @(kursKart.Kurs.YayinlandiMi ? "Yayinda" : "Taslak")</p>
-                    <div class="buton-grup">
-                        <a class="buton ikincil" asp-action="Panel" asp-route-kursId="@kursKart.Kurs.Id">Duzenle</a>
-                        <form asp-action="YayinDurumuDegistir" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="kursId" value="@kursKart.Kurs.Id" />
-                            <button type="submit" class="buton kucuk birincil">Yayin Durumunu Degistir</button>
-                        </form>
-                    </div>
-                </article>
-            }
+      <!-- ══ TAB 4: PROFİL AYARLARI ══ -->
+      <div id="tab-profil" class="tab-pane">
+        <div class="sec-head" style="margin-bottom: 2rem;">
+            <h2 style="font-family: var(--fh); font-size: 2rem;">Kişisel <em style="color:var(--mint); font-style:italic;">Profiliniz</em></h2>
+            <p style="color:var(--text2); font-size:.9rem;">Platformda nasıl göründüğünüzü kontrol edin; bilgileriniz genel profilde yayınlanır.</p>
         </div>
-    </div>
-</section>
 
-@if (Model.DuzenlenenKurs is not null)
-{
-    <section class="iki-sutun">
-        <div class="kart-form">
-            @* Bu alan secili kursa yeni video bolumu ekler. *@
-            <h2>Video Bolumu Ekle</h2>
-            <form asp-action="BolumEkle" method="post" enctype="multipart/form-data">
+        <div class="panel-box">
+            <form action="/Egitmen/ProfilGuncelle" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
-                <input type="hidden" name="kursId" value="@Model.DuzenlenenKurs.Id" />
+                <input type="hidden" name="mevcutProfilFotoUrl" value="@Model.Profil.ProfilFotoUrl" />
 
-                <label class="alan">
-                    <span>Bolum Basligi</span>
-                    <input class="girdi" name="baslik" required />
-                </label>
+                <!-- Fotoğraf Alanı -->
+                <div style="display:flex; align-items:center; gap: 2rem; margin-bottom: 2.5rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--border);">
+                    <div style="position:relative; width: 120px; height: 120px; border-radius: 50%; overflow:hidden; border: 2px solid var(--border); flex-shrink:0;">
+                        @if (!string.IsNullOrEmpty(Model.Profil.ProfilFotoUrl))
+                        {
+                            <img src="@Model.Profil.ProfilFotoUrl" alt="Profil Fotografi" style="width:100%; height:100%; object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <div style="width:100%; height:100%; background:var(--surfaceH); display:flex; align-items:center; justify-content:center; font-size:3.5rem;">🧑‍🏫</div>
+                        }
+                    </div>
+                    <div style="flex: 1;">
+                        <label class="lbl">Profil Fotoğrafı Seç (İsteğe bağlı)</label>
+                        <input type="file" name="yeniProfilFoto" accept="image/*" class="form-control" style="cursor:none;" />
+                        <p style="color:var(--text2); font-size:.8rem; margin-top:.5rem;">Görünümünüzü zenginleştirmek için net ve temiz bir yüz fotoğrafı kullanın.</p>
+                    </div>
+                </div>
 
-                <label class="alan">
-                    <span>Bolum Aciklamasi</span>
-                    <textarea class="girdi" name="aciklama" rows="3" required></textarea>
-                </label>
+                <div class="form-row" style="margin-bottom:1.5rem;">
+                    <div class="form-group">
+                        <label class="lbl">Ad Soyad (Gorünen Ad)</label>
+                        <input type="text" name="adSoyad" class="form-control" required value="@Model.Profil.AdSoyad" />
+                    </div>
+                    <div class="form-group">
+                        <label class="lbl" style="color:var(--mint);">E-posta Adresi (Giriş için kullanılır)</label>
+                        <input type="email" name="eposta" class="form-control" required value="@Model.Profil.Eposta" />
+                    </div>
+                    <div class="form-group">
+                        <label class="lbl">Kısa Ünvan</label>
+                        <input type="text" name="unvan" class="form-control" placeholder="Örn: Kıdemli Yazılım Geliştirici" value="@Model.Profil.Unvan" />
+                    </div>
+                    <div class="form-group">
+                        <label class="lbl">Deneyim Yılı</label>
+                        <input type="number" name="deneyimYili" class="form-control" min="0" required value="@Model.Profil.DeneyimYili" />
+                    </div>
+                    <div class="form-group">
+                        <label class="lbl">Uzmanlık Alanları (Virgülle ayırın)</label>
+                        <input type="text" name="uzmanlikAlanlari" class="form-control" placeholder="C#, React, SQL..." value="@Model.Profil.UzmanlikAlanlari" />
+                    </div>
+                </div>
 
-                <label class="alan">
-                    <span>Video Dosyasi</span>
-                    <input class="girdi" type="file" name="videoDosyasi" accept="video/*" required />
-                </label>
+                <div class="form-group" style="margin-bottom:1.5rem;">
+                    <label class="lbl">Hakkımda (Biyografi)</label>
+                    <textarea name="hakkinda" class="form-control" style="min-height: 120px;" placeholder="Kendinizden, başarılarınızdan ve öğretim stilinizden bahsedin...">@Model.Profil.Hakkinda</textarea>
+                </div>
+                
+                <div class="form-group" style="margin-bottom:1.5rem;">
+                    <label class="lbl" style="color:var(--red);">Yeni Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
+                    <input type="password" name="yeniSifre" class="form-control" placeholder="En az 6 karakterli yeni bir şifre belirleyin..." />
+                </div>
 
-                <label class="alan">
-                    <span>Bu Videonun Dokumani</span>
-                    <input class="girdi" type="file" name="dokumanDosyasi" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" />
-                </label>
+                <div class="form-row" style="margin-bottom:2rem;">
+                    <div class="form-group">
+                        <label class="lbl">LinkedIn Profil Bağlantısı</label>
+                        <input type="text" name="linkedinProfili" class="form-control" placeholder="https://linkedin.com/in/..." value="@Model.Profil.LinkedinProfili" />
+                    </div>
+                    <div class="form-group">
+                        <label class="lbl">Sık Kullanılan Kurs Formatı</label>
+                        <select name="kursFormati" class="form-control">
+                            @if (Model.Profil.KursFormati == "Sadece Ekran Kaydi") { <option value="Sadece Ekran Kaydi" selected>Sadece Ekran Kaydı</option> } else { <option value="Sadece Ekran Kaydi">Sadece Ekran Kaydı</option> }
+                            @if (Model.Profil.KursFormati == "Yuz Yüze + Ekran") { <option value="Yuz Yüze + Ekran" selected>Yüz Yüze + Ekran (Kamera Açık)</option> } else { <option value="Yuz Yüze + Ekran">Yüz Yüze + Ekran (Kamera Açık)</option> }
+                            @if (Model.Profil.KursFormati == "Animasyonlu Anlatim") { <option value="Animasyonlu Anlatim" selected>Slayt ve Animasyonlu Anlatım</option> } else { <option value="Animasyonlu Anlatim">Slayt ve Animasyonlu Anlatım</option> }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="lbl">Fiyatlandırma Tercihi</label>
+                        <select name="fiyatlandirmaTercihi" class="form-control">
+                            @if (Model.Profil.FiyatlandirmaTercihi == "Dusuk Butce") { <option value="Dusuk Butce" selected>Sürümden Kazanma (Düşük Bütçe Yüksek Katılımcı)</option> } else { <option value="Dusuk Butce">Sürümden Kazanma (Düşük Bütçe Yüksek Katılımcı)</option> }
+                            @if (Model.Profil.FiyatlandirmaTercihi == "Standart" || string.IsNullOrEmpty(Model.Profil.FiyatlandirmaTercihi)) { <option value="Standart" selected>Standart Piyasa Fiyatları</option> } else { <option value="Standart">Standart Piyasa Fiyatları</option> }
+                            @if (Model.Profil.FiyatlandirmaTercihi == "Premium") { <option value="Premium" selected>Premium Fiyat (Az ve Öz Öğrenci)</option> } else { <option value="Premium">Premium Fiyat (Az ve Öz Öğrenci)</option> }
+                        </select>
+                    </div>
+                </div>
 
-                <button type="submit" class="buton birincil tam">Bolum Yukle</button>
+                <div style="display:flex; justify-content:flex-end;">
+                    <button type="submit" class="btn-mint" style="padding: 1rem 2rem; font-size:1.1rem; border-radius:12px;">💾 Profil Bilgilerini Kaydet</button>
+                </div>
             </form>
         </div>
+      </div>
 
-        <div class="liste-karti">
-            @* Bu alan secili kursun video bolumlerini listeler. *@
-            <h2>Yuklenen Bolumler</h2>
-            <div class="kart-izgara tek-kolon">
-                @if (Model.Bolumler.Count == 0)
-                {
-                    <p>Bu kursa henuz video bolumu eklenmedi.</p>
-                }
-                else
-                {
-                    @foreach (var bolum in Model.Bolumler)
-                    {
-                        <article class="bilgi-kart">
-                            <h3>@bolum.SiraNo. @bolum.Baslik</h3>
-                            <p>@bolum.Aciklama</p>
-                            <video class="onizleme-video" controls src="@bolum.VideoUrl"></video>
-                            @if (!string.IsNullOrWhiteSpace(bolum.DokumanUrl))
-                            {
-                                <a class="buton ikincil" href="@bolum.DokumanUrl" target="_blank">Bolum Dokumani</a>
-                            }
-                        </article>
-                    }
-                }
-            </div>
+    </div>
+  </main>
+
+  <!-- ══ KURS OLUŞTUR MODALI ══ -->
+  <div id="kursModal" class="modal-overlay">
+    <div class="modal-content">
+      <button type="button" class="modal-close" onclick="closeKursModal()">✕</button>
+      <h2 style="font-family: var(--fh); font-size: 2.2rem; color: var(--mint); margin-bottom: .5rem; line-height: 1.1;">Yeni Eğitim Seti Oluştur</h2>
+      <p style="color: var(--text2); margin-bottom: 2rem; font-size: .95rem;">Bilgilerini eksiksiz doldurarak kitleni büyütme yolunda ilk adımını at.</p>
+      
+      <form action="/Egitmen/KursKaydet" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="0" />
+        
+        <div class="form-group">
+          <label class="form-label">Kurs Başlığı</label>
+          <input type="text" name="baslik" class="form-control" placeholder="Örn: Sıfırdan İleri Seviye C# Kampı" required />
         </div>
-    </section>
-}
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          <div class="form-group">
+            <label class="form-label">Kategori</label>
+            <select name="kategoriId" class="form-control" required style="cursor:none;">
+              <option value="">Kategori Seçin...</option>
+              @if(Model.Kategoriler != null)
+              {
+                  foreach (var kat in Model.Kategoriler)
+                  {
+                      <option value="@kat.Id">@kat.Ad</option>
+                  }
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fiyatlandırma (₺)</label>
+            <input type="number" step="0.01" name="fiyat" class="form-control" placeholder="Örn: 299.90" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Eğitim Açıklaması</label>
+          <textarea name="aciklama" class="form-control" placeholder="Öğrenciler bu kursu neden almalı? Neler öğrenecekler? Detaylıca anlat..." required></textarea>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Önizleme Videosu (Tanıtım)</label>
+            <label class="file-drop-area">
+              <i style="font-style:normal;">🎬</i>
+              <span>Videonuzu buraya bırakın veya <strong>seçin</strong> (.mp4)</span>
+              <input type="file" name="onizlemeVideoDosyasi" accept="video/mp4,video/x-m4v,video/*" required onchange="this.previousElementSibling.innerHTML = '<strong style=\'color:var(--mint)\'>Seçildi:</strong> ' + this.files[0].name" />
+            </label>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Ek Ders Dokümanı (İsteğe Bağlı)</label>
+            <label class="file-drop-area" style="border-color: rgba(255,255,255,0.05);">
+              <i style="color:var(--copper); font-style:normal;">📄</i>
+              <span>PDF veya ZIP dosyanızı <strong>seçin</strong></span>
+              <input type="file" name="dokumanDosyasi" onchange="this.previousElementSibling.innerHTML = '<strong style=\'color:var(--copper)\'>Seçildi:</strong> ' + this.files[0].name" />
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group" style="display:flex; align-items:center; gap: 1rem; margin-top: 1.5rem; padding: 1rem; background: rgba(61,255,192,0.05); border-radius: 10px; border: 1px solid var(--mint2);">
+          <input type="checkbox" name="yayinlandiMi" value="true" id="yayinToggle" style="width: 20px; height: 20px; accent-color: var(--mint); cursor:none;" checked />
+          <div>
+            <label for="yayinToggle" style="color:var(--text); font-weight:600; cursor:none; display:block;">Hemen Yayına Al</label>
+            <span style="font-size: .8rem; color:var(--text2);">İşaretlerseniz kurs kaydedildiği an tüm öğrencilere açık hale gelir.</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 2.5rem; text-align: right; display:flex; justify-content: flex-end; gap: 1rem;">
+          <button type="button" class="btn-mint" style="background:transparent; border:1px solid var(--borderH); color:var(--text);" onclick="closeKursModal()">İptal Et</button>
+          <button type="submit" class="btn-mint" style="padding-left: 2.5rem; padding-right: 2.5rem;">Oluştur ve Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ── SPA Tab Logic ──
+    const navItems = document.querySelectorAll('.nav-item[data-tab]');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        // Remove active from all tabs & links
+        navItems.forEach(i => i.classList.remove('active'));
+        tabPanes.forEach(p => p.classList.remove('active'));
+
+        // Add active to clicked target
+        item.classList.add('active');
+        const targetId = item.getAttribute('data-tab');
+        document.getElementById(targetId).classList.add('active');
+      });
+    });
+
+    // ── Modal Logic ──
+    function openKursModal() {
+      const modal = document.getElementById('kursModal');
+      modal.style.display = 'flex';
+      setTimeout(() => modal.classList.add('show'), 10);
+    }
+    
+    function closeKursModal() {
+      const modal = document.getElementById('kursModal');
+      modal.classList.remove('show');
+      setTimeout(() => modal.style.display = 'none', 300);
+    }
+
+    // ── Global Cursor Logic ──
+    const cursor = document.getElementById('cur');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+    });
+
+    // Hover effect for interactive elements
+    document.querySelectorAll('a, button, .nav-item, input, select, textarea').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+    });
+
+    // ── Sidebar Toggle ──
+    const sidebarToggleBtn = document.getElementById('sidebarToggle');
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        });
+    }
+  </script>
+</body>
+</html>

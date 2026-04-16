@@ -49,12 +49,46 @@ public class KayitViewModel
 
     // Bu alan sifre bilgisini tutar.
     [Required(ErrorMessage = "Sifre zorunludur.")]
+    [MinLength(8, ErrorMessage = "Şifre en az 8 karakter olmalıdır.")]
     [DataType(DataType.Password)]
     public string Sifre { get; set; } = string.Empty;
 
     // Bu alan kayit olacak kullanicinin rolunu tutar.
     [Required(ErrorMessage = "Rol secimi zorunludur.")]
     public string Rol { get; set; } = "Ogrenci";
+
+    // Bu alan ogrenci icin egitim seviyesini tutar.
+    public string EgitimSeviyesi { get; set; } = string.Empty;
+
+    // Bu alan ogrenci icin ilgi alanlarini virgul ayracli olarak tutar.
+    public string IlgiAlanlari { get; set; } = string.Empty;
+
+    // Bu alan egitmen icin unvan / meslek bilgisini tutar.
+    public string Unvan { get; set; } = string.Empty;
+
+    // Bu alan egitmen icin biyografi / hakkinda metnini tutar.
+    public string Hakkinda { get; set; } = string.Empty;
+
+    // Bu alan egitmen icin deneyim yilini tutar.
+    public int DeneyimYili { get; set; }
+
+    // Bu alan egitmen icin uzmanlik alanlarini virgul ayracli olarak tutar.
+    public string UzmanlikAlanlari { get; set; } = string.Empty;
+
+    // Bu alan ogrencinin hedefini tutar.
+    public string Hedef { get; set; } = string.Empty;
+
+    // Bu alan ogrenciyi sisteme yonlendiren kaynagi tutar.
+    public string Yonlendiren { get; set; } = string.Empty;
+
+    // Bu alan egitmenin linkedin baglantisini tutar.
+    public string LinkedinProfili { get; set; } = string.Empty;
+
+    // Bu alan egitmenin kurs format tercihini tutar.
+    public string KursFormati { get; set; } = string.Empty;
+
+    // Bu alan egitmenin fiyatlandirma tercihini tutar.
+    public string FiyatlandirmaTercihi { get; set; } = string.Empty;
 }
 
 // Bu model admin panel verilerini tasir.
@@ -93,6 +127,29 @@ public class EgitmenPanelViewModel
 
     // Bu alan secili kursun bolumlerini tutar.
     public List<KursBolumu> Bolumler { get; set; } = [];
+
+    // Bu alan egitmenin son basarili eylemlerini (kurs acma, yeni ogrenci gelmesi vb) tutar.
+    public List<AktiviteOgesi> SonAktiviteler { get; set; } = [];
+
+    // ── Dashboard istatistikleri ──
+
+    // Egitmene ait kurslara toplam kayitli ogrenci sayisi (tekrarlanmayan).
+    public int ToplamOgrenciSayisi { get; set; }
+
+    // Bu ay kayit olan ogrenci sayisi.
+    public int BuAyKatilanOgrenciSayisi { get; set; }
+
+    // Egitmenin kurslarindan elde ettigi toplam gelir.
+    public decimal ToplamGelir { get; set; }
+
+    // Egitmene ait kurslarin aldigi toplam yorum sayisi (profil goruntu proxy'si).
+    public int ToplamYorumSayisi { get; set; }
+
+    // Her kurs icin kayitli ogrencilerin ilerleme listesi.
+    public List<EgitmenKursOgrencileri> KursOgrencileri { get; set; } = [];
+
+    // Egitmenin mevcut kisisel ve profesyonel profil ayarlarini tutar.
+    public Kullanici Profil { get; set; } = new();
 }
 
 // Bu model ogrenci panel verilerini tasir.
@@ -112,6 +169,9 @@ public class OgrenciPanelViewModel
 
     // Bu alan kurs bazli ilerleme ozetlerini tutar.
     public List<KursIlerlemeOzeti> Ilerlemeler { get; set; } = [];
+
+    // Bu alan ogrencinin kisisel profil bilgilerini tutar.
+    public Kullanici Profil { get; set; } = new();
 }
 
 // Bu model kurs detay ekranini tasir.
@@ -172,4 +232,64 @@ public class BagisSayfasiViewModel
 
     // Bu alan toplam bagis sayisini tutar.
     public int ToplamBagisSayisi { get; set; }
+}
+
+// Bu model profil tamamlama ekranini tasir.
+public class ProfilTamamlaViewModel
+{
+    // Bu alan kullanicinin rolunu tutar (Ogrenci veya Egitmen).
+    public string Rol { get; set; } = string.Empty;
+
+    // ── Öğrenci alanları ──
+
+    // Bu alan ogrencinin egitim seviyesini tutar.
+    public string EgitimSeviyesi { get; set; } = string.Empty;
+
+    // Bu alan ogrencinin secili ilgi alanlarini virgul ayracli tutar.
+    public string IlgiAlanlari { get; set; } = string.Empty;
+
+    // Bu alan ogrencinin secili kariyer hedefini tutar.
+    public string Hedef { get; set; } = string.Empty;
+
+    // Bu alan ogrenciyi sisteme kimin yonlendirdigini tutar.
+    public string Yonlendiren { get; set; } = string.Empty;
+
+    // ── Eğitmen alanları ──
+
+    // Bu alan egitmenin unvan bilgisini tutar.
+    public string Unvan { get; set; } = string.Empty;
+
+    // Bu alan egitmenin biyografisini tutar.
+    public string Hakkinda { get; set; } = string.Empty;
+
+    // Bu alan egitmenin deneyim yilini tutar.
+    public int DeneyimYili { get; set; }
+
+    // Bu alan egitmenin uzmanlik alanlarini virgul ayracli tutar.
+    public string UzmanlikAlanlari { get; set; } = string.Empty;
+
+    // Bu alan egitmenin linkedin baglantisini tutar.
+    public string LinkedinProfili { get; set; } = string.Empty;
+
+    // Bu alan egitmenin kurs formati tercihini tutar.
+    public string KursFormati { get; set; } = string.Empty;
+
+    // Bu alan egitmenin fiyatlandirma tercihini tutar.
+    public string FiyatlandirmaTercihi { get; set; } = string.Empty;
+}
+
+// Bu model öğrencinin kurs videolarını izlediği SPA ekranı için verileri taşır.
+public class OgrenciKursIzlemeViewModel
+{
+    // İzlenilen kurs bilgisi.
+    public Kurs Kurs { get; set; } = new();
+
+    // Kursu oluşturan eğitmenin görünen adı.
+    public string EgitmenAdi { get; set; } = string.Empty;
+
+    // Kursa ait tüm bölümler (videolar).
+    public List<KursBolumu> Bolumler { get; set; } = [];
+
+    // Öğrencinin bu kursa ait hangi bölümleri tamamladığı vb. durumu.
+    public List<BolumIlerlemesi> Ilerlemeler { get; set; } = [];
 }

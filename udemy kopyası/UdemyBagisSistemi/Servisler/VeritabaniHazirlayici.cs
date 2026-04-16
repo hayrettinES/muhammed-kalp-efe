@@ -39,6 +39,8 @@ public class VeritabaniHazirlayici
                 Hakkinda TEXT NOT NULL DEFAULT '',
                 ProfilFotoUrl TEXT NOT NULL DEFAULT '',
                 Bakiye REAL NOT NULL DEFAULT 0,
+                EpostaOnaylandiMi INTEGER NOT NULL DEFAULT 0,
+                EpostaOnayKodu TEXT NOT NULL DEFAULT '',
                 KayitTarihi TEXT NOT NULL
             );
 
@@ -136,6 +138,17 @@ public class VeritabaniHazirlayici
         KolonYoksaEkle("Kullanicilar", "Hakkinda", "TEXT NOT NULL DEFAULT ''");
         KolonYoksaEkle("Kullanicilar", "ProfilFotoUrl", "TEXT NOT NULL DEFAULT ''");
         KolonYoksaEkle("Kullanicilar", "Bakiye", "REAL NOT NULL DEFAULT 0");
+        KolonYoksaEkle("Kullanicilar", "EpostaOnaylandiMi", "INTEGER NOT NULL DEFAULT 0");
+        KolonYoksaEkle("Kullanicilar", "EpostaOnayKodu", "TEXT NOT NULL DEFAULT ''");
+        KolonYoksaEkle("Kullanicilar", "EgitimSeviyesi", "TEXT NOT NULL DEFAULT ''");
+        KolonYoksaEkle("Kullanicilar", "IlgiAlanlari", "TEXT NOT NULL DEFAULT ''");
+        KolonYoksaEkle("Kullanicilar", "Hedef", "TEXT NOT NULL DEFAULT ''");
+        KolonYoksaEkle("Kullanicilar", "Yonlendiren", "TEXT NOT NULL DEFAULT ''");
+        KolonYoksaEkle("Kullanicilar", "DeneyimYili", "INTEGER NOT NULL DEFAULT 0");
+        KolonYoksaEkle("Kullanicilar", "UzmanlikAlanlari", "TEXT NOT NULL DEFAULT ''");
+        KolonYoksaEkle("Kullanicilar", "LinkedinProfili", "TEXT NOT NULL DEFAULT ''");
+        KolonYoksaEkle("Kullanicilar", "KursFormati", "TEXT NOT NULL DEFAULT ''");
+        KolonYoksaEkle("Kullanicilar", "FiyatlandirmaTercihi", "TEXT NOT NULL DEFAULT ''");
         KolonYoksaEkle("Kurslar", "VideoUrl", "TEXT NOT NULL DEFAULT ''");
         KolonYoksaEkle("Kurslar", "OnizlemeVideoUrl", "TEXT NOT NULL DEFAULT ''");
         KolonYoksaEkle("KursBolumleri", "DokumanUrl", "TEXT NOT NULL DEFAULT ''");
@@ -180,7 +193,7 @@ public class VeritabaniHazirlayici
 
         // Bu satir guvenli ekleme SQL'ini calistirir.
         _sqlite.KomutCalistir($"""
-            INSERT INTO Kullanicilar (AdSoyad, Eposta, SifreHash, Rol, Unvan, Hakkinda, ProfilFotoUrl, Bakiye, KayitTarihi)
+            INSERT INTO Kullanicilar (AdSoyad, Eposta, SifreHash, Rol, Unvan, Hakkinda, ProfilFotoUrl, Bakiye, EpostaOnaylandiMi, EpostaOnayKodu, KayitTarihi)
             VALUES (
                 '{_sqlite.MetinGuvenli(adSoyad)}',
                 '{_sqlite.MetinGuvenli(eposta)}',
@@ -190,31 +203,38 @@ public class VeritabaniHazirlayici
                 '',
                 '',
                 0,
+                1,
+                '',
                 '{tarih}'
             );
             """);
     }
 
-    // Bu metod ornek kategorileri sadece bos tabloda ekler.
+    // Bu metod sistemdeki temel kategorileri varligina gore kontrol edip ekler.
     private void OrnekKategorileriEkle()
     {
-        // Bu satir kategori sayisini kontrol eder.
-        var kayit = _sqlite.SorguCalistir("SELECT COUNT(*) AS Toplam FROM Kategoriler;").FirstOrDefault();
-        var toplam = int.TryParse(kayit?["Toplam"], out var sayi) ? sayi : 0;
-
-        // Bu satir kategoriler varsa tekrar eklemeyi durdurur.
-        if (toplam > 0)
+        var kategoriler = new[]
         {
-            return;
-        }
+            "Yazılım Geliştirme", "Web Geliştirme", "Mobil Uygulama Geliştirme", 
+            "Veri Bilimi ve Yapay Zeka", "Siber Güvenlik", "Ağ ve Sistem Yönetimi", 
+            "Grafik Tasarım", "UI/UX Tasarım", "Video Düzenleme ve Montaj", 
+            "Fotoğrafçılık", "Dijital Pazarlama", "Sosyal Medya Yönetimi", 
+            "SEO", "E-Ticaret", "İşletme", "Girişimcilik", "Finans ve Muhasebe", 
+            "Ofis Programları", "Kişisel Gelişim", "İletişim Becerileri", 
+            "Liderlik ve Yönetim", "Yabancı Dil", "Sınav Hazırlık", "Müzik", 
+            "Sağlık ve Yaşam Tarzı"
+        };
 
-        // Bu blok ornek kategori verilerini ekler.
-        _sqlite.KomutCalistir("""
-            INSERT INTO Kategoriler (Ad, Aciklama) VALUES
-            ('Yazilim', 'Yazilim gelistirme ve programlama egitimleri'),
-            ('Tasarim', 'UI, UX ve grafik tasarim egitimleri'),
-            ('Pazarlama', 'Dijital pazarlama ve satis egitimleri');
-            """);
+        foreach (var k in kategoriler)
+        {
+            var guvenliAd = _sqlite.MetinGuvenli(k);
+            var varMi = _sqlite.SorguCalistir($"SELECT COUNT(*) AS Toplam FROM Kategoriler WHERE Ad = '{guvenliAd}';").FirstOrDefault();
+            
+            if (int.TryParse(varMi?["Toplam"], out var sayi) && sayi == 0)
+            {
+                _sqlite.KomutCalistir($"INSERT INTO Kategoriler (Ad, Aciklama) VALUES ('{guvenliAd}', '{guvenliAd} eğitimleri');");
+            }
+        }
     }
 
     // Bu metod ornek kurslari ilk acilis deneyimi icin ekler.

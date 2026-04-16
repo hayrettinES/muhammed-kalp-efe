@@ -1,0 +1,451 @@
+@{
+    Layout = null;
+    // Bölümleri JavaScript tarafında kolay kullanabilmek için JSON'a çeviriyoruz.
+    var bolumJson = System.Text.Json.JsonSerializer.Serialize(Model.Bolumler.Select(b => new {
+        id = b.Id,
+        sira = b.SiraNo,
+        baslik = b.Baslik,
+        aciklama = b.Aciklama,
+        videoUrl = b.VideoUrl,
+        dokumanUrl = b.DokumanUrl,
+        tamamlandi = Model.Ilerlemeler.Any(i => i.KursBolumuId == b.Id && i.TamamlandiMi)
+    }).OrderBy(x => x.sira));
+}
+@model UdemyBagisSistemi.ViewModels.OgrenciKursIzlemeViewModel
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>İzleniyor: @Model.Kurs.Baslik - EduVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --bg: #111827;
+            --bg-alt: #1a2235;
+            --surface: rgba(255,255,255,.05);
+            --surface-hover: rgba(255,255,255,.1);
+            --border: rgba(255,255,255,.1);
+            --copper: #e8924a;
+            --mint: #3dffc0;
+            --text: #e2e8f4;
+            --text-muted: #8898b8;
+            --fh: 'Cormorant Garamond', serif;
+            --fs: 'Plus Jakarta Sans', sans-serif;
+            --fm: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            font-family: var(--fs);
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            cursor: none;
+        }
+
+        /* CUSTOM CURSOR */
+        #cur {
+            position: fixed; width: 14px; height: 14px; border-radius: 50%;
+            background: var(--copper); pointer-events: none; z-index: 9999;
+            transform: translate(-50%,-50%); transition: width .2s, height .2s, opacity .2s;
+            mix-blend-mode: screen;
+        }
+        #cur.grow { width: 32px; height: 32px; opacity: 0.6; }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--copper); }
+
+        /* HEADER / NAVBAR */
+        .topbar {
+            height: 70px;
+            background: var(--bg-alt);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            justify-content: space-between;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            transition: color .3s;
+        }
+        .back-btn:hover { color: var(--copper); }
+
+        .course-title {
+            font-family: var(--fh);
+            font-size: 1.5rem;
+            color: var(--copper);
+            font-weight: bold;
+            margin: 0 auto;
+        }
+
+        /* MAIN LAYOUT */
+        .layout {
+            display: flex;
+            width: 100%;
+            margin-top: 70px;
+            height: calc(100vh - 70px);
+        }
+
+        /* PLAYER AREA (LEFT) */
+        .player-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .video-wrapper {
+            width: 100%;
+            background: #000;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        video { width: 100%; height: 100%; outline: none; }
+
+        .content-details { padding: 3rem; max-width: 1000px; margin: 0 auto; width: 100%; }
+        
+        .content-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+        .content-header h1 { font-family: var(--fh); font-size: 2.5rem; line-height: 1.1; margin-bottom: 10px; }
+        .author { color: var(--text-muted); font-size: 1rem; display: flex; align-items: center; gap: 8px;}
+        
+        .mark-btn {
+            background: rgba(232,146,74,0.1);
+            color: var(--copper);
+            border: 1px solid rgba(232,146,74,0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            font-family: var(--fs);
+            transition: all .3s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .mark-btn:hover { background: rgba(232,146,74,0.2); }
+        .mark-btn.done { background: rgba(61,255,192,0.1); border-color: rgba(61,255,192,0.3); color: var(--mint); }
+        .mark-btn.done:hover { background: rgba(61,255,192,0.2); }
+
+        .description { font-size: 1.05rem; line-height: 1.7; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 2rem; margin-top: 2rem;}
+
+        .resources { margin-top: 2rem; background: var(--surface); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }
+        .resources h3 { font-family: var(--fh); font-size: 1.5rem; margin-bottom: 1rem; color: var(--text); }
+        .resource-link { display: inline-flex; align-items: center; gap: 10px; color: var(--copper); text-decoration: none; font-weight: 500; background: rgba(232,146,74,0.1); padding: 8px 16px; border-radius: 8px;}
+        .resource-link:hover { background: rgba(232,146,74,0.2); }
+
+        /* SIDEBAR (RIGHT) */
+        .playlist-sidebar {
+            width: 350px;
+            background: var(--bg-alt);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .playlist-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .playlist-header h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; }
+        .playlist-header p { font-size: 0.9rem; color: var(--text-muted); font-family: var(--fm); }
+
+        .playlist-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .play-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: all .3s;
+        }
+        .play-item:hover { background: var(--surface-hover); border-color: rgba(232,146,74,0.3); }
+        .play-item.active { background: rgba(232,146,74,0.1); border-color: var(--copper); }
+
+        .play-icon {
+            width: 24px; height: 24px; border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; color: var(--text-muted); flex-shrink: 0;
+            margin-top: 3px;
+        }
+        .play-item.active .play-icon { background: var(--copper); color: var(--bg); }
+        .play-item.completed .play-icon { background: var(--mint); color: var(--bg); font-weight: bold; }
+
+        .play-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 5px; line-height: 1.3; }
+        .play-info p { font-size: 0.8rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
+    </style>
+</head>
+<body>
+    <div id="cur"></div>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <a href="/Ogrenci/Panel" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Panele Dön
+        </a>
+        <div class="course-title">@Model.Kurs.Baslik</div>
+        <div style="width: 100px;"></div> <!-- Spacer for centering -->
+    </header>
+
+    <!-- LAYOUT -->
+    <div class="layout">
+        <!-- PLAYER AREA -->
+        <main class="player-container">
+            <div class="video-wrapper">
+                <video id="courseVideo" controls controlsList="nodownload"></video>
+            </div>
+            
+            <div class="content-details">
+                <div class="content-header">
+                    <div>
+                        <h1 id="bTitle">Yükleniyor...</h1>
+                        <div class="author">
+                            <span style="display:inline-block; width:24px; height:24px; background:var(--copper); color:#000; border-radius:50%; text-align:center; line-height:24px; font-weight:bold; font-size:12px;">E</span>
+                            Eğitmen: @Model.EgitmenAdi
+                        </div>
+                    </div>
+                    <button class="mark-btn" id="markBtn" onclick="toggleCompletion()">
+                        <span id="markIcon">⭕</span> 
+                        <span id="markText">Tamamlandı İşaretle</span>
+                    </button>
+                </div>
+                
+                <div class="description" id="bDesc">
+                    İçerik açıklaması yükleniyor...
+                </div>
+
+                <div class="resources" id="bRes" style="display:none;">
+                    <h3>Ek İçerik / Doküman</h3>
+                    <a href="#" id="resLink" class="resource-link" target="_blank" download>
+                        📄 İndir veya Görüntüle
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <!-- PLAYLIST SIDEBAR -->
+        <aside class="playlist-sidebar">
+            <div class="playlist-header">
+                <h2>Kurs İçeriği</h2>
+                <p id="progressText">0 / @Model.Bolumler.Count Bölüm Tamamlandı</p>
+            </div>
+            <div class="playlist-items" id="playlist">
+                <!-- Javascript will render items here -->
+            </div>
+        </aside>
+    </div>
+
+    <!-- CSRF Token For Ajax -->
+    <form id="antiForgeryForm">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <script>
+        // Custom Cursor
+        const cursor = document.getElementById('cur');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top  = e.clientY + 'px';
+        });
+        document.querySelectorAll('a, button, video, .play-item').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+        });
+
+        // Data Models
+        const bolumler = @Html.Raw(bolumJson);
+        const kursId = @Model.Kurs.Id;
+        const videoEl = document.getElementById('courseVideo');
+        
+        let currentBolumIndex = 0;
+
+        // Form Token for API calls
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        // Initialize API
+        function init() {
+            // Find last playing video or first uncompleted
+            let lastId = localStorage.getItem(`edu_last_bolum_${kursId}`);
+            
+            if (lastId) {
+                currentBolumIndex = bolumler.findIndex(b => b.id == lastId);
+                if(currentBolumIndex === -1) currentBolumIndex = 0;
+            } else {
+                // Find first uncompleted
+                currentBolumIndex = bolumler.findIndex(b => !b.tamamlandi);
+                if(currentBolumIndex === -1) currentBolumIndex = 0; // all done
+            }
+
+            renderPlaylist();
+            loadBolum(currentBolumIndex);
+        }
+
+        function renderPlaylist() {
+            const container = document.getElementById('playlist');
+            container.innerHTML = '';
+            let completedCount = 0;
+
+            bolumler.forEach((bolum, index) => {
+                if(bolum.tamamlandi) completedCount++;
+
+                const div = document.createElement('div');
+                div.className = `play-item ${index === currentBolumIndex ? 'active' : ''} ${bolum.tamamlandi ? 'completed' : ''}`;
+                div.onclick = () => loadBolum(index);
+                
+                div.innerHTML = `
+                    <div class="play-icon">${bolum.tamamlandi ? '✓' : '▶'}</div>
+                    <div class="play-info">
+                        <h4>${bolum.sira}. ${bolum.baslik}</h4>
+                        <p>${bolum.aciklama}</p>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('progressText').innerText = `${completedCount} / ${bolumler.length} Bölüm Tamamlandı`;
+        }
+
+        function loadBolum(index) {
+            currentBolumIndex = index;
+            const bolum = bolumler[index];
+            
+            // UI Update
+            document.getElementById('bTitle').innerText = `${bolum.sira}. ${bolum.baslik}`;
+            document.getElementById('bDesc').innerText = bolum.aciklama;
+            
+            const resLink = document.getElementById('resLink');
+            const bRes = document.getElementById('bRes');
+            if (bolum.dokumanUrl) {
+                resLink.href = bolum.dokumanUrl;
+                bRes.style.display = 'block';
+            } else {
+                bRes.style.display = 'none';
+            }
+
+            updateMarkBtn(bolum.tamamlandi);
+
+            // Video Load
+            videoEl.src = bolum.videoUrl;
+            
+            // Resume Progress Check
+            let savedTime = localStorage.getItem(`edu_time_${kursId}_${bolum.id}`);
+            if (savedTime) {
+                videoEl.currentTime = parseFloat(savedTime);
+            }
+            videoEl.play().catch(e => console.log('Autoplay engellendi.'));
+
+            // Set state
+            localStorage.setItem(`edu_last_bolum_${kursId}`, bolum.id);
+            renderPlaylist();
+        }
+
+        // Tracking Time
+        videoEl.addEventListener('timeupdate', () => {
+             const bolum = bolumler[currentBolumIndex];
+             if(videoEl.currentTime > 0) {
+                 localStorage.setItem(`edu_time_${kursId}_${bolum.id}`, videoEl.currentTime);
+             }
+        });
+
+        // Auto Complete on End
+        videoEl.addEventListener('ended', async () => {
+            const bolum = bolumler[currentBolumIndex];
+            if (!bolum.tamamlandi) {
+                await setCompletion(bolum.id, true);
+                bolum.tamamlandi = true;
+            }
+            
+            // Auto Play Next
+            if (currentBolumIndex + 1 < bolumler.length) {
+                setTimeout(() => {
+                    loadBolum(currentBolumIndex + 1);
+                }, 2000); // Wait 2 secs then jump
+            }
+        });
+
+        // Manual Marking Toggle
+        async function toggleCompletion() {
+            const bolum = bolumler[currentBolumIndex];
+            const newState = !bolum.tamamlandi;
+            
+            // Optimistic UI
+            bolum.tamamlandi = newState;
+            updateMarkBtn(newState);
+            renderPlaylist();
+
+            await setCompletion(bolum.id, newState);
+        }
+
+        function updateMarkBtn(isDone) {
+            const btn = document.getElementById('markBtn');
+            if(isDone) {
+                btn.classList.add('done');
+                document.getElementById('markIcon').innerText = '✓';
+                document.getElementById('markText').innerText = 'Tamamlandı';
+            } else {
+                btn.classList.remove('done');
+                document.getElementById('markIcon').innerText = '⭕';
+                document.getElementById('markText').innerText = 'Tamamlandı İşaretle';
+            }
+        }
+
+        // Real API Call
+        async function setCompletion(bolumId, isDone) {
+            const formData = new FormData();
+            formData.append('kursId', kursId);
+            formData.append('kursBolumuId', bolumId);
+            formData.append('tamamlandiMi', isDone);
+
+            try {
+                await fetch('/Ogrenci/BolumDurumuKaydet', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    body: formData
+                });
+            } catch(err) {
+                console.error("İlerleme kaydedilirken hata:", err);
+            }
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>

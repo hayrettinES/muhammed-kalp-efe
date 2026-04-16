@@ -1,0 +1,1023 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Öğrenci Kaydı — EduVerse</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #141c2e;
+    --bg2:       #111827;
+    --surface:   rgba(255,255,255,.05);
+    --surfaceH:  rgba(255,255,255,.09);
+    --glass:     rgba(20,28,46,.7);
+    --border:    rgba(255,255,255,.09);
+    --borderH:   rgba(255,255,255,.18);
+    --copper:    #e8924a;
+    --mint:      #3dffc0;
+    --blue:      #7eb8ff;
+    --lavender:  #b89cff;
+    --text:      #e2e8f4;
+    --text2:     #8898b8;
+    --muted:     #4a5878;
+    --fh:        'Cormorant Garamond', serif;
+    --fs:        'Plus Jakarta Sans', sans-serif;
+    --fm:        'JetBrains Mono', monospace;
+    --r:         12px;
+    --r2:        20px;
+    --accent:    #e8924a;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--fs);
+    background: var(--bg);
+    color: var(--text);
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* Custom Cursor */
+  .cursor {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--copper);
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: width .2s, height .2s, opacity .2s;
+    mix-blend-mode: screen;
+  }
+  .cursor.grow { width: 28px; height: 28px; opacity: .7; }
+
+  /* Neon Link */
+  .neon-link {
+    color: var(--copper) !important;
+    text-shadow: 0 0 8px rgba(232,146,74,0.6);
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .neon-link:hover {
+    text-shadow: 0 0 15px rgba(232,146,74,0.9);
+    opacity: 0.9;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--copper); border-radius: 99px; }
+
+  /* Layout */
+  .page-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    background: var(--bg2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 3rem 3.5rem;
+    gap: 0;
+  }
+
+  /* Blobs */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: .4;
+    pointer-events: none;
+  }
+  .blob-1 {
+    width: 420px; height: 420px;
+    background: rgba(232,146,74,.2);
+    top: -100px; left: -80px;
+  }
+  .blob-2 {
+    width: 360px; height: 360px;
+    background: rgba(184,156,255,.12);
+    bottom: 60px; right: -60px;
+  }
+  .blob-3 {
+    width: 200px; height: 200px;
+    background: rgba(232,146,74,.1);
+    top: 50%; left: 40%;
+  }
+
+  /* Dot grid */
+  .dot-grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+
+  .left-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .logo-link {
+    text-decoration: none;
+    font-family: var(--fh);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--copper);
+    letter-spacing: .02em;
+    display: inline-block;
+    margin-bottom: .4rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .8rem;
+    color: var(--text2);
+    text-decoration: none;
+    margin-bottom: 2.8rem;
+    transition: color .2s;
+  }
+  .back-link:hover { color: var(--text); }
+  .back-link svg { width: 14px; height: 14px; }
+
+  .role-tag {
+    display: inline-block;
+    font-family: var(--fm);
+    font-size: .72rem;
+    color: var(--copper);
+    background: rgba(232,146,74,.1);
+    border: 1px solid rgba(232,146,74,.25);
+    border-radius: 100px;
+    padding: .3rem .85rem;
+    margin-bottom: 1.2rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  .display-title {
+    font-family: var(--fh);
+    font-size: clamp(3rem, 5vw, 5.5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: var(--text);
+    margin-bottom: 1.2rem;
+  }
+  .display-title em {
+    font-style: italic;
+    color: var(--copper);
+  }
+
+  .desc-text {
+    font-size: .93rem;
+    line-height: 1.7;
+    color: var(--text2);
+    max-width: 360px;
+    margin-bottom: 1.8rem;
+  }
+
+  .perks-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: .65rem;
+    margin-bottom: 2rem;
+  }
+  .perks-list li {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    font-size: .88rem;
+    color: var(--text2);
+  }
+  .perk-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--copper);
+    flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(232,146,74,.5);
+  }
+
+  /* Glass card */
+  .glass-card {
+    backdrop-filter: blur(16px);
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: var(--r2);
+    padding: 1.4rem 1.6rem;
+    margin-bottom: auto;
+  }
+  .glass-card-label {
+    font-size: .75rem;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: .4rem;
+    font-family: var(--fm);
+  }
+  .glass-card-value {
+    font-family: var(--fh);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--copper);
+    line-height: 1;
+  }
+  .glass-card-sub {
+    font-size: .78rem;
+    color: var(--text2);
+    margin-top: .3rem;
+  }
+
+  .quote-block {
+    margin-top: 1.8rem;
+    padding: 1rem 1.2rem;
+    border-left: 2px solid rgba(232,146,74,.4);
+  }
+  .quote-block p {
+    font-family: var(--fh);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    background: var(--bg);
+    overflow-y: auto;
+    padding: 5rem 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Dot grid on right too */
+  .right-panel::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 50%; right: 0; bottom: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .form-container {
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Step indicator */
+  .step-indicator {
+    margin-bottom: 2.8rem;
+  }
+  .step-progress-bar {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,.08);
+    border-radius: 99px;
+    margin-bottom: 1.2rem;
+    overflow: hidden;
+  }
+  .step-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--copper), #f0b070);
+    border-radius: 99px;
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+    width: 50%;
+  }
+  .step-dots {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+  .step-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,.15);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--text2);
+    font-family: var(--fm);
+    transition: all .3s;
+    flex-shrink: 0;
+  }
+  .step-dot.active {
+    background: var(--copper);
+    border-color: var(--copper);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(232,146,74,.4);
+  }
+  .step-dot.done {
+    background: rgba(232,146,74,.2);
+    border-color: rgba(232,146,74,.5);
+    color: var(--copper);
+  }
+  .step-connector {
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,.08);
+  }
+  .step-label {
+    margin-top: .8rem;
+    font-size: .8rem;
+    color: var(--text2);
+    font-family: var(--fm);
+  }
+  .step-label span { color: var(--copper); font-weight: 500; }
+
+  /* Form head */
+  .form-head { margin-bottom: 2rem; }
+  .form-title {
+    font-family: var(--fh);
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: .4rem;
+  }
+  .form-subtitle {
+    font-size: .9rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* Form steps */
+  .form-step { display: none; }
+  .form-step.active { display: flex; flex-direction: column; gap: 1.1rem; }
+
+  /* Fields */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+  }
+  .field-label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .field-opt {
+    font-weight: 400;
+    color: var(--muted);
+    font-size: .72rem;
+    margin-left: .3rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .field-wrap {
+    position: relative;
+  }
+  .field-wrap input,
+  .field-wrap select,
+  .field-wrap textarea {
+    width: 100%;
+    background: rgba(255,255,255,.06);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    color: var(--text);
+    font-family: var(--fs);
+    font-size: .92rem;
+    padding: .85rem 1.1rem;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field-wrap input:focus,
+  .field-wrap select:focus,
+  .field-wrap textarea:focus {
+    border-color: var(--copper);
+    box-shadow: 0 0 0 3px rgba(232,146,74,.12);
+    background: rgba(255,255,255,.08);
+  }
+  .field-wrap input::placeholder,
+  .field-wrap textarea::placeholder { color: var(--muted); }
+  .field-wrap select option { background: #1a2540; color: var(--text); }
+  .field-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text2);
+    font-size: 1rem;
+    pointer-events: none;
+  }
+  .field-icon.clickable { pointer-events: all; cursor: pointer; user-select: none; }
+  .field-wrap input.has-icon { padding-right: 2.8rem; }
+
+  /* Select arrow */
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text2);
+    pointer-events: none;
+    font-size: .85rem;
+  }
+
+  /* Password strength */
+  .pw-strength {
+    display: flex;
+    gap: 5px;
+    margin-top: .4rem;
+  }
+  .pw-seg {
+    flex: 1;
+    height: 3px;
+    border-radius: 99px;
+    background: rgba(255,255,255,.08);
+    transition: background .3s;
+  }
+  .pw-label {
+    font-size: .74rem;
+    color: var(--text2);
+    margin-top: .3rem;
+    min-height: 1em;
+  }
+
+  /* Chips */
+  .chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: .45rem 1rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,.03);
+    color: var(--text2);
+    font-size: .82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    user-select: none;
+  }
+  .chip:hover {
+    border-color: var(--borderH);
+    color: var(--text);
+    background: rgba(255,255,255,.06);
+  }
+  .chip.active {
+    border-color: var(--copper);
+    background: rgba(232,146,74,.1);
+    color: var(--copper);
+  }
+
+  /* Textarea */
+  .field-wrap textarea {
+    resize: vertical;
+    min-height: 90px;
+    padding: .85rem 1.1rem;
+  }
+
+  /* Checkboxes */
+  .check-group {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+  }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    cursor: pointer;
+  }
+  .check-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border);
+    background: rgba(255,255,255,.06);
+    accent-color: var(--copper);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: .1rem;
+  }
+  .check-text {
+    font-size: .84rem;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+  .check-text a { color: var(--copper); text-decoration: none; }
+  .check-text a:hover { text-decoration: underline; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    border: none;
+    cursor: pointer;
+    font-family: var(--fs);
+    font-weight: 700;
+    font-size: .95rem;
+    border-radius: 100px;
+    padding: .95rem 2rem;
+    transition: transform .2s, box-shadow .2s, opacity .2s;
+    text-decoration: none;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(0); }
+  .btn-primary {
+    background: linear-gradient(135deg, #e8924a, #f0b070);
+    color: #fff;
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(232,146,74,.25);
+  }
+  .btn-primary:hover { box-shadow: 0 8px 32px rgba(232,146,74,.4); }
+  .btn-secondary {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    color: var(--text);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,.1); }
+
+  .btn-row {
+    display: flex;
+    gap: .8rem;
+    align-items: center;
+  }
+  .btn-row .btn-secondary { flex-shrink: 0; }
+  .btn-row .btn-primary { flex: 1; }
+
+  /* OR divider */
+  .or-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.4rem 0;
+    color: var(--muted);
+    font-size: .8rem;
+  }
+  .or-divider::before, .or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    width: 100%;
+    padding: .85rem 1.5rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,.04);
+    color: var(--text);
+    font-family: var(--fs);
+    font-size: .9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-social:hover {
+    border-color: var(--borderH);
+    background: rgba(255,255,255,.08);
+  }
+  .btn-social svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .role-switch {
+    text-align: center;
+    margin-top: 1.8rem;
+    font-size: .85rem;
+    color: var(--text2);
+  }
+  .role-switch a {
+    color: var(--copper);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .role-switch a:hover { text-decoration: underline; }
+
+  /* Responsive */
+  @@media (max-width: 900px) {
+    .left-panel { display: none; }
+    .page-grid { grid-template-columns: 1fr; }
+    .right-panel { padding: 3rem 1.5rem; }
+    .right-panel::before { left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<div class="page-grid">
+
+  <!-- ══ LEFT PANEL ══ -->
+  <aside class="left-panel">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="dot-grid"></div>
+
+    <div class="left-content">
+      <a href="/" class="logo-link">EduVerse</a>
+      <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Ana sayfaya dön
+      </a>
+
+      <span class="role-tag">Öğrenci Kaydı</span>
+
+      <h1 class="display-title">Bilgi,<br><em>güçtür.</em></h1>
+
+      <p class="desc-text">EduVerse'e katılarak yüzlerce uzmandan ders al, sertifika kazan ve kariyerini bir üst seviyeye taşı.</p>
+
+      <ul class="perks-list">
+        <li><span class="perk-dot"></span>Ücretsiz başlangıç</li>
+        <li><span class="perk-dot"></span>Bağışçı bursları</li>
+        <li><span class="perk-dot"></span>Uluslararası geçerli sertifika</li>
+        <li><span class="perk-dot"></span>12.000+ aktif öğrenci topluluğu</li>
+        <li><span class="perk-dot"></span>Tam mobil uyumlu deneyim</li>
+      </ul>
+
+      <div class="glass-card">
+        <div class="glass-card-label">Platforma özel</div>
+        <div class="glass-card-value">870+</div>
+        <div class="glass-card-sub">Aktif Kurs &nbsp;·&nbsp; 200+ Uzman Eğitmen</div>
+      </div>
+
+      <div class="quote-block">
+        <p>"Bilgi, paylaştıkça büyür."</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ RIGHT PANEL ══ -->
+  <main class="right-panel">
+    <div class="form-container">
+
+      <!-- TempData mesajları -->
+      @if (TempData["Hata"] != null)
+      {
+          <div style="background:rgba(220,60,60,.15);border:1px solid rgba(220,60,60,.35);border-radius:12px;padding:.9rem 1.2rem;margin-bottom:1.5rem;color:#ff8080;font-size:.88rem;">
+              ⚠️ @TempData["Hata"]
+          </div>
+      }
+      @if (TempData["Mesaj"] != null)
+      {
+          <div style="background:rgba(232,146,74,.12);border:1px solid rgba(232,146,74,.35);border-radius:12px;padding:.9rem 1.2rem;margin-bottom:1.5rem;color:#e8924a;font-size:.88rem;">
+              ✓ @TempData["Mesaj"]
+          </div>
+      }
+
+      <!-- Step indicator -->
+      <div class="step-indicator">
+        <div class="step-progress-bar">
+          <div class="step-progress-fill" id="progressFill"></div>
+        </div>
+        <div class="step-dots">
+          <div class="step-dot active" id="dot1">1</div>
+          <div class="step-connector"></div>
+          <div class="step-dot" id="dot2">2</div>
+        </div>
+        <div class="step-label" id="stepLabel">Adım 1 / 2 &nbsp;—&nbsp; <span>Hesap Bilgileri</span></div>
+      </div>
+
+      <div class="form-head">
+        <h2 class="form-title" id="formTitle">Hesap Bilgileri</h2>
+        <p class="form-subtitle" id="formSubtitle">Başlamak için temel bilgilerinizi girin.</p>
+      </div>
+
+      <form id="regForm" method="post" action="/Hesap/Kayit" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Rol" value="Ogrenci" />
+
+        <!-- ── STEP 1 ── -->
+        <div class="form-step active" id="step1">
+
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label" for="firstName">Ad</label>
+              <div class="field-wrap">
+                <input type="text" id="firstName" name="__firstName" placeholder="Adınız" autocomplete="given-name" required />
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="lastName">Soyad</label>
+              <div class="field-wrap">
+                <input type="text" id="lastName" name="__lastName" placeholder="Soyadınız" autocomplete="family-name" required />
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="AdSoyad" name="AdSoyad" value="" />
+
+          <div class="field-group">
+            <label class="field-label" for="email">E-posta</label>
+            <div class="field-wrap">
+              <input type="email" id="email" name="Eposta" placeholder="ornek@eposta.com" class="has-icon" autocomplete="email" required />
+              <span class="field-icon">✉</span>
+            </div>
+          </div>
+
+
+
+          <div class="field-group">
+            <label class="field-label" for="password">Şifre</label>
+            <div class="field-wrap">
+              <input type="password" id="password" name="Sifre" placeholder="En az 8 karakter" class="has-icon" autocomplete="new-password" required />
+              <span class="field-icon clickable" id="togglePw" title="Şifreyi göster/gizle">👁</span>
+            </div>
+            <div class="pw-strength">
+              <div class="pw-seg" id="seg1"></div>
+              <div class="pw-seg" id="seg2"></div>
+              <div class="pw-seg" id="seg3"></div>
+              <div class="pw-seg" id="seg4"></div>
+            </div>
+            <div class="pw-label" id="pwLabel"></div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="edu">Eğitim Seviyesi</label>
+            <div class="field-wrap select-wrap">
+              <select id="edu" name="EgitimSeviyesi" required>
+                <option value="" disabled selected>Seçiniz…</option>
+                <option>Lise</option>
+                <option>Ön Lisans</option>
+                <option>Lisans</option>
+                <option>Yüksek Lisans / Doktora</option>
+                <option>Meslek Okulu</option>
+                <option>Diğer</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="nextBtn">Devam Et &nbsp;→</button>
+
+          <div class="or-divider">ya da</div>
+
+          <button type="button" class="btn-social" onclick="window.location.href='/Hesap/GoogleLogin?rol=Ogrenci'">
+            <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Google ile devam et
+          </button>
+
+          <div class="role-switch">Eğitmen misiniz? <a href="/Hesap/KayitEgitmen">Eğitmen kaydı →</a></div>
+        </div>
+
+        <!-- ── STEP 2 ── -->
+        <div class="form-step" id="step2">
+
+          <div class="field-group">
+            <label class="field-label">İlgi Alanlarınız</label>
+            <div class="chips-grid" id="interestChips">
+              <span class="chip" data-val="yazilim">Yazılım Geliştirme</span>
+              <span class="chip" data-val="veri">Veri Bilimi</span>
+              <span class="chip" data-val="ai">Yapay Zeka</span>
+              <span class="chip" data-val="tasarim">Tasarım</span>
+              <span class="chip" data-val="isdunyasi">İş Dünyası</span>
+              <span class="chip" data-val="dil">Dil Öğrenimi</span>
+              <span class="chip" data-val="pazarlama">Pazarlama</span>
+              <span class="chip" data-val="finans">Finans</span>
+              <span class="chip" data-val="foto">Fotoğraf &amp; Video</span>
+              <span class="chip" data-val="muzik">Müzik</span>
+              <span class="chip" data-val="kisisel">Kişisel Gelişim</span>
+              <span class="chip" data-val="saglik">Sağlık</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="goal">Hedefiniz nedir?</label>
+            <div class="field-wrap">
+              <textarea id="goal" name="Hedef" placeholder="Kariyer hedeflerinizi, öğrenmek istediklerinizi kısaca anlatın…" required></textarea>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="referral">Sizi kim yönlendirdi? <span class="field-opt">(isteğe bağlı)</span></label>
+            <div class="field-wrap select-wrap">
+              <select id="referral" name="Yonlendiren">
+                <option value="" selected>Seçiniz…</option>
+                <option>Arkadaş / Tanıdık</option>
+                <option>Sosyal Medya</option>
+                <option>Google / Arama Motoru</option>
+                <option>YouTube</option>
+                <option>Podcast / Blog</option>
+                <option>Okul / Üniversite</option>
+                <option>Diğer</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <label class="check-item">
+              <input type="checkbox" id="terms" required />
+              <span class="check-text"><a href="#">Kullanım Koşulları</a>'nı ve <a href="#">Gizlilik Politikası</a>'nı okudum, kabul ediyorum.</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" id="newsletter" checked />
+              <span class="check-text">Yeni kurslar ve fırsatlar hakkında haber bülteni almak istiyorum.</span>
+            </label>
+          </div>
+
+          <!-- İlgi alanları seçimlerini sunucuya taşıyan hidden input -->
+          <input type="hidden" id="IlgiAlanlariHidden" name="IlgiAlanlari" value="" />
+
+          <div class="btn-row">
+            <button type="button" class="btn btn-secondary" id="backBtn">← Geri</button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">Hesap Oluştur 🎓</button>
+          </div>
+        </div>
+
+      </form>
+      
+      <div class="role-switch" style="margin-top: 2rem; text-align: center;">
+          Zaten hesabınız var mı? <a href="/Hesap/Giris" class="neon-link">O zaman giriş yapın →</a>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  // ── Cursor ──
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+  });
+  document.querySelectorAll('a,button,.chip,.check-item,.field-icon.clickable').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+  });
+
+  // ── Steps ──
+  const steps = ['step1','step2'];
+  const titles   = ['Hesap Bilgileri','Tercihler & Onay'];
+  const subtitles= ['Başlamak için temel bilgilerinizi girin.','İlgi alanlarınızı seçin ve koşulları onaylayın.'];
+  const labels   = ['Hesap Bilgileri','Tercihler & Onay'];
+  const fills    = ['50%','100%'];
+  let current = 0;
+
+  function goTo(n) {
+    document.getElementById(steps[current]).classList.remove('active');
+    current = n;
+    document.getElementById(steps[current]).classList.add('active');
+    document.getElementById('progressFill').style.width = fills[current];
+    document.getElementById('formTitle').textContent   = titles[current];
+    document.getElementById('formSubtitle').textContent= subtitles[current];
+    document.getElementById('stepLabel').innerHTML = `Adım ${current+1} / 2 &nbsp;—&nbsp; <span>${labels[current]}</span>`;
+    ['dot1','dot2'].forEach((id,i) => {
+      const d = document.getElementById(id);
+      d.classList.remove('active','done');
+      if (i < current) d.classList.add('done');
+      else if (i === current) d.classList.add('active');
+    });
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    const fn = document.getElementById('firstName').value.trim();
+    const ln = document.getElementById('lastName').value.trim();
+    const em = document.getElementById('email').value.trim();
+    const pw = document.getElementById('password').value;
+    const ed = document.getElementById('edu').value;
+    if (!fn || !ln || !em || !pw || !ed) {
+      alert('Lütfen zorunlu alanları doldurunuz.');
+      return;
+    }
+    if (pw.length < 8) {
+      alert('Şifreniz en az 8 karakter olmak zorundadır!');
+      return;
+    }
+    // AdSoyad hidden alanını doldur
+    document.getElementById('AdSoyad').value = fn + ' ' + ln;
+    goTo(1);
+  });
+  document.getElementById('backBtn').addEventListener('click', () => goTo(0));
+
+  // ── Password toggle ──
+  document.getElementById('togglePw').addEventListener('click', () => {
+    const pw = document.getElementById('password');
+    pw.type = pw.type === 'password' ? 'text' : 'password';
+  });
+
+  // ── Password strength ──
+  const segs  = [1,2,3,4].map(i => document.getElementById('seg' + i));
+  const segColors = ['#e85d26','#e8a226','#3dffc0','#3dffc0'];
+  const segLabels = ['','Zayıf','Orta','İyi','Güçlü'];
+
+  function calcStrength(pw) {
+    let s = 0;
+    if (pw.length >= 8)  s++;
+    if (/[A-Z]/.test(pw)) s++;
+    if (/[0-9]/.test(pw)) s++;
+    if (/[^A-Za-z0-9]/.test(pw)) s++;
+    return s;
+  }
+
+  document.getElementById('password').addEventListener('input', e => {
+    const val = e.target.value;
+    const str = val.length === 0 ? 0 : Math.max(1, calcStrength(val));
+    segs.forEach((seg, i) => {
+      seg.style.background = i < str ? segColors[str - 1] : 'rgba(255,255,255,.08)';
+    });
+    document.getElementById('pwLabel').textContent = val.length ? segLabels[str] : '';
+  });
+
+  // ── Chips ──
+  document.querySelectorAll('#interestChips .chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('active'));
+  });
+
+  // ── Adim 1 Dogrulama (EgitimSeviyesi dahil) ──
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    const fn = document.getElementById('firstName').value.trim();
+    const ln = document.getElementById('lastName').value.trim();
+    const em = document.getElementById('email').value.trim();
+    const pw = document.getElementById('password').value;
+    const ed = document.getElementById('edu').value;
+    if (!fn || !ln || !em || !pw || !ed) {
+      alert('Lütfen zorunlu alanları doldurunuz.');
+      return;
+    }
+    if (pw.length < 8) {
+      alert('Şifreniz en az 8 karakter olmak zorundadır!');
+      return;
+    }
+    document.getElementById('AdSoyad').value = fn + ' ' + ln;
+    goTo(1);
+  });
+
+  // ── Form submit — ilgi alanlarini hidden input'a yaz ──
+  document.getElementById('regForm').addEventListener('submit', e => {
+    if (!document.getElementById('terms').checked) {
+      e.preventDefault();
+      alert('Devam etmek için kullanım koşullarını kabul etmelisiniz.');
+      return;
+    }
+    const adSoyad = document.getElementById('AdSoyad').value.trim();
+    if (!adSoyad) {
+      e.preventDefault();
+      alert('Lütfen 1. adıma dönüp Ad ve Soyad alanlarını doldurunuz.');
+      return;
+    }
+    // Secili chip degerlerini hidden input'a yaz
+    const seciliChipler = [...document.querySelectorAll('#interestChips .chip.active')]
+      .map(c => c.dataset.val)
+      .filter(Boolean);
+    
+    if (seciliChipler.length === 0) {
+      e.preventDefault();
+      alert('Lütfen en az bir ilgi alanı seçiniz.');
+      return;
+    }
+
+    const hedefVal = document.getElementById('goal').value.trim();
+    if (!hedefVal) {
+      e.preventDefault();
+      alert('Lütfen hedeflerinizi anlatan alanı doldurunuz.');
+      return;
+    }
+
+    document.getElementById('IlgiAlanlariHidden').value = seciliChipler.join(',');
+    // Formu sunucuya gonder
+  });
+</script>
+</body>
+</html>

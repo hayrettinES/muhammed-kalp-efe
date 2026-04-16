@@ -7,8 +7,19 @@
   "targets": {
     ".NETCoreApp,Version=v10.0": {
       "UdemyBagisSistemi/1.0.0": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Authentication.Google": "10.0.6"
+        },
         "runtime": {
           "UdemyBagisSistemi.dll": {}
+        }
+      },
+      "Microsoft.AspNetCore.Authentication.Google/10.0.6": {
+        "runtime": {
+          "lib/net10.0/Microsoft.AspNetCore.Authentication.Google.dll": {
+            "assemblyVersion": "10.0.6.0",
+            "fileVersion": "10.0.626.17701"
+          }
         }
       }
     }
@@ -18,6 +29,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "Microsoft.AspNetCore.Authentication.Google/10.0.6": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ta/Odpe4E0mDjuE+fUwgDs4fvlvVdR8jysyfYrZnZuMxJGl6aw9H9RbRKZWIV+3J09Jn068blIOQpdY9Vetb2g==",
+      "path": "microsoft.aspnetcore.authentication.google/10.0.6",
+      "hashPath": "microsoft.aspnetcore.authentication.google.10.0.6.nupkg.sha512"
     }
   }
 }

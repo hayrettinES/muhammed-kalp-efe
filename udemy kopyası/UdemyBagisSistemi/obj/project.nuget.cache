@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "xkya55kBeJI=",
+  "dgSpecHash": "d957+iJrSCY=",
   "success": true,
-  "projectFilePath": "/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/UdemyBagisSistemi.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\efeak\\Desktop\\Yeni klasör (2)\\muhammed-kalp-efe\\udemy kopyası\\UdemyBagisSistemi\\UdemyBagisSistemi.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\efeak\\.nuget\\packages\\microsoft.aspnetcore.authentication.google\\10.0.6\\microsoft.aspnetcore.authentication.google.10.0.6.nupkg.sha512"
+  ],
   "logs": []
 }

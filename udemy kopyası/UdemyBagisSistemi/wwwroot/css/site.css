@@ -19,7 +19,29 @@ body {
     color: var(--yazi);
     font-family: "Avenir Next", "Trebuchet MS", sans-serif;
     margin: 0;
+    cursor: none;
 }
+
+/* Global Custom Cursor */
+.custom-global-cursor {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--vurgu-ikinci, #f0a04b);
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: width .2s, height .2s, opacity .2s, background-color .2s;
+}
+
+.custom-global-cursor.grow {
+    width: 28px;
+    height: 28px;
+    opacity: 0.7;
+    background: var(--vurgu, #125b50);
+}
+
 
 /* Bu sinif ortak genislik sinirini belirler. */
 .sayfa-genislik {

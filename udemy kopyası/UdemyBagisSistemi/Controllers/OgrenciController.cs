@@ -13,11 +13,15 @@ public class OgrenciController : Controller
     // Bu alan platform servislerine erisim saglar.
     private readonly PlatformServisi _platformServisi;
 
-    // Bu kurucu servis bagimliligini alir.
-    public OgrenciController(PlatformServisi platformServisi)
+    // Bu alan fotoğraf yükleme işlemleri için gereklidir.
+    private readonly DosyaYuklemeServisi _dosyaYuklemeServisi;
+
+    // Bu kurucu servis bagimliliklarini alir.
+    public OgrenciController(PlatformServisi platformServisi, DosyaYuklemeServisi dosyaYuklemeServisi)
     {
-        // Bu satir bagimliligi saklar.
+        // Bu satir bagimliliklari saklar.
         _platformServisi = platformServisi;
+        _dosyaYuklemeServisi = dosyaYuklemeServisi;
     }
 
     // Bu aksiyon ogrenci panelini gosterir.
@@ -30,11 +34,20 @@ public class OgrenciController : Controller
         return View(_platformServisi.OgrenciPanelVerisiniGetir(ogrenciId));
     }
 
-    // Bu aksiyon ogrencinin kurs detayini gormesini saglar.
+    // Bu aksiyon ogrencinin tam ekran egitim izleme sayfasini gosterir.
     public IActionResult KursDetay(int kursId)
     {
-        // Bu satir ogrenci detay istegini genel kurs detay ekranina yonlendirir.
-        return RedirectToAction("KursDetay", "Home", new { kursId });
+        try
+        {
+            var ogrenciId = KullaniciIdGetir();
+            var model = _platformServisi.OgrenciKursIzlemeVerisiniGetir(kursId, ogrenciId);
+            return View(model);
+        }
+        catch(Exception hata)
+        {
+            TempData["Hata"] = hata.Message;
+            return RedirectToAction(nameof(Panel));
+        }
     }
 
     // Bu aksiyon bagis yapma islemini isler.
@@ -151,6 +164,43 @@ public class OgrenciController : Controller
 
         // Bu satir kurs detayina geri doner.
         return RedirectToAction("KursDetay", "Home", new { kursId });
+    }
+
+    // Bu aksiyon ogrencinin kendi profilini guncellemesini saglar.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ProfilGuncelle(string adSoyad, string eposta, string egitimSeviyesi, string hedef, string ilgiAlanlari, IFormFile? profilFoto, string? mevcutFotoUrl)
+    {
+        try
+        {
+            var ogrenciId = KullaniciIdGetir();
+
+            var fotoUrl = await _dosyaYuklemeServisi.DosyaKaydetAsync(profilFoto, "profil-fotograflari");
+            var eklenecekFoto = string.IsNullOrWhiteSpace(fotoUrl) ? mevcutFotoUrl ?? "" : fotoUrl;
+
+            // PlatformServisi.ProfilGuncelle, rol bazında özel alanları doğrudan desteklemiyor (sadece unvan/hakkinda güncelliyor).
+            // Bu nedenle Ogrenci tablosu için özelleştirilmiş alanları PlatformServisi üzerinden veya direkt komut ile cậpnceliyoruz.
+            // Ama önce standart ProfilGuncelle'yi çağıralım:
+            _platformServisi.ProfilGuncelle(ogrenciId, adSoyad, eposta, "", "", eklenecekFoto);
+
+            // Ogrenci özel alanları (EgitimSeviyesi, Hedef, IlgiAlanlari) için Sql güncellemesi işlemi:
+            var model = new UdemyBagisSistemi.ViewModels.ProfilTamamlaViewModel 
+            { 
+                Rol = "Ogrenci",
+                EgitimSeviyesi = egitimSeviyesi,
+                Hedef = hedef,
+                IlgiAlanlari = ilgiAlanlari
+            };
+            _platformServisi.ProfilTamamla(ogrenciId, model);
+
+            TempData["Mesaj"] = "Profil bilgilerin güncellendi.";
+        }
+        catch (Exception hata)
+        {
+            TempData["Hata"] = hata.Message;
+        }
+
+        return RedirectToAction(nameof(Panel));
     }
 
     // Bu yardimci metod claim icinden kullanici kimligini ceker.

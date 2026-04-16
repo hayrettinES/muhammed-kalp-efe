@@ -14,14 +14,20 @@ public class PlatformServisi
     // Bu alan sifreleme servisini tutar.
     private readonly SifrelemeServisi _sifreleme;
 
+    // Bu alan eposta servisini tutar.
+    private readonly IEpostaServisi _epostaServisi;
+
     // Bu kurucu servis bagimliliklarini alir.
-    public PlatformServisi(SqliteKomutServisi sqlite, SifrelemeServisi sifreleme)
+    public PlatformServisi(SqliteKomutServisi sqlite, SifrelemeServisi sifreleme, IEpostaServisi epostaServisi)
     {
         // Bu satir sqlite bagimliligini saklar.
         _sqlite = sqlite;
 
         // Bu satir sifreleme bagimliligini saklar.
         _sifreleme = sifreleme;
+
+        // Bu satir eposta bagimliligini saklar.
+        _epostaServisi = epostaServisi;
     }
 
     // Bu metod anasayfa icin gerekli ozet verileri getirir.
@@ -91,6 +97,32 @@ public class PlatformServisi
         };
     }
 
+    // Bu metod egitmen profiline ozgu tum alanlari gunceller. Sifre alani bos degilse sifreyi de gunceller.
+    public void EgitmenProfilGuncelle(int kullaniciId, string adSoyad, string eposta, string unvan, string hakkinda, string profilFotoUrl, int deneyimYili, string uzmanlikAlanlari, string linkedinProfili, string kursFormati, string fiyatlandirmaTercihi, string? yeniSifreHash = null)
+    {
+        // Bu satir ayni epostanin baska kullanicida olup olmadigini kontrol eder.
+        var cakisanKayit = SayiGetir($"SELECT COUNT(*) AS Toplam FROM Kullanicilar WHERE Eposta = '{_sqlite.MetinGuvenli(eposta)}' AND Id <> {kullaniciId};");
+        if (cakisanKayit > 0)
+            throw new InvalidOperationException("Bu e-posta adresi başka bir kullanıcı tarafından kullanılıyor.");
+
+        var sifreGuncellemesi = string.IsNullOrWhiteSpace(yeniSifreHash) ? "" : $", SifreHash = '{_sqlite.MetinGuvenli(yeniSifreHash)}'";
+
+        _sqlite.KomutCalistir($"""
+            UPDATE Kullanicilar
+            SET AdSoyad = '{_sqlite.MetinGuvenli(adSoyad)}',
+                Eposta = '{_sqlite.MetinGuvenli(eposta)}'{sifreGuncellemesi},
+                Unvan = '{_sqlite.MetinGuvenli(unvan)}',
+                Hakkinda = '{_sqlite.MetinGuvenli(hakkinda)}',
+                ProfilFotoUrl = '{_sqlite.MetinGuvenli(profilFotoUrl)}',
+                DeneyimYili = {deneyimYili},
+                UzmanlikAlanlari = '{_sqlite.MetinGuvenli(uzmanlikAlanlari)}',
+                LinkedinProfili = '{_sqlite.MetinGuvenli(linkedinProfili)}',
+                KursFormati = '{_sqlite.MetinGuvenli(kursFormati)}',
+                FiyatlandirmaTercihi = '{_sqlite.MetinGuvenli(fiyatlandirmaTercihi)}'
+            WHERE Id = {kullaniciId};
+            """);
+    }
+
     // Bu metod profil gunceller.
     public void ProfilGuncelle(int kullaniciId, string adSoyad, string eposta, string unvan, string hakkinda, string profilFotoUrl)
     {
@@ -128,11 +160,14 @@ public class PlatformServisi
         }
 
         // Bu satir sifre eslesmiyorsa basarisiz doner.
-        return _sifreleme.Dogrula(sifre, kullanici.SifreHash) ? kullanici : null;
+        if (!_sifreleme.Dogrula(sifre, kullanici.SifreHash))
+            return null;
+
+        return kullanici;
     }
 
     // Bu metod yeni ogrenci veya egitmen kaydi olusturur.
-    public (bool Basarili, string Mesaj) KayitOl(KayitViewModel model)
+    public async Task<(bool Basarili, string Mesaj)> KayitOlAsync(KayitViewModel model)
     {
         // Bu satir daha once ayni eposta var mi diye kontrol eder.
         if (KullaniciGetir(model.Eposta) is not null)
@@ -153,25 +188,145 @@ public class PlatformServisi
         var sifreHash = _sifreleme.HashOlustur(model.Sifre);
 
         // Bu satir rol tabanli varsayilan unvani belirler.
-        var unvan = model.Rol == "Egitmen" ? "Yeni Egitmen" : "Yeni Ogrenci";
+        var unvan = string.IsNullOrWhiteSpace(model.Unvan)
+            ? (model.Rol == "Egitmen" ? "Yeni Egitmen" : "Yeni Ogrenci")
+            : model.Unvan;
 
-        // Bu satir yeni kullaniciyi veritabanina ekler.
+        // Bu satir onay kodunu olusturur.
+        var onayKodu = Guid.NewGuid().ToString("N");
+
+        // Bu satir yeni kullaniciyi veritabanina ekler. (EpostaOnaylandiMi varsayilan 0)
         _sqlite.KomutCalistir($"""
-            INSERT INTO Kullanicilar (AdSoyad, Eposta, SifreHash, Rol, Unvan, Hakkinda, ProfilFotoUrl, KayitTarihi)
+            INSERT INTO Kullanicilar (AdSoyad, Eposta, SifreHash, Rol, Unvan, Hakkinda, ProfilFotoUrl,
+                                     Bakiye, EpostaOnaylandiMi, EpostaOnayKodu, KayitTarihi,
+                                     EgitimSeviyesi, IlgiAlanlari, DeneyimYili, UzmanlikAlanlari,
+                                     Hedef, Yonlendiren, LinkedinProfili, KursFormati, FiyatlandirmaTercihi)
             VALUES (
                 '{_sqlite.MetinGuvenli(model.AdSoyad)}',
                 '{_sqlite.MetinGuvenli(model.Eposta)}',
                 '{_sqlite.MetinGuvenli(sifreHash)}',
                 '{_sqlite.MetinGuvenli(model.Rol)}',
                 '{_sqlite.MetinGuvenli(unvan)}',
+                '{_sqlite.MetinGuvenli(model.Hakkinda)}',
                 '',
-                '',
-                '{tarih}'
+                0,
+                0,
+                '{_sqlite.MetinGuvenli(onayKodu)}',
+                '{tarih}',
+                '{_sqlite.MetinGuvenli(model.EgitimSeviyesi)}',
+                '{_sqlite.MetinGuvenli(model.IlgiAlanlari)}',
+                {model.DeneyimYili},
+                '{_sqlite.MetinGuvenli(model.UzmanlikAlanlari)}',
+                '{_sqlite.MetinGuvenli(model.Hedef)}',
+                '{_sqlite.MetinGuvenli(model.Yonlendiren)}',
+                '{_sqlite.MetinGuvenli(model.LinkedinProfili)}',
+                '{_sqlite.MetinGuvenli(model.KursFormati)}',
+                '{_sqlite.MetinGuvenli(model.FiyatlandirmaTercihi)}'
             );
             """);
 
+        // Bu satir e-posta gonderir. TODO: Burada Host bilgisini alabilecegimiz IHttpContextAccessor eklenebilir, gecici olarak localhost:5003 kullanilacak.
+        var dogrulamaUrl = $"http://localhost:5003/Hesap/Dogrula?eposta={Uri.EscapeDataString(model.Eposta)}&kod={Uri.EscapeDataString(onayKodu)}";
+        var mesaj = $@"
+            <div style='font-family: sans-serif;'>
+                <h2>EduVerse'e Hos Geldiniz!</h2>
+                <p>Üyeliğinizi tamamlamak için lütfen aşağıdaki linke tıklayarak e-posta adresinizi onaylayın:</p>
+                <p><a href='{dogrulamaUrl}' style='display:inline-block;padding:10px 20px;background:#3dffc0;color:#1e1e1e;text-decoration:none;border-radius:6px;font-weight:bold;'>Hesabımı Doğrula</a></p>
+                <p>Eğer buton çalışmıyorsa aşağıdaki linki tarayıcınıza yapıştırın:<br/>{dogrulamaUrl}</p>
+            </div>";
+
+        await _epostaServisi.EpostaGonderAsync(model.Eposta, "EduVerse - E-posta Doğrulama", mesaj);
+
         // Bu satir basarili sonuc dondurur.
-        return (true, "Kayit basarili. Simdi giris yapabilirsin.");
+        return (true, "Kayıt başarılı. Lütfen e-posta adresinize gönderilen doğrulama linkine tıklayınız.");
+    }
+
+    public (bool Basarili, string Mesaj) EpostaDogrula(string eposta, string kod)
+    {
+        var kullanici = KullaniciGetir(eposta);
+        if (kullanici == null)
+            return (false, "Kullanıcı bulunamadı.");
+
+        if (kullanici.EpostaOnaylandiMi)
+            return (true, "E-posta zaten onaylanmış.");
+
+        if (kullanici.EpostaOnayKodu != kod)
+            return (false, "Doğrulama kodu geçersiz.");
+
+        _sqlite.KomutCalistir($"""
+            UPDATE Kullanicilar
+            SET EpostaOnaylandiMi = 1, EpostaOnayKodu = ''
+            WHERE Id = {kullanici.Id};
+            """);
+
+        return (true, "E-posta adresiniz başarıyla onaylandı. Şimdi giriş yapabilirsiniz.");
+    }
+
+    public void EpostaDogrulaByGoogle(string eposta)
+    {
+        var kullanici = KullaniciGetir(eposta);
+        if (kullanici != null)
+        {
+            _sqlite.KomutCalistir($"UPDATE Kullanicilar SET EpostaOnaylandiMi = 1, EpostaOnayKodu = '' WHERE Id = {kullanici.Id};");
+        }
+    }
+
+    // Bu metod kullanicinin profil bilgilerinin eksik olup olmadigini kontrol eder.
+    public bool ProfilEksikMi(Kullanici kullanici)
+    {
+        // Bu satir ogrenci icin zorunlu alanlari kontrol eder.
+        if (kullanici.Rol == "Ogrenci")
+        {
+            return string.IsNullOrWhiteSpace(kullanici.EgitimSeviyesi)
+                || string.IsNullOrWhiteSpace(kullanici.IlgiAlanlari)
+                || string.IsNullOrWhiteSpace(kullanici.Hedef);
+        }
+
+        // Bu satir egitmen icin zorunlu alanlari kontrol eder.
+        if (kullanici.Rol == "Egitmen")
+        {
+            return string.IsNullOrWhiteSpace(kullanici.Unvan)
+                || kullanici.Unvan == "Yeni Egitmen"
+                || string.IsNullOrWhiteSpace(kullanici.UzmanlikAlanlari)
+                || kullanici.DeneyimYili == 0
+                || string.IsNullOrWhiteSpace(kullanici.KursFormati)
+                || string.IsNullOrWhiteSpace(kullanici.FiyatlandirmaTercihi);
+        }
+
+        // Bu satir admin ve diger roller icin profil tamamlamaya gerek olmadigi anlaminaddir.
+        return false;
+    }
+
+    // Bu metod kullanicinin eksik profil bilgilerini tamamlar.
+    public void ProfilTamamla(int kullaniciId, ProfilTamamlaViewModel model)
+    {
+        // Bu satir ogrenci profilini tamamlar.
+        if (model.Rol == "Ogrenci")
+        {
+            _sqlite.KomutCalistir($"""
+                UPDATE Kullanicilar
+                SET EgitimSeviyesi = '{_sqlite.MetinGuvenli(model.EgitimSeviyesi)}',
+                    IlgiAlanlari   = '{_sqlite.MetinGuvenli(model.IlgiAlanlari)}',
+                    Hedef          = '{_sqlite.MetinGuvenli(model.Hedef)}',
+                    Yonlendiren    = '{_sqlite.MetinGuvenli(model.Yonlendiren)}'
+                WHERE Id = {kullaniciId};
+                """);
+        }
+        // Bu satir egitmen profilini tamamlar.
+        else if (model.Rol == "Egitmen")
+        {
+            _sqlite.KomutCalistir($"""
+                UPDATE Kullanicilar
+                SET Unvan            = '{_sqlite.MetinGuvenli(model.Unvan)}',
+                    Hakkinda         = '{_sqlite.MetinGuvenli(model.Hakkinda)}',
+                    DeneyimYili      = {model.DeneyimYili},
+                    UzmanlikAlanlari = '{_sqlite.MetinGuvenli(model.UzmanlikAlanlari)}',
+                    LinkedinProfili  = '{_sqlite.MetinGuvenli(model.LinkedinProfili)}',
+                    KursFormati      = '{_sqlite.MetinGuvenli(model.KursFormati)}',
+                    FiyatlandirmaTercihi = '{_sqlite.MetinGuvenli(model.FiyatlandirmaTercihi)}'
+                WHERE Id = {kullaniciId};
+                """);
+        }
     }
 
     // Bu metod admin paneli verilerini toplar.
@@ -233,13 +388,50 @@ public class PlatformServisi
         // Bu satir secili kurs nesnesini bulur.
         var seciliKurs = kursId.HasValue ? KursGetir(kursId.Value, egitmenId) : null;
 
+        // Egitmene ait kurslara kayitli toplam tekil ogrenci sayisi.
+        var toplamOgrenci = SayiGetir($@"
+            SELECT COUNT(DISTINCT kk.OgrenciId) AS Toplam
+            FROM KursKayitlari kk
+            JOIN Kurslar k ON k.Id = kk.KursId
+            WHERE k.EgitmenId = {egitmenId};");
+
+        // Bu ay kayit olan ogrenci sayisi.
+        var buAy = DateTime.Now.ToString("yyyy-MM");
+        var buAyKatilan = SayiGetir($@"
+            SELECT COUNT(DISTINCT kk.OgrenciId) AS Toplam
+            FROM KursKayitlari kk
+            JOIN Kurslar k ON k.Id = kk.KursId
+            WHERE k.EgitmenId = {egitmenId}
+              AND kk.Tarih LIKE '{buAy}%';");
+
+        // Egitmenin kurslarindan kazandigi toplam gelir.
+        var toplamGelir = DecimalGetir($@"
+            SELECT COALESCE(SUM(kk.OdenenTutar), 0) AS Toplam
+            FROM KursKayitlari kk
+            JOIN Kurslar k ON k.Id = kk.KursId
+            WHERE k.EgitmenId = {egitmenId};");
+
+        // Egitmene ait kurslarin aldigi toplam yorum sayisi.
+        var toplamYorum = SayiGetir($@"
+            SELECT COUNT(*) AS Toplam
+            FROM KursYorumlari ky
+            JOIN Kurslar k ON k.Id = ky.KursId
+            WHERE k.EgitmenId = {egitmenId};");
+
         // Bu satir egitmen modeli olusturur.
         return new EgitmenPanelViewModel
         {
-            Kategoriler = KategorileriGetir(),
-            Kurslar = EgitmenKurslariniGetir(egitmenId),
-            DuzenlenenKurs = seciliKurs,
-            Bolumler = seciliKurs is null ? [] : KursBolumleriniGetir(seciliKurs.Id)
+            Kategoriler          = KategorileriGetir(),
+            Kurslar              = EgitmenKurslariniGetir(egitmenId),
+            DuzenlenenKurs       = seciliKurs,
+            Bolumler             = seciliKurs is null ? [] : KursBolumleriniGetir(seciliKurs.Id),
+            SonAktiviteler       = EgitmenAktiviteleriGetir(egitmenId),
+            ToplamOgrenciSayisi  = toplamOgrenci,
+            BuAyKatilanOgrenciSayisi = buAyKatilan,
+            ToplamGelir          = toplamGelir,
+            ToplamYorumSayisi    = toplamYorum,
+            KursOgrencileri      = EgitmenKursOgrencileriniGetir(egitmenId),
+            Profil               = KullaniciGetir(egitmenId) ?? new Kullanici()
         };
     }
 
@@ -336,6 +528,62 @@ public class PlatformServisi
             """);
     }
 
+    // Bu metod mevcut bir kursu bolumunu gunceller.
+    public void BolumGuncelle(int bolumId, int egitmenId, string baslik, string aciklama, string? yeniVideoUrl, string? yeniDokumanUrl)
+    {
+        // Bolumun egitmene ait oldugunu dogrula.
+        var sahipMi = SayiGetir($@"
+            SELECT COUNT(*) AS Toplam
+            FROM KursBolumleri kb
+            JOIN Kurslar k ON k.Id = kb.KursId
+            WHERE kb.Id = {bolumId} AND k.EgitmenId = {egitmenId};");
+
+        if (sahipMi == 0)
+            throw new InvalidOperationException("Bu bölüm size ait değil veya bulunamadı.");
+
+        // Video guncelleme: yeni dosya geldiyse kullan, gelmezse eskiyi koru.
+        var videoSatiri = string.IsNullOrWhiteSpace(yeniVideoUrl) ? "" : $"VideoUrl = '{_sqlite.MetinGuvenli(yeniVideoUrl)}',";
+        var dokumanSatiri = string.IsNullOrWhiteSpace(yeniDokumanUrl) ? "" : $"DokumanUrl = '{_sqlite.MetinGuvenli(yeniDokumanUrl)}',";
+
+        _sqlite.KomutCalistir($"""
+            UPDATE KursBolumleri
+            SET Baslik     = '{_sqlite.MetinGuvenli(baslik)}',
+                Aciklama   = '{_sqlite.MetinGuvenli(aciklama)}',
+                {videoSatiri}
+                {dokumanSatiri}
+                SiraNo     = SiraNo
+            WHERE Id = {bolumId};
+            """);
+    }
+
+    // Bu metod bir kursu bolumunu siler.
+    public void BolumSil(int bolumId, int egitmenId)
+    {
+        // Bolumun egitmene ait oldugunu dogrula.
+        var sahipMi = SayiGetir($@"
+            SELECT COUNT(*) AS Toplam
+            FROM KursBolumleri kb
+            JOIN Kurslar k ON k.Id = kb.KursId
+            WHERE kb.Id = {bolumId} AND k.EgitmenId = {egitmenId};");
+
+        if (sahipMi == 0)
+            throw new InvalidOperationException("Bu bölüm size ait değil veya bulunamadı.");
+
+        _sqlite.KomutCalistir($"DELETE FROM KursBolumleri WHERE Id = {bolumId};");
+    }
+
+    // Bu metod kursu tamamen siler (bolumler dahil).
+    public void KursSil(int kursId, int egitmenId)
+    {
+        // Kursun egitmene ait oldugunu dogrula.
+        var kurs = KursGetir(kursId, egitmenId);
+        if (kurs is null)
+            throw new InvalidOperationException("Kurs bulunamadı veya size ait değil.");
+
+        _sqlite.KomutCalistir($"DELETE FROM KursBolumleri WHERE KursId = {kursId};");
+        _sqlite.KomutCalistir($"DELETE FROM Kurslar WHERE Id = {kursId} AND EgitmenId = {egitmenId};");
+    }
+
     // Bu metod kurs yayin durumunu tersine cevirir.
     public void KursYayinDurumuDegistir(int kursId, int egitmenId)
     {
@@ -376,7 +624,8 @@ public class PlatformServisi
             OgrenciBakiyesi = OgrenciBakiyesiGetir(ogrenciId),
             Kurslar = OgrenciIcinKurslariGetir(ogrenciId),
             AldigiKurslar = aldigiKurslar,
-            Ilerlemeler = aldigiKurslar.Select(x => KursIlerlemeOzetiGetir(x.Kurs.Id, ogrenciId)).ToList()
+            Ilerlemeler = aldigiKurslar.Select(x => KursIlerlemeOzetiGetir(x.Kurs.Id, ogrenciId)).ToList(),
+            Profil = KullaniciGetir(ogrenciId) ?? new Kullanici()
         };
     }
 
@@ -408,6 +657,71 @@ public class PlatformServisi
             YorumYapabilirMi = sahipMi && aktifKullaniciId.HasValue,
             IlerlemeOzeti = ilerleme,
             AktifKullaniciId = aktifKullaniciId
+        };
+    }
+
+    // Bu metod ögrenci paneline özel tam ekran eğitim izleme detaylarını hazırlayıp gönderir.
+    public OgrenciKursIzlemeViewModel OgrenciKursIzlemeVerisiniGetir(int kursId, int ogrenciId)
+    {
+        // 1. Kursun varlığını ve öğrenciye aidiyetini kontrol et.
+        var sahiplik = SayiGetir($"SELECT COUNT(*) AS Toplam FROM KursKayitlari WHERE OgrenciId = {ogrenciId} AND KursId = {kursId};");
+        if (sahiplik == 0)
+        {
+            throw new InvalidOperationException("Bu kursa sahip değilsiniz veya bulunamadı.");
+        }
+
+        // 2. Kurs bilgilerini getir.
+        var kursData = _sqlite.SorguCalistir($"SELECT * FROM Kurslar WHERE Id = {kursId}").FirstOrDefault();
+        if (kursData is null) throw new InvalidOperationException("Kurs bulunamadı.");
+        
+        var egitmenAdi = _sqlite.SorguCalistir($"SELECT AdSoyad FROM Kullanicilar WHERE Id = {Convert.ToInt32(kursData["EgitmenId"])}").FirstOrDefault()?["AdSoyad"]?.ToString() ?? "Bilinmiyor";
+
+        // 3. Kurs bölümlerini getir
+        var bolumlerCikti = _sqlite.SorguCalistir($"SELECT * FROM KursBolumleri WHERE KursId = {kursId} ORDER BY SiraNo ASC");
+        var bolumler = new List<KursBolumu>();
+        foreach (var b in bolumlerCikti)
+        {
+            bolumler.Add(new KursBolumu
+            {
+                Id = Convert.ToInt32(b["Id"]),
+                KursId = Convert.ToInt32(b["KursId"]),
+                SiraNo = Convert.ToInt32(b["SiraNo"]),
+                Baslik = b["Baslik"].ToString() ?? "",
+                Aciklama = b["Aciklama"].ToString() ?? "",
+                VideoUrl = b["VideoUrl"].ToString() ?? "",
+                DokumanUrl = b["DokumanUrl"].ToString() ?? "",
+                OlusturmaTarihi = b["OlusturmaTarihi"].ToString() ?? ""
+            });
+        }
+
+        // 4. Öğrencinin bölüm ilerlemelerini getir
+        var ilerlemelerCikti = _sqlite.SorguCalistir($"SELECT * FROM BolumIlerlemeleri WHERE KursId = {kursId} AND OgrenciId = {ogrenciId}");
+        var ilerlemeler = new List<BolumIlerlemesi>();
+        foreach (var i in ilerlemelerCikti)
+        {
+            ilerlemeler.Add(new BolumIlerlemesi
+            {
+                Id = Convert.ToInt32(i["Id"]),
+                OgrenciId = Convert.ToInt32(i["OgrenciId"]),
+                KursId = Convert.ToInt32(i["KursId"]),
+                KursBolumuId = Convert.ToInt32(i["KursBolumuId"]),
+                TamamlandiMi = Convert.ToInt32(i["TamamlandiMi"]) == 1,
+                SonIzlemeTarihi = i["SonIzlemeTarihi"].ToString() ?? ""
+            });
+        }
+
+        return new OgrenciKursIzlemeViewModel
+        {
+            Kurs = new Kurs
+            {
+                Id = Convert.ToInt32(kursData["Id"]),
+                Baslik = kursData["Baslik"].ToString() ?? "",
+                Aciklama = kursData["Aciklama"].ToString() ?? "",
+                OnizlemeVideoUrl = kursData["OnizlemeVideoUrl"].ToString() ?? ""
+            },
+            EgitmenAdi = egitmenAdi,
+            Bolumler = bolumler,
+            Ilerlemeler = ilerlemeler
         };
     }
 
@@ -959,7 +1273,18 @@ public class PlatformServisi
             Hakkinda = satir.GetValueOrDefault("Hakkinda") ?? string.Empty,
             ProfilFotoUrl = satir.GetValueOrDefault("ProfilFotoUrl") ?? string.Empty,
             Bakiye = DecimalGetir(satir, "Bakiye"),
-            KayitTarihi = satir.GetValueOrDefault("KayitTarihi") ?? string.Empty
+            EpostaOnaylandiMi = satir.GetValueOrDefault("EpostaOnaylandiMi") == "1",
+            EpostaOnayKodu = satir.GetValueOrDefault("EpostaOnayKodu") ?? string.Empty,
+            KayitTarihi = satir.GetValueOrDefault("KayitTarihi") ?? string.Empty,
+            EgitimSeviyesi = satir.GetValueOrDefault("EgitimSeviyesi") ?? string.Empty,
+            IlgiAlanlari = satir.GetValueOrDefault("IlgiAlanlari") ?? string.Empty,
+            DeneyimYili = IntGetir(satir, "DeneyimYili"),
+            UzmanlikAlanlari = satir.GetValueOrDefault("UzmanlikAlanlari") ?? string.Empty,
+            Hedef = satir.GetValueOrDefault("Hedef") ?? string.Empty,
+            Yonlendiren = satir.GetValueOrDefault("Yonlendiren") ?? string.Empty,
+            LinkedinProfili = satir.GetValueOrDefault("LinkedinProfili") ?? string.Empty,
+            KursFormati = satir.GetValueOrDefault("KursFormati") ?? string.Empty,
+            FiyatlandirmaTercihi = satir.GetValueOrDefault("FiyatlandirmaTercihi") ?? string.Empty
         };
     }
 
@@ -1007,5 +1332,127 @@ public class PlatformServisi
             out var sonuc)
             ? sonuc
             : 0;
+    }
+
+    // Bu metod egitmenin gerceklestirdigi ve egitmeni ilgilendiren son etkinlikleri getirir.
+    public List<AktiviteOgesi> EgitmenAktiviteleriGetir(int egitmenId)
+    {
+        var aktiviteler = new List<AktiviteOgesi>();
+
+        // 1. Yayina alinan kurslar (Kurslar Tablosu)
+        var yayindakiler = _sqlite.SorguCalistir($@"
+            SELECT Baslik, OlusturmaTarihi 
+            FROM Kurslar 
+            WHERE EgitmenId = {egitmenId} AND YayinlandiMi = 1;
+        ");
+        foreach(var satir in yayindakiler)
+        {
+            var tarih = satir.GetValueOrDefault("OlusturmaTarihi") ?? string.Empty;
+            if(!string.IsNullOrEmpty(tarih))
+            {
+                aktiviteler.Add(new AktiviteOgesi {
+                    Metin = $"<strong>{satir.GetValueOrDefault("Baslik")}</strong> isimli eğitim setiniz yayınlandı ve öğrencilere açıldı.",
+                    Tarih = tarih,
+                    IkonRengi = "" // default
+                });
+            }
+        }
+
+        // 2. Kurslara kayit olan yeni ogrenciler (KursKayitlari Tablosu)
+        // EgitmenId'ye ait kurslarin id'lerinden kayitlara ulasilir.
+        var kayitlar = _sqlite.SorguCalistir($@"
+            SELECT k.Baslik, kk.Tarih 
+            FROM KursKayitlari kk
+            JOIN Kurslar k ON k.Id = kk.KursId
+            WHERE k.EgitmenId = {egitmenId};
+        ");
+        foreach(var satir in kayitlar)
+        {
+            var tarih = satir.GetValueOrDefault("Tarih") ?? string.Empty;
+            if(!string.IsNullOrEmpty(tarih))
+            {
+                aktiviteler.Add(new AktiviteOgesi {
+                    Metin = $"<strong>{satir.GetValueOrDefault("Baslik")}</strong> eğitiminize yeni bir öğrenci katılım sağladı.",
+                    Tarih = tarih,
+                    IkonRengi = "copper" 
+                });
+            }
+        }
+
+        // 3. Profil Tanimlamasi (Kullanicilar Tablosu)
+        var egitmenKaydi = _sqlite.SorguCalistir($@"
+            SELECT KayitTarihi FROM Kullanicilar WHERE Id = {egitmenId};
+        ").FirstOrDefault();
+        if(egitmenKaydi != null && egitmenKaydi.TryGetValue("KayitTarihi", out var eTarih) && !string.IsNullOrEmpty(eTarih))
+        {
+            aktiviteler.Add(new AktiviteOgesi {
+                Metin = "Eğitmen paneliniz aktifleşti ve profiliniz başarıyla onaylandı.",
+                Tarih = eTarih,
+                IkonRengi = ""
+            });
+        }
+
+        // Listeyi tarihe gore sondan basa dogru sirala ve sadece son 15'ini al.
+        return aktiviteler.OrderByDescending(a => a.Tarih).Take(15).ToList();
+    }
+
+    // Bu metod egitmene ait tum kursları ve o kursa kayitli ogrencilerin ilerleme ve temel bilgilerini getirir.
+    public List<EgitmenKursOgrencileri> EgitmenKursOgrencileriniGetir(int egitmenId)
+    {
+        var egitmeninKurslari = _sqlite.SorguCalistir($@"
+            SELECT Id, Baslik, YayinlandiMi
+            FROM Kurslar
+            WHERE EgitmenId = {egitmenId};
+        ");
+
+        var liste = new List<EgitmenKursOgrencileri>();
+
+        foreach (var kursSatir in egitmeninKurslari)
+        {
+            var kursId = int.TryParse(kursSatir.GetValueOrDefault("Id"), out var id) ? id : 0;
+            var toplamBolum = SayiGetir($"SELECT COUNT(*) AS Toplam FROM KursBolumleri WHERE KursId = {kursId};");
+
+            var ogrenciSatirlari = _sqlite.SorguCalistir($@"
+                SELECT 
+                    ku.Id AS OgrenciId, 
+                    ku.AdSoyad, 
+                    ku.Eposta, 
+                    kk.Tarih AS KayitTarihi
+                FROM KursKayitlari kk
+                JOIN Kullanicilar ku ON ku.Id = kk.OgrenciId
+                WHERE kk.KursId = {kursId};
+            ");
+
+            var ogrenciListesi = new List<KursOgrencisi>();
+
+            foreach (var os in ogrenciSatirlari)
+            {
+                var oId = int.TryParse(os.GetValueOrDefault("OgrenciId"), out var oid) ? oid : 0;
+                var tamamlananCount = SayiGetir($@"
+                    SELECT COUNT(*) AS Toplam FROM BolumIlerlemeleri 
+                    WHERE OgrenciId = {oId} AND KursId = {kursId} AND TamamlandiMi = 1;
+                ");
+
+                ogrenciListesi.Add(new KursOgrencisi
+                {
+                    OgrenciId = oId,
+                    AdSoyad = os.GetValueOrDefault("AdSoyad") ?? "Bilinmiyor",
+                    Eposta = os.GetValueOrDefault("Eposta") ?? "Bilinmiyor",
+                    KayitTarihi = os.GetValueOrDefault("KayitTarihi") ?? "",
+                    TamamlananBolum = tamamlananCount,
+                    ToplamBolum = toplamBolum
+                });
+            }
+
+            liste.Add(new EgitmenKursOgrencileri
+            {
+                KursId = kursId,
+                KursBaslik = kursSatir.GetValueOrDefault("Baslik") ?? "Isimsiz Egitim",
+                YayinlandiMi = kursSatir.GetValueOrDefault("YayinlandiMi") == "1",
+                Ogrenciler = ogrenciListesi.OrderByDescending(x => x.IlerlemeYuzdesi).ToList()
+            });
+        }
+
+        return liste.OrderByDescending(x => x.Ogrenciler.Count).ToList();
     }
 }

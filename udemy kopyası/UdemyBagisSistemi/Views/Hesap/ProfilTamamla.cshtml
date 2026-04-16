@@ -1,0 +1,585 @@
+@{
+    Layout = null;
+}
+@model UdemyBagisSistemi.ViewModels.ProfilTamamlaViewModel
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Profili Tamamla — EduVerse</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #141c2e;
+    --bg2:      #111827;
+    --border:   rgba(255,255,255,.09);
+    --borderH:  rgba(255,255,255,.18);
+    --mint:     #3dffc0;
+    --copper:   #e8924a;
+    --blue:     #7eb8ff;
+    --text:     #e2e8f4;
+    --text2:    #8898b8;
+    --muted:    #4a5878;
+    --error:    #ff4c4c;
+    --fh:       'Cormorant Garamond', serif;
+    --fs:       'Plus Jakarta Sans', sans-serif;
+    --fm:       'JetBrains Mono', monospace;
+    --r:        12px;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--fs);
+    background: var(--bg);
+    color: var(--text);
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* Custom Cursor */
+  .cursor {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: width .2s, height .2s, opacity .2s;
+    mix-blend-mode: screen;
+  }
+  .cursor.grow { width: 28px; height: 28px; opacity: .7; }
+
+  /* Accent per role */
+  body.ogrenci { --accent: var(--copper); --accent-glow: rgba(232,146,74,.14); }
+  body.egitmen { --accent: var(--mint);   --accent-glow: rgba(61,255,192,.12);  }
+
+  /* Page Layout */
+  .page-grid {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 100vh;
+  }
+  .page-grid > * { flex: 1; min-width: 320px; }
+  
+  /* Öğrencide inputlar (panel) solda, yazılar sağda. Flex row-reverse yapıyoruz */
+  body.ogrenci .page-grid { flex-direction: row-reverse; }
+
+  /* ══ INFO PANEL (Text) ══ */
+  .info-panel {
+    position: relative;
+    background: var(--bg2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 4rem;
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: .4;
+    pointer-events: none;
+  }
+  body.ogrenci .blob-1 { width: 440px; height: 440px; background: rgba(232,146,74,.15); top: -100px; left: -100px; }
+  body.ogrenci .blob-2 { width: 320px; height: 320px; background: rgba(184,156,255,.15); bottom: -50px; right: -50px; }
+  
+  body.egitmen .blob-1 { width: 440px; height: 440px; background: rgba(61,255,192,.15); top: -100px; left: -100px; }
+  body.egitmen .blob-2 { width: 320px; height: 320px; background: rgba(126,184,255,.15); bottom: -50px; right: -50px; }
+
+  .dot-grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+
+  .info-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .logo-link {
+    text-decoration: none;
+    font-family: var(--fh);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: .02em;
+    display: inline-block;
+    margin-bottom: 3rem;
+  }
+
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--fm);
+    font-size: .75rem;
+    color: var(--accent);
+    background: var(--accent-glow);
+    border: 1px solid var(--accent);
+    border-radius: 100px;
+    padding: .4rem 1rem;
+    margin-bottom: 1.5rem;
+    align-self: flex-start;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  .display-title {
+    font-family: var(--fh);
+    font-size: clamp(3rem, 4vw, 4.2rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+  .display-title em { font-style: italic; color: var(--accent); }
+
+  .desc-text {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text2);
+    max-width: 400px;
+    margin-bottom: auto;
+  }
+
+  /* Info box in the info panel */
+  .info-box {
+    display: flex;
+    gap: .75rem;
+    align-items: flex-start;
+    padding: 1.2rem 1.4rem;
+    border-radius: 16px;
+    font-size: .88rem;
+    line-height: 1.55;
+    background: var(--accent-glow);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    margin-top: 3rem;
+  }
+  .info-icon { font-size: 1.4rem; flex-shrink: 0; }
+
+  /* ══ FORM PANEL ══ */
+  .form-panel {
+    background: var(--bg);
+    padding: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow-y: auto;
+  }
+  .form-panel::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .form-container {
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    z-index: 1;
+    margin: auto 0;
+  }
+
+  /* Progress */
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,.08);
+    border-radius: 99px;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width .5s ease;
+  }
+  body.ogrenci .progress-fill { background: linear-gradient(90deg, var(--copper), #f0b070); }
+  body.egitmen .progress-fill { background: linear-gradient(90deg, var(--mint), #1ec490); }
+
+  .form-head { margin-bottom: 2rem; }
+  .form-title { font-family: var(--fh); font-size: 2.2rem; font-weight: 700; color: var(--text); margin-bottom: .4rem; }
+  .form-subtitle { font-size: .95rem; color: var(--text2); line-height: 1.5; }
+
+  /* Fields */
+  .field-group { display: flex; flex-direction: column; gap: .45rem; margin-bottom: 1.4rem; }
+  .field-label { font-size: .8rem; font-weight: 600; color: var(--text2); letter-spacing: .04em; text-transform: uppercase; }
+  .field-wrap { position: relative; }
+  .field-wrap input, .field-wrap select, .field-wrap textarea {
+    width: 100%;
+    background: rgba(255,255,255,.06);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    color: var(--text);
+    font-family: var(--fs);
+    font-size: .95rem;
+    padding: .9rem 1.1rem;
+    outline: none;
+    transition: all .2s;
+    appearance: none; -webkit-appearance: none;
+  }
+  .field-wrap input:focus, .field-wrap select:focus, .field-wrap textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    background: rgba(255,255,255,.08);
+  }
+  .field-wrap textarea { resize: vertical; min-height: 110px; }
+  .field-wrap select option { background: #1a2540; color: var(--text); }
+  .select-wrap::after { content: '▾'; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text2); pointer-events: none; font-size: .85rem; }
+
+  /* Chips */
+  .chips-grid { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .chip {
+    display: inline-flex; align-items: center; padding: .5rem 1rem; border-radius: 100px;
+    border: 1px solid var(--border); background: rgba(255,255,255,.03); color: var(--text2);
+    font-size: .84rem; font-weight: 500; cursor: pointer; transition: all .2s; user-select: none;
+  }
+  .chip:hover { border-color: var(--borderH); color: var(--text); background: rgba(255,255,255,.06); }
+  .chip.active { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+
+  /* Slider */
+  .slider-wrap { display: flex; flex-direction: column; gap: .6rem; }
+  .slider-row { display: flex; align-items: center; gap: 1rem; }
+  .slider-val { font-family: var(--fm); font-size: 1.1rem; color: var(--mint); min-width: 80px; text-align: right; }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 99px; background: rgba(255,255,255,.12); outline: none; cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--mint);
+    border: 2px solid #0a1628; box-shadow: 0 0 8px rgba(61,255,192,.4); cursor: pointer;
+  }
+
+  /* Button */
+  .btn-submit {
+    display: inline-flex; align-items: center; justify-content: center; gap: .6rem; width: 100%;
+    border: none; cursor: pointer; font-family: var(--fs); font-weight: 700; font-size: 1rem;
+    border-radius: 100px; padding: 1.1rem; transition: transform .2s, box-shadow .2s; margin-top: 1rem;
+  }
+  .btn-submit:hover { transform: translateY(-2px); }
+  .btn-submit:active { transform: translateY(0); }
+  body.ogrenci .btn-submit { background: linear-gradient(135deg, var(--copper), #f0b070); color: #fff; box-shadow: 0 4px 24px rgba(232,146,74,.25); }
+  body.ogrenci .btn-submit:hover { box-shadow: 0 8px 36px rgba(232,146,74,.4); }
+  body.egitmen .btn-submit { background: linear-gradient(135deg, var(--mint), #1ec490); color: #0a1628; box-shadow: 0 4px 24px rgba(61,255,192,.2); }
+  body.egitmen .btn-submit:hover { box-shadow: 0 8px 36px rgba(61,255,192,.35); }
+
+  /* Message */
+  .alert-success { background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); padding: 1rem; border-radius: var(--r); margin-bottom: 1.5rem; font-size: .88rem; text-align: center; }
+
+  @@media (max-width: 900px) {
+    .info-panel { display: none; }
+    .page-grid { flex-direction: column !important; }
+    .form-panel { padding: 3rem 1.5rem; }
+  }
+</style>
+</head>
+<body class="@(Model.Rol == "Egitmen" ? "egitmen" : "ogrenci")">
+
+<div class="cursor" id="cursor"></div>
+
+<div class="page-grid">
+
+  <!-- ══ INFO PANEL ══ -->
+  <aside class="info-panel">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="dot-grid"></div>
+
+    <div class="info-content">
+      <a href="/" class="logo-link">EduVerse</a>
+
+      <div class="role-badge">
+        @(Model.Rol == "Egitmen" ? "🎓 EĞİTMEN PROFİLİ" : "📚 ÖĞRENCİ PROFİLİ")
+      </div>
+
+      <h1 class="display-title">Neredeyse<br><em>hazırsın!</em></h1>
+      <p class="desc-text">
+        @if (Model.Rol == "Egitmen")
+        {
+            <text>Binlerce öğrenciye ulaşmak için son bir adım kaldı. Uzmanlık alanı ve detaylarını paylaşarak öğrencilerle buluşmaya başla.</text>
+        }
+        else
+        {
+            <text>Seni tanımamız için sadece birkaç sorumuz kaldı. Hangi alanlarda gelişmek istiyorsun? Öğrenme serüvenini kişiselleştirelim!</text>
+        }
+      </p>
+
+      <div class="info-box">
+        <span class="info-icon">@(Model.Rol == "Egitmen" ? "🚀" : "🎯")</span>
+        <span>
+          @if (Model.Rol == "Egitmen")
+          {
+              <text>Girdiğin bu bilgiler, öğrencilerin seni eğitmen dizininde bulmasını ve derslerinde karar vermesini sağlayacak.</text>
+          }
+          else
+          {
+              <text>Bu sayede sana en uygun kursları listeleyecek ve gereksiz içeriklerle vakit kaybetmeni engelleyeceğiz.</text>
+          }
+        </span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ FORM PANEL ══ -->
+  <main class="form-panel">
+    <div class="form-container">
+      
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:75%"></div>
+      </div>
+
+      <div class="form-head">
+        <h2 class="form-title">Eksik Bilgiler</h2>
+        <p class="form-subtitle">Lütfen son ayarlar için aşağıdaki formu tamamlayın.</p>
+      </div>
+
+      @if (TempData["Mesaj"] != null)
+      {
+          <div class="alert-success">✓ @TempData["Mesaj"]</div>
+      }
+
+      <form method="post" action="/Hesap/ProfilTamamla" id="completionForm" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Rol" value="@Model.Rol" />
+
+        @if (Model.Rol == "Ogrenci")
+        {
+            <!-- ── Öğrenci Alanları ── -->
+            <div class="field-group">
+              <label class="field-label" for="edu">Eğitim Seviyeniz</label>
+              <div class="field-wrap select-wrap">
+                <select id="edu" name="EgitimSeviyesi" required>
+                  <option value="" disabled selected>Seçiniz…</option>
+                  <option>Lise</option>
+                  <option>Ön Lisans</option>
+                  <option>Lisans</option>
+                  <option>Yüksek Lisans / Doktora</option>
+                  <option>Meslek Okulu</option>
+                  <option>Diğer</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">İlgi Alanlarınız</label>
+              <div class="chips-grid" id="interestChips">
+                <span class="chip" data-val="yazilim">Yazılım Geliştirme</span>
+                <span class="chip" data-val="veri">Veri Bilimi</span>
+                <span class="chip" data-val="ai">Yapay Zeka</span>
+                <span class="chip" data-val="tasarim">Tasarım</span>
+                <span class="chip" data-val="isdunyasi">İş Dünyası</span>
+                <span class="chip" data-val="dil">Dil Öğrenimi</span>
+                <span class="chip" data-val="pazarlama">Pazarlama</span>
+                <span class="chip" data-val="finans">Finans</span>
+                <span class="chip" data-val="foto">Foto & Video</span>
+                <span class="chip" data-val="muzik">Müzik</span>
+                <span class="chip" data-val="kisisel">Kişisel Gelişim</span>
+              </div>
+              <input type="hidden" id="IlgiAlanlariInput" name="IlgiAlanlari" value="" />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="goal">Hedefiniz nedir?</label>
+              <div class="field-wrap">
+                <textarea id="goal" name="Hedef" placeholder="Kariyer hedefleriniz, öğrenmek istedikleriniz..." required></textarea>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="referral">Sizi kim yönlendirdi? (İsteğe Bağlı)</label>
+              <div class="field-wrap select-wrap">
+                <select id="referral" name="Yonlendiren">
+                  <option value="" selected>Seçiniz…</option>
+                  <option>Arkadaş / Tanıdık</option>
+                  <option>Sosyal Medya</option>
+                  <option>Google / Arama Motoru</option>
+                  <option>YouTube</option>
+                  <option>Diğer</option>
+                </select>
+              </div>
+            </div>
+        }
+        else
+        {
+            <!-- ── Eğitmen Alanları ── -->
+            <div class="field-group">
+              <label class="field-label" for="unvan">Unvan / Meslek</label>
+              <div class="field-wrap">
+                <input type="text" id="unvan" name="Unvan" placeholder="Senior Backend Developer, SEO Uzmanı vs." required />
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Uzmanlık Alanları</label>
+              <div class="chips-grid" id="expertChips">
+                <span class="chip" data-val="yazilim">Yazılım</span>
+                <span class="chip" data-val="veri">Veri Bilimi</span>
+                <span class="chip" data-val="ai">Yapay Zeka</span>
+                <span class="chip" data-val="uiux">UI/UX Tasarım</span>
+                <span class="chip" data-val="grafik">Grafik Tasarım</span>
+                <span class="chip" data-val="pazarlama">Pazarlama</span>
+                <span class="chip" data-val="is">İş Dünyası</span>
+                <span class="chip" data-val="finans">Finans</span>
+                <span class="chip" data-val="dil">Dil</span>
+              </div>
+              <input type="hidden" id="UzmanlikAlanlariInput" name="UzmanlikAlanlari" value="" />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="expRange">Deneyim Yılı</label>
+              <div class="slider-wrap">
+                <div class="slider-row">
+                  <input type="range" id="expRange" min="1" max="30" value="5" step="1" />
+                  <span class="slider-val" id="sliderVal">5 yıl</span>
+                </div>
+              </div>
+              <input type="hidden" id="DeneyimYiliInput" name="DeneyimYili" value="5" />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="bio">Biyografi (İsteğe Bağlı)</label>
+              <div class="field-wrap">
+                <textarea id="bio" name="Hakkinda" placeholder="Eğitmen olarak kimsiniz? Kendinizi tanıtın..."></textarea>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Kurs Formatı</label>
+              <div class="chips-grid" id="formatGrid">
+                <span class="chip" data-val="video">🎥 Video Ders</span>
+                <span class="chip" data-val="live">📡 Canlı Ders</span>
+                <span class="chip" data-val="hybrid">⚡ Hibrit</span>
+                <span class="chip" data-val="text">📝 Metin &amp; Kaynak</span>
+              </div>
+              <input type="hidden" id="KursFormatiInput" name="KursFormati" value="" />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="pricing">Fiyatlandırma Tercihi</label>
+              <div class="field-wrap select-wrap">
+                <select id="pricing" name="FiyatlandirmaTercihi">
+                  <option value="" disabled selected>Tercih edilen model…</option>
+                  <option>Ücretli kurs (tek seferlik)</option>
+                  <option>Abonelik modeli</option>
+                  <option>Ücretsiz + premium içerik</option>
+                </select>
+              </div>
+            </div>
+        }
+
+        <button type="submit" class="btn-submit" id="submitBtn">Kaydı Tamamla &nbsp;→</button>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, input, .chip, select, textarea').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+  });
+
+  // Chip toggle
+  document.querySelectorAll('.chip').forEach(chip => {
+    if(!chip.closest('#formatGrid')) {
+        chip.addEventListener('click', () => chip.classList.toggle('active'));
+    }
+  });
+
+  @if (Model.Rol == "Egitmen")
+  {
+      <text>
+  // Range slider
+  const slider = document.getElementById('expRange');
+  const sliderVal = document.getElementById('sliderVal');
+  const deneyimInput = document.getElementById('DeneyimYiliInput');
+
+  slider.addEventListener('input', () => {
+    const v = parseInt(slider.value);
+    sliderVal.textContent = v >= 30 ? '30+ yıl' : `${v} yıl`;
+    const pct = ((v - 1) / 29) * 100;
+    slider.style.background = `linear-gradient(90deg, #3dffc0 ${pct}%, rgba(255,255,255,.12) ${pct}%)`;
+    deneyimInput.value = v;
+  });
+  slider.style.background = 'linear-gradient(90deg, #3dffc0 13.8%, rgba(255,255,255,.12) 13.8%)';
+
+  // Format cards unique choice
+  document.querySelectorAll('#formatGrid .chip').forEach(ch => {
+    ch.addEventListener('click', () => {
+      document.querySelectorAll('#formatGrid .chip').forEach(c => c.classList.remove('active'));
+      ch.classList.add('active');
+    });
+  });
+      </text>
+  }
+
+  // Form submit
+  document.getElementById('completionForm').addEventListener('submit', e => {
+    @if (Model.Rol == "Ogrenci")
+    {
+        <text>
+    const edu = document.getElementById('edu').value;
+    if (!edu) { e.preventDefault(); alert('Lütfen eğitim seviyenizi seçiniz.'); return; }
+    
+    const seciliChipler = [...document.querySelectorAll('#interestChips .chip.active')].map(c => c.dataset.val);
+    if (seciliChipler.length === 0) { e.preventDefault(); alert('Lütfen en az bir ilgi alanı seçiniz.'); return; }
+    
+    const hedef = document.getElementById('goal').value.trim();
+    if (!hedef) { e.preventDefault(); alert('Lütfen hedeflerinizi kısaca belirtiniz.'); return; }
+    
+    document.getElementById('IlgiAlanlariInput').value = seciliChipler.join(',');
+        </text>
+    }
+    else
+    {
+        <text>
+    const unvan = document.getElementById('unvan').value.trim();
+    if (!unvan) { e.preventDefault(); alert('Lütfen unvan / meslek bilginizi giriniz.'); return; }
+    
+    const uzmanliklar = [...document.querySelectorAll('#expertChips .chip.active')].map(c => c.dataset.val);
+    if (uzmanliklar.length === 0) { e.preventDefault(); alert('Lütfen en az bir uzmanlık alanı seçiniz.'); return; }
+    
+    const seciliFormat = document.querySelector('#formatGrid .chip.active');
+    if (!seciliFormat) { e.preventDefault(); alert('Lütfen bir kurs formatı seçiniz.'); return; }
+    
+    const fiyatSecimi = document.getElementById('pricing').value;
+    if (!fiyatSecimi) { e.preventDefault(); alert('Lütfen bir fiyatlandırma modeli seçiniz.'); return; }
+    
+    document.getElementById('UzmanlikAlanlariInput').value = uzmanliklar.join(',');
+    document.getElementById('KursFormatiInput').value = seciliFormat.dataset.val;
+    document.getElementById('DeneyimYiliInput').value = document.getElementById('expRange').value;
+        </text>
+    }
+  });
+
+  // Progress animasyonu
+  setTimeout(() => {
+    document.getElementById('progressFill').style.width = '100%';
+  }, 400);
+</script>
+</body>
+</html>

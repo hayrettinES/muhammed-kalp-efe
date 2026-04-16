@@ -13,17 +13,22 @@ builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(secenekler =>
     {
-        // Bu satir giris yapmayan kullanicilarin yonlenecegi adresi belirler.
         secenekler.LoginPath = "/Hesap/Giris";
-
-        // Bu satir yetkisiz erisimde gosterilecek adresi belirler.
         secenekler.AccessDeniedPath = "/Hesap/Giris";
+    })
+    .AddGoogle(secenekler =>
+    {
+        var googleAuthNSection = builder.Configuration.GetSection("Authentication:Google");
+        secenekler.ClientId = googleAuthNSection["ClientId"]!;
+        secenekler.ClientSecret = googleAuthNSection["ClientSecret"]!;
+        secenekler.CallbackPath = "/signin-google";
     });
 
 // Bu satir uygulama servislerini dependency injection sistemine ekler.
 builder.Services.AddSingleton<SifrelemeServisi>();
 builder.Services.AddSingleton<SqliteKomutServisi>();
 builder.Services.AddSingleton<VeritabaniHazirlayici>();
+builder.Services.AddScoped<IEpostaServisi, SmtpEpostaServisi>();
 builder.Services.AddScoped<DosyaYuklemeServisi>();
 builder.Services.AddScoped<PlatformServisi>();
 

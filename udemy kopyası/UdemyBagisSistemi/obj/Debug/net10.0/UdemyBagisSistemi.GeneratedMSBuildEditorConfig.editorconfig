@@ -11,69 +11,93 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = UdemyBagisSistemi
 build_property.RootNamespace = UdemyBagisSistemi
-build_property.ProjectDir = /Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/
+build_property.ProjectDir = C:\Users\efeak\Desktop\Yeni klasör (2)\muhammed-kalp-efe\udemy kopyası\UdemyBagisSistemi\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = /Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi
+build_property.MSBuildProjectDirectory = C:\Users\efeak\Desktop\Yeni klasör (2)\muhammed-kalp-efe\udemy kopyası\UdemyBagisSistemi
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Admin/Panel.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vUGFuZWwuY3NodG1s
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Admin/Panel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cUGFuZWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Egitmen/Panel.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRWdpdG1lbi9QYW5lbC5jc2h0bWw=
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/basic/index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcYmFzaWNcaW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Hesap/Giris.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSGVzYXAvR2lyaXMuY3NodG1s
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Egitmen/kayitEgitmen.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRWdpdG1lblxrYXlpdEVnaXRtZW4uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Hesap/Kayit.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSGVzYXAvS2F5aXQuY3NodG1s
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Egitmen/KursDetay.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRWdpdG1lblxLdXJzRGV0YXkuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Home/Bagis.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9CYWdpcy5jc2h0bWw=
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Egitmen/Panel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRWdpdG1lblxQYW5lbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Home/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Hesap/Giris.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVzYXBcR2lyaXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Home/KursDetay.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9LdXJzRGV0YXkuY3NodG1s
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Hesap/Kayit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVzYXBcS2F5aXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Ogrenci/Panel.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT2dyZW5jaS9QYW5lbC5jc2h0bWw=
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Hesap/ProfilTamamla.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVzYXBcUHJvZmlsVGFtYW1sYS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Profil/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvZmlsL0luZGV4LmNzaHRtbA==
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Home/Bagis.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxCYWdpcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Shared/Error.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Shared/_ValidationScriptsPartial.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Home/KursDetay.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxLdXJzRGV0YXkuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/_ViewImports.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Ogrenci/kayitOgrenci.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT2dyZW5jaVxrYXlpdE9ncmVuY2kuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/_ViewStart.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Ogrenci/KursDetay.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT2dyZW5jaVxLdXJzRGV0YXkuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/Views/Shared/_Layout.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = b-gogkusy85t
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Ogrenci/Panel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT2dyZW5jaVxQYW5lbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Profil/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZmlsXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-qvkrg7yhkr

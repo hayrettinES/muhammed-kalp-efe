@@ -22,8 +22,8 @@ public class HomeController : Controller
     // Bu aksiyon anasayfayi gosterir.
     public IActionResult Index()
     {
-        // Bu satir anasayfa modelini alip gorunume yollar.
-        return View(_platformServisi.AnasayfaVerisiniGetir());
+        // View klasöründeki basic altındaki index gösterilir.
+        return View("~/Views/basic/index.cshtml");
     }
 
     // Bu aksiyon herkese acik bagis sayfasini gosterir.

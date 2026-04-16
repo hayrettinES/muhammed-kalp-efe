@@ -1,26 +1,62 @@
 {
   "version": 3,
   "targets": {
-    "net10.0": {}
+    "net10.0": {
+      "Microsoft.AspNetCore.Authentication.Google/10.0.6": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/Microsoft.AspNetCore.Authentication.Google.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.AspNetCore.Authentication.Google.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "Microsoft.AspNetCore.Authentication.Google/10.0.6": {
+      "sha512": "ta/Odpe4E0mDjuE+fUwgDs4fvlvVdR8jysyfYrZnZuMxJGl6aw9H9RbRKZWIV+3J09Jn068blIOQpdY9Vetb2g==",
+      "type": "package",
+      "path": "microsoft.aspnetcore.authentication.google/10.0.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net10.0/Microsoft.AspNetCore.Authentication.Google.dll",
+        "lib/net10.0/Microsoft.AspNetCore.Authentication.Google.xml",
+        "microsoft.aspnetcore.authentication.google.10.0.6.nupkg.sha512",
+        "microsoft.aspnetcore.authentication.google.nuspec"
+      ]
+    }
+  },
   "projectFileDependencyGroups": {
-    "net10.0": []
+    "net10.0": [
+      "Microsoft.AspNetCore.Authentication.Google >= 10.0.6"
+    ]
   },
   "packageFolders": {
-    "/Users/muhammedduman/.nuget/packages/": {}
+    "C:\\Users\\efeak\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/UdemyBagisSistemi.csproj",
+      "projectUniqueName": "C:\\Users\\efeak\\Desktop\\Yeni klasör (2)\\muhammed-kalp-efe\\udemy kopyası\\UdemyBagisSistemi\\UdemyBagisSistemi.csproj",
       "projectName": "UdemyBagisSistemi",
-      "projectPath": "/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/UdemyBagisSistemi.csproj",
-      "packagesPath": "/Users/muhammedduman/.nuget/packages/",
-      "outputPath": "/Users/muhammedduman/Desktop/udemy/UdemyBagisSistemi/obj/",
+      "projectPath": "C:\\Users\\efeak\\Desktop\\Yeni klasör (2)\\muhammed-kalp-efe\\udemy kopyası\\UdemyBagisSistemi\\UdemyBagisSistemi.csproj",
+      "packagesPath": "C:\\Users\\efeak\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\efeak\\Desktop\\Yeni klasör (2)\\muhammed-kalp-efe\\udemy kopyası\\UdemyBagisSistemi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/muhammedduman/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\efeak\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -49,6 +85,12 @@
     "frameworks": {
       "net10.0": {
         "targetAlias": "net10.0",
+        "dependencies": {
+          "Microsoft.AspNetCore.Authentication.Google": {
+            "target": "Package",
+            "version": "[10.0.6, )"
+          }
+        },
         "imports": [
           "net461",
           "net462",
@@ -68,7 +110,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.201/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

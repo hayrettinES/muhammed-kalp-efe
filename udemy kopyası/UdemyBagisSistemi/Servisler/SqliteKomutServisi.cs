@@ -1,7 +1,9 @@
 // Bu dosya sqlite3 komut aracini kullanarak SQLite veritabanina erisim saglar.
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text.Json;
+
 
 namespace UdemyBagisSistemi.Servisler;
 
@@ -102,10 +104,15 @@ public class SqliteKomutServisi
     // Bu metod sqlite3 komutunu calistirip cikti nesnesi dondurur.
     private static (int CikisKodu, string StandartCikis, string Hata) Calistir(IEnumerable<string> argumanlar)
     {
+        // Bu satir isletim sistemine gore sqlite3 yolunu belirler.
+        var sqlite3Yolu = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? "sqlite3.exe"
+            : "/usr/bin/sqlite3";
+
         // Bu blok process ayarlarini kurar.
         var bilgi = new ProcessStartInfo
         {
-            FileName = "/usr/bin/sqlite3",
+            FileName = sqlite3Yolu,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,

@@ -31,8 +31,41 @@ public class Kullanici
     // Bu alan kullanicinin sistem icindeki mevcut bakiyesini tutar.
     public decimal Bakiye { get; set; }
 
+    // Bu alan kullanicinin e-postasini dogrulayip dogrulamadigini tutar.
+    public bool EpostaOnaylandiMi { get; set; }
+
+    // Bu alan e-posta dogrulama kodunu tutar.
+    public string EpostaOnayKodu { get; set; } = string.Empty;
+
     // Bu alan kullanicinin sisteme kaydoldugu zamani tutar.
     public string KayitTarihi { get; set; } = string.Empty;
+
+    // Bu alan ogrencinin egitim seviyesini tutar (Lise, Lisans vs.).
+    public string EgitimSeviyesi { get; set; } = string.Empty;
+
+    // Bu alan ogrencinin ilgi alanlarini virgulle ayrilmis olarak tutar.
+    public string IlgiAlanlari { get; set; } = string.Empty;
+
+    // Bu alan egitmenin deneyim yilini tutar.
+    public int DeneyimYili { get; set; }
+
+    // Bu alan egitmenin uzmanlik alanlarini virgulle ayrilmis olarak tutar.
+    public string UzmanlikAlanlari { get; set; } = string.Empty;
+
+    // Bu alan ogrencinin hedefini tutar.
+    public string Hedef { get; set; } = string.Empty;
+
+    // Bu alan ogrenciyi sisteme yonlendiren kaynagi tutar.
+    public string Yonlendiren { get; set; } = string.Empty;
+
+    // Bu alan egitmenin LinkedIn profil baglantisini tutar.
+    public string LinkedinProfili { get; set; } = string.Empty;
+
+    // Bu alan egitmenin kurs formati tercihini tutar.
+    public string KursFormati { get; set; } = string.Empty;
+
+    // Bu alan egitmenin kurs fiyatlandirma tercihini tutar.
+    public string FiyatlandirmaTercihi { get; set; } = string.Empty;
 }
 
 // Bu model kurs kategorisini temsil eder.
@@ -271,4 +304,42 @@ public class KursIlerlemeOzeti
 
     // Bu alan son kalinan bolum kimligini tutar.
     public int? SonKalinanBolumId { get; set; }
+}
+
+// Bu model bir kursa kayitli tek bir ogrencinin ozet bilgisini tutar.
+public class KursOgrencisi
+{
+    public int OgrenciId { get; set; }
+    public string AdSoyad { get; set; } = string.Empty;
+    public string Eposta { get; set; } = string.Empty;
+    // Tamamlanan bolum sayisi
+    public int TamamlananBolum { get; set; }
+    // Kursdaki toplam bolum sayisi
+    public int ToplamBolum { get; set; }
+    // Yuzde ilerleme (0-100)
+    public int IlerlemeYuzdesi => ToplamBolum == 0 ? 0 : (int)Math.Round(TamamlananBolum * 100.0 / ToplamBolum);
+    // Kayit tarihi
+    public string KayitTarihi { get; set; } = string.Empty;
+}
+
+// Bu model egitmene ait tek bir kursun ogrenci listesini tutar.
+public class EgitmenKursOgrencileri
+{
+    public int KursId { get; set; }
+    public string KursBaslik { get; set; } = string.Empty;
+    public bool YayinlandiMi { get; set; }
+    public List<KursOgrencisi> Ogrenciler { get; set; } = [];
+}
+
+// Bu model egitmen paneli gibi yerlerde son hareketleri gostermek icindir.
+public class AktiviteOgesi
+{
+    // Aktivitenin HTML destekli, hazir islenmis metni
+    public string Metin { get; set; } = string.Empty;
+
+    // Aktivitenin gerceklestigi tarih
+    public string Tarih { get; set; } = string.Empty;
+
+    // CSS tasarimi icin verilebilecek renk/tip degeri (orn: "copper")
+    public string IkonRengi { get; set; } = string.Empty;
 }
