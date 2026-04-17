@@ -12,6 +12,9 @@
 
     @* Bu satir uygulamaya ozel stil dosyasini ekler. *@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/assistant.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <script src="~/js/theme.js" asp-append-version="true"></script>
 </head>
 <body>
     <div class="custom-global-cursor" id="global-cursor"></div>
@@ -24,6 +27,12 @@
             <nav class="menu-linkleri">
                 <a asp-controller="Home" asp-action="Index">Anasayfa</a>
                 <a asp-controller="Home" asp-action="Bagis">Bagis Yap</a>
+
+                <div class="theme-toggle" title="Tema değiştir">
+                    <span class="theme-toggle-icon">🌙</span>
+                    <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+                    <span class="theme-toggle-label">Koyu</span>
+                </div>
 
                 @if (User.Identity?.IsAuthenticated == true)
                 {
@@ -70,6 +79,9 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await Html.PartialAsync("_AssistantWidget")
+    <script src="~/js/assistant.js" asp-append-version="true"></script>
 
     @* Bu satir sayfaya ozel script alanina izin verir. *@
     @await RenderSectionAsync("Scripts", required: false)

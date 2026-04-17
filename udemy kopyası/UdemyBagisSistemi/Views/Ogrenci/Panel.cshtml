@@ -13,6 +13,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Öğrenci Paneli — EduVerse</title>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/assistant.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <script src="~/js/theme.js" asp-append-version="true"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         
@@ -42,17 +45,11 @@
             cursor: none;
         }
 
-        /* ══ CUSTOM SCROLLBAR ══ */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--copper); }
-
-        /* ══ GLOBAl CURSOR ══ */
-        #cur {
+        /* ══ CUSTOM CURSOR ══ */
+        .cursor {
             position: fixed;
-            width: 14px;
-            height: 14px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: var(--copper);
             pointer-events: none;
@@ -61,7 +58,13 @@
             transition: width .2s, height .2s, opacity .2s;
             mix-blend-mode: screen;
         }
-        #cur.grow { width: 32px; height: 32px; opacity: 0.6; }
+        .cursor.grow { width: 28px; height: 28px; opacity: .7; }
+
+        /* ══ CUSTOM SCROLLBAR ══ */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--copper); }
 
         .sidebar {
             width: 280px;
@@ -109,7 +112,6 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            cursor: none;
         }
 
         .nav-item:hover {
@@ -205,7 +207,6 @@
             font-weight: bold;
             font-size: 1rem;
             border: none;
-            cursor: none;
             transition: all .3s;
         }
         .btn:hover { transform: scale(1.02); filter: brightness(1.1); box-shadow: 0 4px 15px rgba(232,146,74,.3); }
@@ -258,9 +259,9 @@
     </style>
 </head>
 <body>
-    <div id="cur"></div>
+    <div class="cursor" id="cursor"></div>
 
-    <button id="sidebarToggle" style="position:fixed; top: 2.8rem; left: 1.5rem; z-index: 1001; background:transparent; border:none; color:var(--text); cursor:none; transition: all .3s;">
+    <button id="sidebarToggle" style="position:fixed; top: 2.8rem; left: 1.5rem; z-index: 1001; background:transparent; border:none; color:var(--text); transition: all .3s;">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
 
@@ -272,7 +273,14 @@
             <li><a class="nav-item" data-tab="tab-kurslarim">Eğitimlerim</a></li>
             <li><a class="nav-item" data-tab="tab-magaza">Kurs Mağazası</a></li>
             <li><a class="nav-item" data-tab="tab-profil">Profil Ayarları</a></li>
-            <li style="margin-top:20px;"><a href="/Hesap/Cikis" class="nav-item btn outline" style="justify-content:center;">Çıkış Yap</a></li>
+            <li style="margin-top:auto;">
+                <div class="theme-toggle" title="Tema değiştir" style="padding:0.5rem 1rem;">
+                    <span class="theme-toggle-icon">🌙</span>
+                    <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+                    <span class="theme-toggle-label">Koyu</span>
+                </div>
+            </li>
+            <li style="margin-top:10px;"><a href="/Hesap/Cikis" class="nav-item btn outline" style="justify-content:center;">Çıkış Yap</a></li>
         </ul>
     </aside>
 
@@ -507,6 +515,9 @@
 
     </main>
 
+    <!-- AI ASISTAN WIDGET -->
+    @await Html.PartialAsync("_AssistantWidget")
+
     <script>
         // SPA TAB LOGIC
         const tabs = document.querySelectorAll('.nav-item[data-tab]');
@@ -538,22 +549,23 @@
             });
         }
 
+        // ── Cursor ──
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top  = e.clientY + 'px';
+        });
+        document.querySelectorAll('a, button, input, select, textarea, .nav-item').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+        });
+
         // SIDEBAR TOGGLE
         document.getElementById('sidebarToggle').addEventListener('click', () => {
             document.querySelector('.sidebar').classList.toggle('collapsed');
         });
 
-        // CURSOR LOGIC
-        const cur = document.getElementById('cur');
-        document.addEventListener('mousemove', e => {
-            cur.style.left = e.clientX + 'px';
-            cur.style.top = e.clientY + 'px';
-        });
-        document.querySelectorAll('a, button, input, select, textarea, .nav-item').forEach(el => {
-            el.addEventListener('mouseenter', () => cur.classList.add('grow'));
-            el.addEventListener('mouseleave', () => cur.classList.remove('grow'));
-            el.style.cursor = 'none';
-        });
     </script>
+    <script src="~/js/assistant.js" asp-append-version="true"></script>
 </body>
 </html>

@@ -10,6 +10,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Eğitmen Paneli — EduVerse</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/assistant.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <script src="~/js/theme.js" asp-append-version="true"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -36,20 +39,14 @@
     color: var(--text);
     display: flex;
     min-height: 100vh;
-    cursor: none; /* Hide default cursor */
+    cursor: none;
   }
 
-  /* ══ CUSTOM SCROLLBAR ══ */
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--mint); }
-
-  /* ══ GLOBAl CURSOR ══ */
-  #cur {
+  /* ══ CUSTOM CURSOR ══ */
+  .cursor {
     position: fixed;
-    width: 14px;
-    height: 14px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: var(--mint);
     pointer-events: none;
@@ -58,7 +55,13 @@
     transition: width .2s, height .2s, opacity .2s;
     mix-blend-mode: screen;
   }
-  #cur.grow { width: 32px; height: 32px; opacity: 0.6; }
+  .cursor.grow { width: 28px; height: 28px; opacity: .7; }
+
+  /* ══ CUSTOM SCROLLBAR ══ */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--mint); }
 
   /* ══ SIDEBAR ══ */
   .sidebar {
@@ -109,7 +112,6 @@
     display: flex;
     align-items: center;
     gap: .8rem;
-    cursor: none; /* Let custom cursor handle it */
   }
   .nav-item:hover { color: var(--text); background: var(--surface); }
   .nav-item.active { background: var(--mint2); color: var(--mint); position: relative; }
@@ -194,7 +196,7 @@
     padding: .85rem 1.6rem; border-radius: 100px;
     background: var(--mint); color: #000;
     font-weight: 700; font-size: .9rem; text-decoration: none;
-    border: none; cursor: none;
+    border: none;
     transition: transform .2s, box-shadow .2s;
   }
   .btn-mint:hover { box-shadow: 0 4px 20px rgba(61,255,192,.3); transform: translateY(-2px); }
@@ -222,7 +224,7 @@
     position: absolute; top: 1.5rem; right: 1.5rem;
     background: var(--surface); color: var(--text2); border: none; font-size: 1.2rem;
     width: 36px; height: 36px; border-radius: 50%;
-    cursor: none; display:flex; align-items:center; justify-content:center;
+    display:flex; align-items:center; justify-content:center;
     transition: all .2s;
   }
   .modal-close:hover { background: var(--surfaceH); color: var(--mint); transform: rotate(90deg); }
@@ -240,7 +242,7 @@
   
   .file-drop-area {
     border: 2px dashed var(--borderH); border-radius: 12px; padding: 2rem;
-    text-align: center; color: var(--text2); cursor: none; transition: all .3s;
+    text-align: center; color: var(--text2); transition: all .3s;
     background: rgba(255,255,255,0.015); display: block;
   }
   .file-drop-area:hover { border-color: var(--mint); background: var(--mint2); color: var(--mint); transform: translateY(-2px); }
@@ -249,9 +251,7 @@
 </style>
 </head>
 <body>
-
-  <!-- GLOBAL CURSOR -->
-  <div id="cur"></div>
+  <div class="cursor" id="cursor"></div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -262,6 +262,13 @@
       <li><a class="nav-item" data-tab="tab-ogrenciler">Öğrencilerim</a></li>
       <li><a class="nav-item" data-tab="tab-profil">Profil Ayarları</a></li>
       <li style="margin-top:auto;">
+        <div class="theme-toggle" title="Tema değiştir" style="padding:0.5rem 1rem;">
+          <span class="theme-toggle-icon">🌙</span>
+          <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+          <span class="theme-toggle-label">Koyu</span>
+        </div>
+      </li>
+      <li>
         <a href="/Hesap/Cikis" class="nav-item" style="color:var(--copper)">← Çıkış Yap</a>
       </li>
     </ul>
@@ -523,7 +530,7 @@
                     </div>
                     <div style="flex: 1;">
                         <label class="lbl">Profil Fotoğrafı Seç (İsteğe bağlı)</label>
-                        <input type="file" name="yeniProfilFoto" accept="image/*" class="form-control" style="cursor:none;" />
+                        <input type="file" name="yeniProfilFoto" accept="image/*" class="form-control" />
                         <p style="color:var(--text2); font-size:.8rem; margin-top:.5rem;">Görünümünüzü zenginleştirmek için net ve temiz bir yüz fotoğrafı kullanın.</p>
                     </div>
                 </div>
@@ -594,6 +601,9 @@
     </div>
   </main>
 
+  <!-- AI ASISTAN WIDGET -->
+  @await Html.PartialAsync("_AssistantWidget")
+
   <!-- ══ KURS OLUŞTUR MODALI ══ -->
   <div id="kursModal" class="modal-overlay">
     <div class="modal-content">
@@ -613,7 +623,7 @@
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
           <div class="form-group">
             <label class="form-label">Kategori</label>
-            <select name="kategoriId" class="form-control" required style="cursor:none;">
+            <select name="kategoriId" class="form-control" required>
               <option value="">Kategori Seçin...</option>
               @if(Model.Kategoriler != null)
               {
@@ -656,9 +666,9 @@
         </div>
 
         <div class="form-group" style="display:flex; align-items:center; gap: 1rem; margin-top: 1.5rem; padding: 1rem; background: rgba(61,255,192,0.05); border-radius: 10px; border: 1px solid var(--mint2);">
-          <input type="checkbox" name="yayinlandiMi" value="true" id="yayinToggle" style="width: 20px; height: 20px; accent-color: var(--mint); cursor:none;" checked />
+          <input type="checkbox" name="yayinlandiMi" value="true" id="yayinToggle" style="width: 20px; height: 20px; accent-color: var(--mint);" checked />
           <div>
-            <label for="yayinToggle" style="color:var(--text); font-weight:600; cursor:none; display:block;">Hemen Yayına Al</label>
+            <label for="yayinToggle" style="color:var(--text); font-weight:600; display:block;">Hemen Yayına Al</label>
             <span style="font-size: .8rem; color:var(--text2);">İşaretlerseniz kurs kaydedildiği an tüm öğrencilere açık hale gelir.</span>
           </div>
         </div>
@@ -702,15 +712,13 @@
       setTimeout(() => modal.style.display = 'none', 300);
     }
 
-    // ── Global Cursor Logic ──
-    const cursor = document.getElementById('cur');
+    // ── Cursor ──
+    const cursor = document.getElementById('cursor');
     document.addEventListener('mousemove', e => {
       cursor.style.left = e.clientX + 'px';
       cursor.style.top  = e.clientY + 'px';
     });
-
-    // Hover effect for interactive elements
-    document.querySelectorAll('a, button, .nav-item, input, select, textarea').forEach(el => {
+    document.querySelectorAll('a, button, input, select, textarea, .nav-item').forEach(el => {
       el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
       el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
     });
@@ -723,5 +731,6 @@
         });
     }
   </script>
+  <script src="~/js/assistant.js" asp-append-version="true"></script>
 </body>
 </html>

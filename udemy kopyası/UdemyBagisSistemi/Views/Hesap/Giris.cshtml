@@ -10,6 +10,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Giriş Yap — EduVerse</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+<script src="~/js/theme.js" asp-append-version="true"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -369,6 +371,13 @@
   </aside>
 
   <!-- ══ RIGHT PANEL ══ -->
+  <div style="position:fixed; top:1.2rem; right:1.5rem; z-index:100;">
+    <div class="theme-toggle" title="Tema değiştir">
+      <span class="theme-toggle-icon">🌙</span>
+      <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+      <span class="theme-toggle-label">Koyu</span>
+    </div>
+  </div>
   <main class="right-panel">
     <div class="form-container">
       

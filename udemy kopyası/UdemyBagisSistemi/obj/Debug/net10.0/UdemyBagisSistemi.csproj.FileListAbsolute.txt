@@ -197,3 +197,7 @@ C:\Users\efeak\Desktop\Yeni klasör (2)\muhammed-kalp-efe\udemy kopyası\UdemyBa
 C:\Users\efeak\Desktop\Yeni klasör (2)\muhammed-kalp-efe\udemy kopyası\UdemyBagisSistemi\obj\Debug\net10.0\UdemyBag.AF3C9117.Up2Date
 C:\Users\efeak\Desktop\Yeni klasör (2)\muhammed-kalp-efe\udemy kopyası\UdemyBagisSistemi\obj\Debug\net10.0\compressed\migwcvotep-{0}-urvkv7grq9-urvkv7grq9.gz
 C:\Users\efeak\Desktop\Yeni klasör (2)\muhammed-kalp-efe\udemy kopyası\UdemyBagisSistemi\obj\Debug\net10.0\compressed\2stgs500es-{0}-fe3fm7w53j-fe3fm7w53j.gz
+C:\Users\efeak\Desktop\Yeni klasör (2)\muhammed-kalp-efe\udemy kopyası\UdemyBagisSistemi\obj\Debug\net10.0\compressed\3yt62bcarv-{0}-kone7iumye-kone7iumye.gz
+C:\Users\efeak\Desktop\Yeni klasör (2)\muhammed-kalp-efe\udemy kopyası\UdemyBagisSistemi\obj\Debug\net10.0\compressed\gwr0xmouw7-{0}-l0ayzdyspd-l0ayzdyspd.gz
+C:\Users\efeak\Desktop\Yeni klasör (2)\muhammed-kalp-efe\udemy kopyası\UdemyBagisSistemi\obj\Debug\net10.0\compressed\ik0fg0wvau-{0}-bepofwkg4r-bepofwkg4r.gz
+C:\Users\efeak\Desktop\Yeni klasör (2)\muhammed-kalp-efe\udemy kopyası\UdemyBagisSistemi\obj\Debug\net10.0\compressed\h01sdwfddr-{0}-ytk212767l-ytk212767l.gz

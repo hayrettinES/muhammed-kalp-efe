@@ -1,0 +1,25 @@
+@* Yapay zeka asistan chat widget'ı (global) *@
+<div id="assistant-widget" class="assistant-widget" aria-live="polite">
+    <button id="assistant-toggle" class="assistant-toggle" type="button">
+        Asistan
+    </button>
+
+    <div id="assistant-panel" class="assistant-panel" aria-hidden="true">
+        <div class="assistant-header">
+            <div class="assistant-title">EduVerse Asistan</div>
+            <button id="assistant-close" class="assistant-close" type="button" aria-label="Kapat">
+                ×
+            </button>
+        </div>
+
+        <div id="assistant-messages" class="assistant-messages"></div>
+
+        <div class="assistant-composer">
+            <textarea id="assistant-input" class="assistant-input" rows="2" placeholder="Sorunu yaz..."></textarea>
+            <button id="assistant-send" class="assistant-send" type="button">Gönder</button>
+        </div>
+
+        <div id="assistant-error" class="assistant-error" style="display:none;"></div>
+    </div>
+</div>
+

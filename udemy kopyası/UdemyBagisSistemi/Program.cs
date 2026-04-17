@@ -32,6 +32,10 @@ builder.Services.AddScoped<IEpostaServisi, SmtpEpostaServisi>();
 builder.Services.AddScoped<DosyaYuklemeServisi>();
 builder.Services.AddScoped<PlatformServisi>();
 
+// AI asistan servisleri
+builder.Services.AddHttpClient<OpenAiAssistantServisi>();
+builder.Services.AddScoped<IAiAssistantServisi, OpenAiAssistantServisi>();
+
 // Bu satir web uygulamasini olusturur.
 var app = builder.Build();
 

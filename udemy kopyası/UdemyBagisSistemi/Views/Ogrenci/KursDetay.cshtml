@@ -20,7 +20,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>İzleniyor: @Model.Kurs.Baslik - EduVerse</title>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <script src="~/js/theme.js" asp-append-version="true"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         
@@ -218,7 +219,13 @@
             Panele Dön
         </a>
         <div class="course-title">@Model.Kurs.Baslik</div>
-        <div style="width: 100px;"></div> <!-- Spacer for centering -->
+        <div style="width: 100px; display:flex; align-items:center; justify-content:flex-end;">
+            <div class="theme-toggle" title="Tema değiştir">
+                <span class="theme-toggle-icon">🌙</span>
+                <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+                <span class="theme-toggle-label">Koyu</span>
+            </div>
+        </div>
     </header>
 
     <!-- LAYOUT -->
