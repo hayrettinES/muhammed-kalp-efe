@@ -1,4 +1,4 @@
-@* Yapay zeka asistan chat widget'ı (global) *@
+@* Yapay zeka asistan chat widget'ı — sohbet geçmişi sidebar'ı ile *@
 <div id="assistant-widget" class="assistant-widget" aria-live="polite">
     <button id="assistant-toggle" class="assistant-toggle" type="button">
         Asistan
@@ -7,9 +7,20 @@
     <div id="assistant-panel" class="assistant-panel" aria-hidden="true">
         <div class="assistant-header">
             <div class="assistant-title">EduVerse Asistan</div>
-            <button id="assistant-close" class="assistant-close" type="button" aria-label="Kapat">
-                ×
-            </button>
+            <div style="display:flex;gap:6px;">
+                <button id="assistant-history-btn" class="assistant-close" type="button" title="Sohbet Geçmişi" style="font-size:15px;">☰</button>
+                <button id="assistant-new-chat" class="assistant-close" type="button" title="Yeni Sohbet" style="font-size:15px;">＋</button>
+                <button id="assistant-close" class="assistant-close" type="button" aria-label="Kapat">×</button>
+            </div>
+        </div>
+
+        <!-- Sohbet Geçmişi Sidebar -->
+        <div id="assistant-sidebar" class="assistant-sidebar">
+            <div class="assistant-sidebar-header">
+                <span style="font-weight:700;color:var(--assistant-accent);">Sohbet Geçmişi</span>
+                <button id="assistant-sidebar-close" class="assistant-close" style="font-size:14px;" type="button">✕</button>
+            </div>
+            <div id="assistant-sidebar-list" class="assistant-sidebar-list"></div>
         </div>
 
         <div id="assistant-messages" class="assistant-messages"></div>
@@ -22,4 +33,3 @@
         <div id="assistant-error" class="assistant-error" style="display:none;"></div>
     </div>
 </div>
-

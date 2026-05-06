@@ -1,3 +1,7 @@
+@{
+    Layout = null;
+}
+@model UdemyBagisSistemi.ViewModels.AnasayfaViewModel
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -7,6 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+  <script src="~/js/theme.js" asp-append-version="true"></script>
   <style>
     /* ╔══════════════════════════════════════════╗
        ║  TOKENS & RESET                          ║
@@ -62,7 +68,10 @@
       background:rgba(17,24,39,.6);
       backdrop-filter:blur(24px);
       border-bottom:1px solid var(--border);
-      transition:padding .3s;
+      transition:padding .3s, background .3s;
+    }
+    html[data-theme="light"] nav {
+      background: rgba(240, 235, 224, .8);
     }
     nav.shrunk{padding:1rem 3rem}
     .nav-logo{
@@ -220,14 +229,14 @@
       transition:transform .6s cubic-bezier(.34,1.56,.64,1),opacity .4s;
     }
     .deck-card:nth-child(1){
-      background:linear-gradient(145deg,rgba(232,146,74,.15),rgba(20,28,46,.8));
+      background:linear-gradient(145deg,rgba(232,146,74,.15),var(--glass));
       border-color:rgba(232,146,74,.3);
       transform:translateX(30px) translateY(0px) rotateY(-12deg) rotateX(5deg);
       left:60px;top:0;z-index:3;
       box-shadow:0 30px 80px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);
     }
     .deck-card:nth-child(2){
-      background:linear-gradient(145deg,rgba(61,255,192,.1),rgba(20,28,46,.8));
+      background:linear-gradient(145deg,rgba(61,255,192,.1),var(--glass));
       border-color:rgba(61,255,192,.25);
       transform:translateX(0px) translateY(40px) rotateY(4deg) rotateX(5deg);
       left:20px;top:40px;z-index:2;
@@ -235,7 +244,7 @@
       filter:brightness(.85);
     }
     .deck-card:nth-child(3){
-      background:linear-gradient(145deg,rgba(126,184,255,.1),rgba(20,28,46,.8));
+      background:linear-gradient(145deg,rgba(126,184,255,.1),var(--glass));
       border-color:rgba(126,184,255,.2);
       transform:translateX(-30px) translateY(80px) rotateY(16deg) rotateX(5deg);
       left:0px;top:80px;z-index:1;
@@ -324,19 +333,30 @@
     }
     .marquee-track{
       display:flex;white-space:nowrap;
-      animation:marquee 22s linear infinite;
+      animation:marquee 40s linear infinite;
     }
     .marquee-item{
-      font-family:var(--fh);font-size:1.1rem;font-weight:600;
-      font-style:italic;color:var(--text2);padding:0 2rem;
-      display:inline-flex;align-items:center;gap:1.5rem;
+      font-family:var(--fh);font-size:1.65rem;font-weight:600;
+      font-style:italic;color:var(--text2);padding:0 5rem;
+      display:inline-flex;align-items:center;gap:2.5rem;
     }
-    .marquee-gem{font-style:normal;font-size:.6rem;color:var(--copper)}
+    .marquee-gem{font-style:normal;font-size:.75rem;color:var(--copper)}
     @@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
     /* ╔══════════════════════════════════════════╗
        ║  COURSES                                 ║
        ╚══════════════════════════════════════════╝ */
+    .donor-marquee {
+      background:linear-gradient(90deg,rgba(61,255,192,.1),rgba(126,184,255,.1));
+      border-bottom:1px solid var(--border);
+      border-top:1px solid var(--border);
+      margin-top: 1.5rem;
+    }
+    .donor-marquee .marquee-item {
+      font-size: 1.65rem;
+      color: var(--mint);
+      font-weight: 700;
+    }
     #courses{padding:8rem 3rem;max-width:1320px;margin:0 auto}
     .section-top{
       display:flex;align-items:flex-end;justify-content:space-between;
@@ -370,7 +390,7 @@
     /* grid */
     .courses-grid{
       display:grid;
-      grid-template-columns:repeat(3,1fr);
+      grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
       gap:1.5rem;
     }
     .course-card{
@@ -478,7 +498,7 @@
       position:relative;z-index:2;
     }
     .roles-grid{
-      display:grid;grid-template-columns:repeat(3,1fr);
+      display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
       gap:1.5rem;margin-top:4rem;
     }
     .role-card{
@@ -491,15 +511,15 @@
     }
     .role-card:hover{transform:translateY(-6px)}
     .role-card-1{
-      background:linear-gradient(145deg,rgba(232,146,74,.12),rgba(20,28,46,.6));
+      background:linear-gradient(145deg,rgba(232,146,74,.12),var(--glass));
     }
     .role-card-1:hover{border-color:rgba(232,146,74,.4);box-shadow:0 24px 80px rgba(232,146,74,.15)}
     .role-card-2{
-      background:linear-gradient(145deg,rgba(61,255,192,.08),rgba(20,28,46,.6));
+      background:linear-gradient(145deg,rgba(61,255,192,.08),var(--glass));
     }
     .role-card-2:hover{border-color:rgba(61,255,192,.3);box-shadow:0 24px 80px rgba(61,255,192,.1)}
     .role-card-3{
-      background:linear-gradient(145deg,rgba(126,184,255,.08),rgba(20,28,46,.6));
+      background:linear-gradient(145deg,rgba(126,184,255,.08),var(--glass));
     }
     .role-card-3:hover{border-color:rgba(126,184,255,.3);box-shadow:0 24px 80px rgba(126,184,255,.1)}
 
@@ -548,7 +568,7 @@
        ╚══════════════════════════════════════════╝ */
     #testi{padding:6rem 3rem;max-width:1320px;margin:0 auto}
     .testi-grid{
-      display:grid;grid-template-columns:repeat(3,1fr);
+      display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
       gap:1.5rem;margin-top:4rem;
     }
     .testi-card{
@@ -682,6 +702,14 @@
   <a href="/Hesap/KayitOgrenci" class="nav-cta">Kayıt Ol</a>
 </nav>
 
+<!-- THEME TOGGLE (FIXED) -->
+<div style="position:fixed; top:7rem; right:1.2rem; z-index:1000;">
+  <div class="theme-toggle" title="Tema değiştir" style="padding:4px 8px;">
+    <span class="theme-toggle-icon">🌙</span>
+    <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+  </div>
+</div>
+
 <!-- HERO -->
 <section id="hero">
   <div class="blob blob-1"></div>
@@ -711,7 +739,7 @@
           <div class="trust-av">👨‍🔬</div>
           <div class="trust-av">👩‍💼</div>
         </div>
-        <span>+12.000 öğrenci bu ay katıldı</span>
+        <span>+@Model.BuAyKatilanOgrenciSayisi öğrenci bu ay katıldı</span>
       </div>
     </div>
 
@@ -724,7 +752,7 @@
           <div class="dc-title">Öğrenmeye<br>Başla</div>
           <div class="dc-desc">Yüzlerce kurs, canlı dersler ve bağışçı bursları seni bekliyor.</div>
           <div class="dc-stat">
-            <span class="dc-stat-num">870+</span>
+            <span class="dc-stat-num">@Model.ToplamKursSayisi</span>
             <span class="dc-stat-label">Aktif Kurs</span>
           </div>
         </div>
@@ -735,7 +763,7 @@
           <div class="dc-title">İlham Ver,<br>Kazan</div>
           <div class="dc-desc">Kursunu oluştur, topluluğunu büyüt, pasif gelir elde et.</div>
           <div class="dc-stat">
-            <span class="dc-stat-num" style="color:var(--mint)">₺8.4K</span>
+            <span class="dc-stat-num" style="color:var(--mint)">₺@Model.OrtalamaAylikKazanc.ToString("N0")</span>
             <span class="dc-stat-label">Ort. Aylık Kazanç</span>
           </div>
         </div>
@@ -753,19 +781,19 @@
 <!-- STATS -->
 <div id="stats">
   <div class="stat reveal">
-    <div class="stat-num" data-target="12400">0</div>
+    <div class="stat-num" data-target="@Model.AktifOgrenciSayisi">0</div>
     <div class="stat-label">Aktif Öğrenci</div>
   </div>
   <div class="stat reveal reveal-delay-1">
-    <div class="stat-num" data-target="480">0</div>
+    <div class="stat-num" data-target="@Model.UzmanEgitmenSayisi">0</div>
     <div class="stat-label">Uzman Öğretmen</div>
   </div>
   <div class="stat reveal reveal-delay-2">
-    <div class="stat-num" data-target="870">0</div>
+    <div class="stat-num" data-target="@Model.ToplamKursSayisi">0</div>
     <div class="stat-label">Eğitim Kursu</div>
   </div>
   <div class="stat reveal reveal-delay-3">
-    <div class="stat-num" data-target="96">0</div>
+    <div class="stat-num" data-target="@Model.TamamlananKursSayisi">0</div>
     <div class="stat-label">Tamamlanan Kurs</div>
   </div>
 </div>
@@ -788,6 +816,23 @@
   </div>
 </div>
 
+<!-- DONOR MARQUEE -->
+@if (!string.IsNullOrEmpty(Model.SonBagisciAdi))
+{
+<div class="marquee-wrap donor-marquee" aria-hidden>
+  <div class="marquee-track" style="animation-duration: 45s; animation-direction: reverse;">
+    @{
+       var donorText = $"Teşekkürler! Son bağışçımız {Model.SonBagisciAdi} ({Model.SonBagisTutari.ToString("N0")}₺) ile öğrenim havuzumuz daha da büyüdü!";
+    }
+    <span class="marquee-item">@donorText <span class="marquee-gem">✦</span></span>
+    <span class="marquee-item">@donorText <span class="marquee-gem">✦</span></span>
+    <span class="marquee-item">@donorText <span class="marquee-gem">✦</span></span>
+    <span class="marquee-item">@donorText <span class="marquee-gem">✦</span></span>
+    <span class="marquee-item">@donorText <span class="marquee-gem">✦</span></span>
+  </div>
+</div>
+}
+
 <!-- COURSES -->
 <section id="courses">
   <div class="section-top">
@@ -795,123 +840,55 @@
       <p class="eyebrow">Öne Çıkan Eğitimler</p>
       <h2 class="section-title reveal">Şimdi <em>Başla</em></h2>
     </div>
-    <div class="filters">
-      <button class="filter active" onclick="setFilter(this)">Tümü</button>
-      <button class="filter" onclick="setFilter(this)">Yazılım</button>
-      <button class="filter" onclick="setFilter(this)">Tasarım</button>
-      <button class="filter" onclick="setFilter(this)">İş Dünyası</button>
-      <button class="filter" onclick="setFilter(this)">Dil</button>
+    <div class="filters" style="margin-left: 2rem; margin-right: 2rem; flex-wrap: wrap; justify-content: flex-end;">
+      <button class="filter active" data-filter="all" onclick="setFilter(this)">Tümü</button>
+      @foreach (var kategori in Model.Kategoriler)
+      {
+          <button class="filter" data-filter="@kategori.Ad.ToLower()" onclick="setFilter(this)">@kategori.Ad</button>
+      }
     </div>
   </div>
 
-  <div class="courses-grid">
-    <div class="course-card reveal">
-      <div class="card-top">
-        <span class="card-badge b-copper">Çok Satan</span>
-        <span class="card-num">01</span>
-      </div>
-      <h3 class="card-title">Python ile Veri Bilimi & Makine Öğrenmesi</h3>
-      <p class="card-instructor">Dr. Ayşe Kaya</p>
-      <div class="card-stars">★★★★★ <span>4.9 (2.1k yorum)</span></div>
-      <div class="card-meta"><span>⏱ 48 saat</span><span>·</span><span>Başlangıç → Pro</span></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-old">₺1.299</span>
-          <span class="card-price">₺249</span>
-        </div>
-        <button class="card-enroll">Kayıt Ol →</button>
-      </div>
-    </div>
+  <div class="courses-grid" id="coursesGrid">
+    @{ int index = 1; }
+    @foreach (var kurs in Model.YayinliKurslar.Take(12))
+    {
+        string badgeClass = index % 3 == 1 ? "b-copper" : index % 3 == 2 ? "b-mint" : "b-blue";
+        string delayClass = index % 3 == 1 ? "" : index % 3 == 2 ? "reveal-delay-1" : "reveal-delay-2";
 
-    <div class="course-card reveal reveal-delay-1">
-      <div class="card-top">
-        <span class="card-badge b-mint">Yeni</span>
-        <span class="card-num">02</span>
-      </div>
-      <h3 class="card-title">Figma ile UI/UX Tasarım: Sıfırdan Prototip</h3>
-      <p class="card-instructor">Mert Demir</p>
-      <div class="card-stars">★★★★☆ <span>4.7 (876 yorum)</span></div>
-      <div class="card-meta"><span>⏱ 28 saat</span><span>·</span><span>Orta Seviye</span></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-old">₺999</span>
-          <span class="card-price">₺179</span>
+        <div class="course-card reveal @delayClass" data-kategori="@kurs.KategoriAdi.ToLower()">
+          <div class="card-top">
+            <span class="card-badge @badgeClass">@kurs.KategoriAdi</span>
+            <span class="card-num">@(index.ToString("D2"))</span>
+          </div>
+          <h3 class="card-title">@kurs.Kurs.Baslik</h3>
+          <p class="card-instructor">@kurs.EgitmenAdi</p>
+          <div class="card-stars">★★★★★ <span>(@kurs.YorumSayisi yorum)</span></div>
+          <div class="card-meta">
+            <span>⏱ @(kurs.Kurs.Aciklama.Length > 60 ? kurs.Kurs.Aciklama.Substring(0, 60) + "..." : kurs.Kurs.Aciklama)</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price-wrap">
+              @if (kurs.Kurs.Fiyat > 0)
+              {
+                <span class="card-price">₺@kurs.Kurs.Fiyat.ToString("N0")</span>
+              }
+              else
+              {
+                <span class="card-free">Ücretsiz</span>
+              }
+            </div>
+            <a href="/Hesap/Giris" class="card-enroll" style="text-decoration:none;">Hemen Katıl →</a>
+          </div>
         </div>
-        <button class="card-enroll">Kayıt Ol →</button>
-      </div>
-    </div>
+        index++;
+    }
+  </div>
 
-    <div class="course-card reveal reveal-delay-2">
-      <div class="card-top">
-        <span class="card-badge b-blue">Popüler</span>
-        <span class="card-num">03</span>
-      </div>
-      <h3 class="card-title">React & Node.js Full-Stack Uygulama</h3>
-      <p class="card-instructor">Selin Arslan</p>
-      <div class="card-stars">★★★★★ <span>4.8 (3.4k yorum)</span></div>
-      <div class="card-meta"><span>⏱ 56 saat</span><span>·</span><span>Orta → İleri</span></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-old">₺1.499</span>
-          <span class="card-price">₺299</span>
-        </div>
-        <button class="card-enroll">Kayıt Ol →</button>
-      </div>
-    </div>
-
-    <div class="course-card reveal">
-      <div class="card-top">
-        <span class="card-badge b-lav">Öne Çıkan</span>
-        <span class="card-num">04</span>
-      </div>
-      <h3 class="card-title">Yapay Zeka & Prompt Mühendisliği Temelleri</h3>
-      <p class="card-instructor">Prof. Can Öz</p>
-      <div class="card-stars">★★★★★ <span>4.9 (1.8k yorum)</span></div>
-      <div class="card-meta"><span>⏱ 32 saat</span><span>·</span><span>Başlangıç</span></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-old">₺1.199</span>
-          <span class="card-price">₺219</span>
-        </div>
-        <button class="card-enroll">Kayıt Ol →</button>
-      </div>
-    </div>
-
-    <div class="course-card reveal reveal-delay-1">
-      <div class="card-top">
-        <span class="card-badge b-copper">Çok Satan</span>
-        <span class="card-num">05</span>
-      </div>
-      <h3 class="card-title">İngilizce B2–C1: İş İngilizcesi Programı</h3>
-      <p class="card-instructor">Emma Wilson</p>
-      <div class="card-stars">★★★★☆ <span>4.6 (654 yorum)</span></div>
-      <div class="card-meta"><span>⏱ 20 saat</span><span>·</span><span>B2 Seviye</span></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-old">₺799</span>
-          <span class="card-price">₺149</span>
-        </div>
-        <button class="card-enroll">Kayıt Ol →</button>
-      </div>
-    </div>
-
-    <div class="course-card reveal reveal-delay-2">
-      <div class="card-top">
-        <span class="card-badge b-mint">Burs</span>
-        <span class="card-num">06</span>
-      </div>
-      <h3 class="card-title">Girişimcilik 101: Fikrinizi İşe Dönüştürün</h3>
-      <p class="card-instructor">Ali Çetin</p>
-      <div class="card-stars">★★★★★ <span>4.8 (410 yorum)</span></div>
-      <div class="card-meta"><span>⏱ 16 saat</span><span>·</span><span>💙 Bağışçı Destekli</span></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-old">₺599</span>
-          <span class="card-free">Ücretsiz</span>
-        </div>
-        <button class="card-enroll">Kayıt Ol →</button>
-      </div>
-    </div>
+  <!-- Boş sonuç mesajı -->
+  <div id="emptyState" style="display:none; text-align:center; padding:4rem 2rem; color:var(--text2); font-family:var(--fm); font-size:.85rem; letter-spacing:.08em;">
+    <div style="font-size:3rem; margin-bottom:1rem; opacity:.4;">📭</div>
+    <p>Bu kategoride henüz yayında kurs bulunamadı.</p>
   </div>
 </section>
 
@@ -962,6 +939,35 @@
       </div>
 
     </div>
+    
+    <div style="display:flex; justify-content:center; gap:1.5rem; margin-top:1.5rem; flex-wrap:wrap;">
+      <div class="role-card role-card-3 reveal reveal-delay-3" style="border-color:rgba(167,139,250,.2); flex:1 1 280px; max-width:392px;">
+        <span class="role-num">04</span>
+        <div class="role-icon-wrap" style="background:rgba(167,139,250,.12);color:#a78bfa;">🛡️</div>
+        <h3 class="role-title">Yönetici</h3>
+        <p class="role-desc">Platform yöneticisi olarak sistemi kontrol edin, kullanıcıları ve kursları yönetin.</p>
+        <ul class="role-perks">
+          <li><span class="rp-dot" style="background:#a78bfa"></span>Tüm kullanıcı ve kurs yönetimi</li>
+          <li><span class="rp-dot" style="background:#a78bfa"></span>Bağış havuzu ve gelir takibi</li>
+          <li><span class="rp-dot" style="background:#a78bfa"></span>Platform istatistikleri ve raporlar</li>
+        </ul>
+        <a href="/Hesap/AdminGiris" class="role-link" style="color:#a78bfa;border-color:rgba(167,139,250,.3);">Yönetici Girişi →</a>
+      </div>
+
+      <!-- Bağışçı Kartı -->
+      <div class="role-card role-card-4 reveal reveal-delay-4" style="border-color:rgba(232,146,74,.2); flex:1 1 280px; max-width:392px;">
+        <span class="role-num">05</span>
+        <div class="role-icon-wrap" style="background:rgba(232,146,74,.12);color:#e8924a;">💝</div>
+        <h3 class="role-title">Bağışçı</h3>
+        <p class="role-desc">Öğrencilerin eğitimlerine destek olmak ve yeni nesillerin hayatına dokunmak için bağışçı olun.</p>
+        <ul class="role-perks">
+          <li><span class="rp-dot" style="background:#e8924a"></span>Öğrencilere burs imkanı</li>
+          <li><span class="rp-dot" style="background:#e8924a"></span>Platform havuzuna destek</li>
+          <li><span class="rp-dot" style="background:#e8924a"></span>Tamamen şeffaf liste</li>
+        </ul>
+        <a href="/Bagisci/BagisPanel" class="role-link" style="color:#e8924a;border-color:rgba(232,146,74,.3);">Bağış Yap →</a>
+      </div>
+
   </div>
 </section>
 
@@ -1100,8 +1106,40 @@ window.addEventListener('scroll', () => {
 
 /* ── FILTER BUTTONS ── */
 function setFilter(btn) {
+  // Aktif butonu güncelle
   document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'))
   btn.classList.add('active')
+
+  const secilen = btn.dataset.filter
+  const kartlar = document.querySelectorAll('#coursesGrid .course-card')
+  let gorunenSayisi = 0
+
+  kartlar.forEach(kart => {
+    const kartKategori = kart.dataset.kategori
+    const eslesiyorMu = secilen === 'all' || kartKategori === secilen
+
+    if (eslesiyorMu) {
+      kart.style.display = ''
+      // Yumuşak belirim animasyonu
+      kart.style.opacity = '0'
+      kart.style.transform = 'translateY(16px)'
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          kart.style.transition = 'opacity .35s ease, transform .35s ease'
+          kart.style.opacity = '1'
+          kart.style.transform = 'translateY(0)'
+        })
+      })
+      gorunenSayisi++
+    } else {
+      kart.style.transition = 'opacity .2s ease'
+      kart.style.opacity = '0'
+      setTimeout(() => { kart.style.display = 'none' }, 200)
+    }
+  })
+
+  // Boş durum mesajı
+  document.getElementById('emptyState').style.display = gorunenSayisi === 0 ? 'block' : 'none'
 }
 </script>
 </body>

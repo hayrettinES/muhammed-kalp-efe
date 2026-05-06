@@ -58,6 +58,10 @@
                 </div>
                 <h3>@kursKart.Kurs.Baslik</h3>
                 <p>@kursKart.Kurs.Aciklama</p>
+                @if (!string.IsNullOrEmpty(kursKart.Kurs.ThumbnailUrl))
+                {
+                    <img src="@kursKart.Kurs.ThumbnailUrl" alt="Kurs Resmi" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin: 10px 0;" />
+                }
                 <p>Bolum: @kursKart.BolumSayisi</p>
                 <p>Puan: @kursKart.OrtalamaPuan.ToString("0.0") / 5</p>
                 <video class="onizleme-video" controls src="@kursKart.Kurs.OnizlemeVideoUrl"></video>

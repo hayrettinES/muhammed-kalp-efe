@@ -20,10 +20,10 @@ public class AdminController : Controller
     }
 
     // Bu aksiyon admin panelini gosterir.
-    public IActionResult Panel(int? kategoriId)
+    public IActionResult Panel(int? kategoriId, string arama = "")
     {
         // Bu satir panel verisini gorunume yollar.
-        return View(_platformServisi.AdminPanelVerisiniGetir(kategoriId));
+        return View(_platformServisi.AdminPanelVerisiniGetir(kategoriId, arama));
     }
 
     // Bu aksiyon yeni kategori ekler.
@@ -74,6 +74,56 @@ public class AdminController : Controller
         }
 
         // Bu satir panele geri doner.
-        return RedirectToAction(nameof(Panel));
+        return Redirect($"{Url.Action(nameof(Panel))}#tab-kat");
+    }
+
+    // Bu aksiyon kullanıcıyı siler.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult KullaniciSil(int id)
+    {
+        try
+        {
+            _platformServisi.KullaniciSil(id);
+            TempData["Mesaj"] = "Kullanıcı başarıyla silindi.";
+        }
+        catch (Exception hata)
+        {
+            TempData["Hata"] = hata.Message;
+        }
+        return Redirect($"{Url.Action(nameof(Panel))}#tab-users");
+    }
+
+    // Bu aksiyon kursun yayın durumunu değiştirir.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult KursYayinToggle(int kursId)
+    {
+        try
+        {
+            _platformServisi.KursYayinDurumDegistir(kursId);
+            TempData["Mesaj"] = "Kurs yayın durumu güncellendi.";
+        }
+        catch (Exception hata)
+        {
+            TempData["Hata"] = hata.Message;
+        }
+        return Redirect($"{Url.Action(nameof(Panel))}#tab-kurs");
+    }
+    // Bu aksiyon bağışı onaylar.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult BagisOnayla(int bagisId)
+    {
+        try
+        {
+            _platformServisi.BagisOnayla(bagisId);
+            TempData["Mesaj"] = "Bağış başarıyla onaylandı ve havuza eklendi.";
+        }
+        catch (Exception hata)
+        {
+            TempData["Hata"] = hata.Message;
+        }
+        return Redirect($"{Url.Action(nameof(Panel))}#tab-bagis");
     }
 }

@@ -26,6 +26,10 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cUGFuZWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Bagisci/BagisPanel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQmFnaXNjaVxCYWdpc1BhbmVsLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/basic/index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcYmFzaWNcaW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -40,6 +44,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Egitmen/Panel.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRWdpdG1lblxQYW5lbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Hesap/AdminGiris.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVzYXBcQWRtaW5HaXJpcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Hesap/Giris.cshtml]
@@ -76,6 +84,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Ogrenci/Panel.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT2dyZW5jaVxQYW5lbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Ogrenci/Sepet.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT2dyZW5jaVxTZXBldC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/efeak/Desktop/Yeni klasör (2)/muhammed-kalp-efe/udemy kopyası/UdemyBagisSistemi/Views/Profil/Index.cshtml]

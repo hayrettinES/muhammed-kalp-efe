@@ -49,6 +49,7 @@ public class EgitmenController : Controller
         bool yayinlandiMi,
         IFormFile? onizlemeVideoDosyasi,
         IFormFile? dokumanDosyasi,
+        IFormFile? thumbnailDosyasi,
         string? mevcutOnizlemeVideoUrl,
         string? mevcutDokumanUrl)
     {
@@ -63,6 +64,9 @@ public class EgitmenController : Controller
             // Bu satir yeni dokuman dosyasini varsa diske kaydeder.
             var dokumanUrl = await _dosyaYuklemeServisi.DosyaKaydetAsync(dokumanDosyasi, "dokumanlar");
 
+            // Bu satir yeni thumbnail dosyasini varsa diske kaydeder.
+            var thumbnailUrl = await _dosyaYuklemeServisi.DosyaKaydetAsync(thumbnailDosyasi, "kurs-resimleri");
+
             // Bu satir kaydedilecek kurs modelini olusturur.
             var kurs = new Kurs
             {
@@ -74,7 +78,8 @@ public class EgitmenController : Controller
                 Fiyat = fiyat,
                 YayinlandiMi = yayinlandiMi,
                 OnizlemeVideoUrl = string.IsNullOrWhiteSpace(onizlemeVideoUrl) ? mevcutOnizlemeVideoUrl ?? string.Empty : onizlemeVideoUrl,
-                DokumanUrl = string.IsNullOrWhiteSpace(dokumanUrl) ? mevcutDokumanUrl ?? string.Empty : dokumanUrl
+                DokumanUrl = string.IsNullOrWhiteSpace(dokumanUrl) ? mevcutDokumanUrl ?? string.Empty : dokumanUrl,
+                ThumbnailUrl = thumbnailUrl ?? string.Empty
             };
 
             // Bu satir kurs kaydetme islemini yapar.
@@ -164,7 +169,8 @@ public class EgitmenController : Controller
         decimal fiyat,
         bool yayinlandiMi,
         IFormFile? onizlemeVideoDosyasi,
-        IFormFile? dokumanDosyasi)
+        IFormFile? dokumanDosyasi,
+        IFormFile? thumbnailDosyasi)
     {
         var egitmenId = KullaniciIdGetir();
         try
@@ -174,6 +180,7 @@ public class EgitmenController : Controller
 
             var onizlemeUrl = await _dosyaYuklemeServisi.DosyaKaydetAsync(onizlemeVideoDosyasi, "onizleme-videolari");
             var dokumanUrl  = await _dosyaYuklemeServisi.DosyaKaydetAsync(dokumanDosyasi, "dokumanlar");
+            var thumbnailUrl = await _dosyaYuklemeServisi.DosyaKaydetAsync(thumbnailDosyasi, "kurs-resimleri");
 
             var guncelKurs = new Kurs
             {
@@ -185,7 +192,8 @@ public class EgitmenController : Controller
                 Fiyat           = fiyat,
                 YayinlandiMi    = yayinlandiMi,
                 OnizlemeVideoUrl = string.IsNullOrWhiteSpace(onizlemeUrl) ? mevcutKurs.OnizlemeVideoUrl : onizlemeUrl,
-                DokumanUrl      = string.IsNullOrWhiteSpace(dokumanUrl)   ? mevcutKurs.DokumanUrl       : dokumanUrl
+                DokumanUrl      = string.IsNullOrWhiteSpace(dokumanUrl)   ? mevcutKurs.DokumanUrl       : dokumanUrl,
+                ThumbnailUrl    = string.IsNullOrWhiteSpace(thumbnailUrl) ? mevcutKurs.ThumbnailUrl     : thumbnailUrl
             };
 
             _platformServisi.KursKaydet(guncelKurs);
@@ -321,6 +329,38 @@ public class EgitmenController : Controller
         // Profil sekmesine (tab-profil) direkt dönmek yerine normal panele dön,
         // kullanıcı tıkladığında JS ile ayarlanabilir ama şimdilik standart panel yeterlidir.
         return RedirectToAction(nameof(Panel));
+    }
+
+    // Bu aksiyon AJAX ile belirli bir bölümün yorumlarını JSON olarak döndürür.
+    [HttpGet]
+    public IActionResult BolumYorumlariniGetir(int kursBolumuId)
+    {
+        try
+        {
+            var yorumlar = _platformServisi.BolumYorumlariniGetir(kursBolumuId);
+            return Json(yorumlar);
+        }
+        catch
+        {
+            return Json(new List<object>());
+        }
+    }
+
+    // Bu aksiyon eğitmenin bir yoruma yanıt vermesini sağlar.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult BolumYorumYanitEkle(int parentYorumId, string yanit)
+    {
+        try
+        {
+            var egitmenId = KullaniciIdGetir();
+            _platformServisi.BolumYorumYanitEkle(parentYorumId, egitmenId, yanit);
+            return Json(new { basarili = true, mesaj = "Yanıtınız eklendi." });
+        }
+        catch (Exception hata)
+        {
+            return Json(new { basarili = false, mesaj = hata.Message });
+        }
     }
 
     // Bu yardimci metod claim icinden kullanici kimligini ceker.

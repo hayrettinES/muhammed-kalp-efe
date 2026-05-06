@@ -106,7 +106,30 @@ public class OgrenciController : Controller
             var ogrenciId = KullaniciIdGetir();
 
             // Bu satir satin alma sonuc mesajini alir.
-            TempData["Mesaj"] = _platformServisi.KursSatinAl(kursId, ogrenciId);
+            TempData["Mesaj"] = _platformServisi.KursSatinAl(kursId, ogrenciId, false);
+        }
+        catch (Exception hata)
+        {
+            // Bu satir olusan hatayi saklar.
+            TempData["Hata"] = hata.Message;
+        }
+
+        // Bu satir panele geri doner.
+        return RedirectToAction(nameof(Panel));
+    }
+
+    // Bu aksiyon kursu bağış havuzundan satın alma islemini isler.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult AskidanAl(int kursId)
+    {
+        try
+        {
+            // Bu satir aktif ogrenci kimligini alir.
+            var ogrenciId = KullaniciIdGetir();
+
+            // Bu satir satin alma sonuc mesajini alir (askidanMi = true).
+            TempData["Mesaj"] = _platformServisi.KursSatinAl(kursId, ogrenciId, true);
         }
         catch (Exception hata)
         {
@@ -201,6 +224,55 @@ public class OgrenciController : Controller
         }
 
         return RedirectToAction(nameof(Panel));
+    }
+
+    // Bu aksiyon öğrencinin bir video (bölüm) altına yorum yapmasını sağlar.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult BolumYorumEkle(int kursBolumuId, int kursId, string yorum)
+    {
+        try
+        {
+            var ogrenciId = KullaniciIdGetir();
+            _platformServisi.BolumYorumEkle(kursBolumuId, ogrenciId, yorum);
+            return Json(new { basarili = true, mesaj = "Yorumunuz eklendi." });
+        }
+        catch (Exception hata)
+        {
+            return Json(new { basarili = false, mesaj = hata.Message });
+        }
+    }
+
+    // Bu aksiyon AJAX ile belirli bir bölümün yorumlarını JSON olarak döndürür.
+    [HttpGet]
+    public IActionResult BolumYorumlariniGetir(int kursBolumuId)
+    {
+        try
+        {
+            var yorumlar = _platformServisi.BolumYorumlariniGetir(kursBolumuId);
+            return Json(yorumlar);
+        }
+        catch
+        {
+            return Json(new List<object>());
+        }
+    }
+
+    // Bu aksiyon öğrencinin bir yoruma yanıt vermesini sağlar.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult BolumYorumYanitEkle(int parentYorumId, string yanit)
+    {
+        try
+        {
+            var ogrenciId = KullaniciIdGetir();
+            _platformServisi.BolumYorumYanitEkle(parentYorumId, ogrenciId, yanit);
+            return Json(new { basarili = true, mesaj = "Yanıtınız eklendi." });
+        }
+        catch (Exception hata)
+        {
+            return Json(new { basarili = false, mesaj = hata.Message });
+        }
     }
 
     // Bu yardimci metod claim icinden kullanici kimligini ceker.

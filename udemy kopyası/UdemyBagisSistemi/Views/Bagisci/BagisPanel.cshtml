@@ -1,0 +1,427 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bağış Yap — EduVerse</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+<script src="~/js/theme.js" asp-append-version="true"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #141c2e;
+    --bg2:       #111827;
+    --border:    rgba(255,255,255,.09);
+    --borderH:   rgba(255,255,255,.18);
+    --mint:      #3dffc0;
+    --blue:      #7eb8ff;
+    --copper:    #e8924a;
+    --text:      #e2e8f4;
+    --text2:     #8898b8;
+    --error:     #ff4c4c;
+    --fh:        'Cormorant Garamond', serif;
+    --fs:        'Plus Jakarta Sans', sans-serif;
+    --fm:        'JetBrains Mono', monospace;
+    --r:         12px;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--fs);
+    background: var(--bg);
+    color: var(--text);
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* Custom Cursor */
+  .cursor {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--mint);
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: width .2s, height .2s, opacity .2s;
+    mix-blend-mode: screen;
+  }
+  .cursor.grow { width: 28px; height: 28px; opacity: .7; }
+
+  /* Page Layout */
+  .page-grid {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 100vh;
+  }
+  .page-grid > * { flex: 1; min-width: 320px; }
+
+  /* ══ LEFT PANEL ══ */
+  .left-panel {
+    position: relative;
+    background: var(--bg2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 4rem;
+  }
+
+  /* Blobs */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: .4;
+    pointer-events: none;
+  }
+  .blob-1 { width: 440px; height: 440px; background: rgba(232,146,74,.15); top: -100px; left: -100px; }
+  .blob-2 { width: 320px; height: 320px; background: rgba(61,255,192,.15); bottom: -50px; right: -50px; }
+
+  /* Dot grid */
+  .dot-grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+
+  .left-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .logo-link {
+    text-decoration: none;
+    font-family: var(--fh);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--copper);
+    letter-spacing: .02em;
+    display: inline-block;
+    margin-bottom: 3rem;
+  }
+
+  .display-title {
+    font-family: var(--fh);
+    font-size: clamp(3.2rem, 5vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: var(--text);
+    margin-bottom: 1.2rem;
+  }
+  .display-title em {
+    font-style: italic;
+    color: var(--copper);
+  }
+
+  .desc-text {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text2);
+    max-width: 380px;
+    margin-bottom: auto; /* pushes everything else down */
+  }
+
+  .glass-card {
+    backdrop-filter: blur(16px);
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 20px;
+    padding: 1.4rem 1.6rem;
+    margin-top: 3rem;
+  }
+  .glass-card-label {
+    font-size: .75rem;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: .4rem;
+    font-family: var(--fm);
+  }
+  .glass-card-value {
+    font-family: var(--fh);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--copper);
+    line-height: 1;
+  }
+  .glass-card-sub {
+    font-size: .8rem;
+    color: var(--text2);
+    margin-top: .4rem;
+  }
+
+  /* ══ RIGHT PANEL ══ */
+  .right-panel {
+    background: var(--bg);
+    padding: 5rem 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+
+  .right-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .form-container {
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .form-head { margin-bottom: 2.5rem; }
+  .form-title {
+    font-family: var(--fh);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: .4rem;
+  }
+  .form-subtitle {
+    font-size: .95rem;
+    color: var(--text2);
+  }
+
+  /* Alerts */
+  .alert {
+    padding: 1rem 1.2rem;
+    border-radius: var(--r);
+    margin-bottom: 1.5rem;
+    font-size: .9rem;
+  }
+  .alert-success {
+    background: rgba(61,255,192,.1);
+    border: 1px solid rgba(61,255,192,.3);
+    color: var(--mint);
+  }
+  .alert-error {
+    background: rgba(255,76,76,.1);
+    border: 1px solid rgba(255,76,76,.3);
+    color: var(--error);
+  }
+
+  /* Info Box (IBAN) */
+  .info-box {
+    background: rgba(255,255,255,.03);
+    border: 1px dashed rgba(255,255,255,.2);
+    border-radius: var(--r);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .info-box p {
+    font-size: 0.9rem;
+    color: var(--text2);
+    margin-bottom: 0.5rem;
+  }
+  .info-box h3 {
+    font-family: var(--fm);
+    color: var(--copper);
+    letter-spacing: 1px;
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+    word-break: break-all;
+  }
+  .info-box .receiver {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  /* Inputs */
+  .field-group { margin-bottom: 1.4rem; display: flex; flex-direction: column; }
+  .field-label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: .6rem;
+  }
+  .field-input {
+    width: 100%;
+    background: rgba(255,255,255,.06);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 1rem 1.2rem;
+    color: var(--text);
+    font-family: var(--fs);
+    font-size: .95rem;
+    transition: all .2s;
+    outline: none;
+  }
+  .field-input:focus {
+    border-color: var(--copper);
+    background: rgba(255,255,255,.08);
+    box-shadow: 0 0 0 3px rgba(232,146,74,.12);
+  }
+
+  /* Buttons */
+  .btn-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    width: 100%;
+    background: linear-gradient(135deg, #e8924a, #c87632);
+    color: #fff;
+    padding: 1.1rem;
+    border-radius: 100px;
+    border: none;
+    font-family: var(--fs);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    margin-top: 1rem;
+  }
+  .btn-submit:hover {
+    box-shadow: 0 4px 20px rgba(232,146,74,.3);
+    transform: translateY(-2px);
+  }
+  .btn-submit:active { transform: translateY(0); }
+
+  /* Back links */
+  .register-link {
+    text-align: center;
+    margin-top: 2.5rem;
+    font-size: .9rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .register-link a {
+    color: var(--copper);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .register-link a:hover {
+    text-decoration: underline;
+  }
+
+  @@media (max-width: 900px) {
+    .left-panel { display: none; }
+    .right-panel { padding: 4rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<div class="page-grid">
+
+  <!-- ══ LEFT PANEL ══ -->
+  <aside class="left-panel">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="dot-grid"></div>
+
+    <div class="left-content">
+      <a href="/" class="logo-link">EduVerse</a>
+
+      <h1 class="display-title">Birlikte<br><em>Büyüyelim.</em></h1>
+      <p class="desc-text">Bağışlarınızla öğrencilerin eğitim hayatına dokunabilir, yüzlerce kursa ücretsiz erişimlerini sağlayabilirsiniz.</p>
+
+      <div class="glass-card">
+        <div class="glass-card-label">Sonsuz Teşekkürler</div>
+        <div class="glass-card-value">Gelecek</div>
+        <div class="glass-card-sub">Senin sayende aydınlanıyor</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ RIGHT PANEL ══ -->
+  <div style="position:fixed; top:1.2rem; right:1.5rem; z-index:100;">
+    <div class="theme-toggle" title="Tema değiştir">
+      <span class="theme-toggle-icon">🌙</span>
+      <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+      <span class="theme-toggle-label">Koyu</span>
+    </div>
+  </div>
+  <main class="right-panel">
+    <div class="form-container">
+      
+      <div class="form-head">
+        <h2 class="form-title">Bağış Yap</h2>
+        <p class="form-subtitle">Lütfen aşağıdaki banka hesabına bağışınızı ilettikten sonra formu doldurunuz.</p>
+      </div>
+
+      @if (TempData["BagisBasarili"] is string mesaj)
+      {
+          <div class="alert alert-success" style="font-size:1.1rem; font-weight:600; text-align:center; padding: 2rem 1.5rem;">
+              🎉 TEŞEKKÜRLER!<br/><br/>
+              <span style="font-weight:400; font-size:0.95rem; color:var(--text);">@mesaj</span>
+          </div>
+      }
+      @if (TempData["BagisHata"] is string hata)
+      {
+          <div class="alert alert-error">⚠️ @hata</div>
+      }
+
+      @if (TempData["BagisBasarili"] == null)
+      {
+          <div class="info-box">
+            <p>Banka Hesap Bilgileri (EFT/Havale)</p>
+            <h3>TR11 1111 1111 1111 1111 1111 11</h3>
+            <p>Alıcı Adı:</p>
+            <div class="receiver">EduVerse Eğitim Hizmetleri A.Ş.</div>
+          </div>
+
+          <form asp-action="BagisYap" method="post" novalidate>
+              @Html.AntiForgeryToken()
+
+              <div class="field-group">
+                  <label class="field-label">Adınız Soyadınız (veya Kurum Adı)</label>
+                  <input name="bagisciAdSoyad" class="field-input" placeholder="Örn: Ahmet Yılmaz" required />
+              </div>
+
+              <div class="field-group">
+                  <label class="field-label">Gönderilen Tutar (₺)</label>
+                  <input name="tutar" type="number" min="1" step="1" class="field-input" placeholder="Örn: 500" required />
+              </div>
+
+              <button type="submit" class="btn-submit">Bağışı Bildir →</button>
+          </form>
+      }
+
+      <div class="register-link">
+          <a href="/">← Ana Sayfaya Dön</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, input').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+  });
+</script>
+</body>
+</html>

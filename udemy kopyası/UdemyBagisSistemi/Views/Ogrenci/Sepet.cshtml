@@ -1,0 +1,67 @@
+@model UdemyBagisSistemi.ViewModels.SepetViewModel
+
+@{
+    ViewData["Title"] = "Sepetim";
+}
+
+<div class="bolum">
+    <h2>Sepetim (@Model.SepettekiKurslar.Count ürün)</h2>
+
+    @if (TempData["Mesaj"] != null)
+    {
+        <div class="basari-mesaji">@TempData["Mesaj"]</div>
+    }
+
+    @if (TempData["Hata"] != null)
+    {
+        <div class="hata-mesaji">@TempData["Hata"]</div>
+    }
+
+    @if (Model.SepettekiKurslar.Count > 0)
+    {
+        <div style="display:flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="flex: 2; min-width: 300px;">
+                @foreach (var kurs in Model.SepettekiKurslar)
+                {
+                    <div style="display:flex; background:#fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; align-items: center;">
+                        <div style="flex:1;">
+                            <h3 style="margin:0 0 5px 0;">@kurs.Kurs.Baslik</h3>
+                            <p style="margin:0; color:#666; font-size:14px;">Eğitmen: @kurs.EgitmenAdi | Kategori: @kurs.KategoriAdi</p>
+                        </div>
+                        <div style="font-weight:bold; font-size: 18px; color: var(--vurgu-renk); margin-right: 20px;">
+                            @kurs.Kurs.Fiyat ₺
+                        </div>
+                        <form asp-controller="Sepet" asp-action="Cikar" method="post">
+                            <input type="hidden" name="kursId" value="@kurs.Kurs.Id" />
+                            <button type="submit" class="btn" style="background:var(--hata-renk);">Sil</button>
+                        </form>
+                    </div>
+                }
+            </div>
+            
+            <div style="flex: 1; min-width: 250px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); align-self: flex-start;">
+                <h3>Sipariş Özeti</h3>
+                <hr style="border:none; border-top: 1px solid #eee; margin: 15px 0;" />
+                <div style="display:flex; justify-content: space-between; font-size: 20px; font-weight: bold; margin-bottom: 20px;">
+                    <span>Toplam:</span>
+                    <span>@Model.ToplamTutar ₺</span>
+                </div>
+                
+                <form asp-controller="Sepet" asp-action="Onayla" method="post">
+                    <button type="submit" class="btn btn-buyuk" style="width: 100%;">Sepeti Onayla ve Satın Al</button>
+                </form>
+                
+                <p style="font-size: 12px; color: #888; margin-top: 15px; text-align: center;">
+                    Not: Satın alma işleminde öncelikle havuz (bağış) bakiyesi kullanılır. Havuz yetersiz kalırsa kendi bakiyenizden düşülür. Bakiyenin yetmediği ürünler sepette kalmaya devam eder.
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div style="text-align:center; padding: 50px 0;">
+            <p style="font-size: 18px; color: #666;">Sepetinizde henüz hiç kurs bulunmuyor.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-buyuk" style="margin-top: 15px;">Kursları İncele</a>
+        </div>
+    }
+</div>

@@ -18,6 +18,7 @@ public class GeminiAssistantServisi : IAiAssistantServisi
     public async Task<string> YanitUretAsync(
         string message,
         IReadOnlyList<ChatMessageDto> history,
+        AgentBaglam? baglam = null,
         CancellationToken cancellationToken = default)
     {
         var apiKey =

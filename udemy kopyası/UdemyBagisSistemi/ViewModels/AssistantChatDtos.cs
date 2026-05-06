@@ -3,6 +3,7 @@ namespace UdemyBagisSistemi.ViewModels;
 public class AssistantChatRequestDto
 {
     public string Message { get; set; } = string.Empty;
+    public int SohbetId { get; set; }
     public List<ChatMessageDto> History { get; set; } = [];
 }
 

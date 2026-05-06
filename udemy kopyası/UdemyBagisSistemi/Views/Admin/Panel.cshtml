@@ -1,154 +1,247 @@
-@* Bu dosya admin panelini cizer. *@
-@model AdminPanelViewModel
-
-<section class="panel-baslik">
-    @* Bu alan admin panelinin ust basligini gosterir. *@
-    <div>
-        <span class="etiket">Admin Paneli</span>
-        <h1>Kategorileri ve genel sistemi buradan yonet</h1>
-    </div>
-    <div class="istatistik-panelleri tek-satir">
-        <article class="istatistik-kart">
-            <span>Havuz Bakiyesi</span>
-            <strong>@Model.HavuzBakiyesi.ToString("N2") TL</strong>
-        </article>
-        <article class="istatistik-kart">
-            <span>Kullanici</span>
-            <strong>@Model.Kullanicilar.Count</strong>
-        </article>
-        <article class="istatistik-kart">
-            <span>Kurs</span>
-            <strong>@Model.Kurslar.Count</strong>
-        </article>
-        <article class="istatistik-kart">
-            <span>Yorum</span>
-            <strong>@Model.ToplamYorumSayisi</strong>
-        </article>
-    </div>
-</section>
-
-@* Bu blok bilgi ve hata mesajlarini gosterir. *@
-@if (TempData["Mesaj"] is string mesaj)
-{
-    <div class="uyari basari">@mesaj</div>
+@{
+    Layout = null;
+    var yayinliKurs = Model.Kurslar.Count(k => k.Kurs.YayinlandiMi);
+    var egitmenSayisi = Model.Kullanicilar.Count(k => k.Rol == "Egitmen");
+    var ogrenciSayisi = Model.Kullanicilar.Count(k => k.Rol == "Ogrenci");
 }
-@if (TempData["Hata"] is string hata)
-{
-    <div class="uyari hata">@hata</div>
-}
+@model UdemyBagisSistemi.ViewModels.AdminPanelViewModel
 
-<section class="iki-sutun">
-    <div class="kart-form">
-        @* Bu alan kategori ekleme veya guncelleme formunu gosterir. *@
-        <h2>@(Model.DuzenlenenKategori is null ? "Kategori Ekle" : "Kategori Guncelle")</h2>
-        <form asp-action="@(Model.DuzenlenenKategori is null ? "KategoriEkle" : "KategoriGuncelle")" method="post">
-            @Html.AntiForgeryToken()
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Paneli — EduVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/assistant.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--bg:#0f1320;--bg2:#111827;--surface:rgba(255,255,255,.04);--surfaceH:rgba(255,255,255,.08);--border:rgba(255,255,255,.09);--borderH:rgba(255,255,255,.18);--accent:#a78bfa;--accent2:rgba(167,139,250,.12);--copper:#e8924a;--mint:#3dffc0;--red:#ff5a5a;--text:#e2e8f4;--text2:#8898b8;--fh:'Cormorant Garamond',serif;--fs:'Plus Jakarta Sans',sans-serif;--fm:'JetBrains Mono',monospace}
+        body{font-family:var(--fs);background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+        .sidebar{width:260px;background:var(--bg2);border-right:1px solid var(--border);padding:2.5rem 1.8rem;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;transition:all .3s}
+        .sidebar.collapsed{width:0;padding:0;border:none;opacity:0}
+        .logo{font-family:var(--fh);font-size:2rem;color:var(--accent);text-decoration:none;font-weight:700;margin-bottom:3rem;display:block}
+        .logo em{color:var(--copper);font-style:normal}
+        .nav-menu{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+        .nav-item{color:var(--text2);text-decoration:none;padding:.85rem 1.2rem;border-radius:10px;font-weight:600;font-size:.88rem;display:flex;align-items:center;gap:.8rem;transition:all .3s;cursor:pointer}
+        .nav-item:hover{color:var(--text);background:var(--surface)}
+        .nav-item.active{background:var(--accent2);color:var(--accent);position:relative}
+        .nav-item.active::before{content:'';position:absolute;left:-1.8rem;top:50%;transform:translateY(-50%);height:60%;width:4px;background:var(--accent);border-radius:0 4px 4px 0}
+        .main{flex:1;overflow-y:auto;height:100vh;background:radial-gradient(circle at top right,rgba(167,139,250,.03),transparent 500px)}
+        .wrap{padding:3rem 3.5rem;max-width:1400px;margin:0 auto}
+        .header h1{font-family:var(--fh);font-size:2.8rem;font-weight:700;line-height:1.1}
+        .header h1 em{color:var(--accent);font-style:italic}
+        .header p{color:var(--text2);margin-top:.6rem;font-size:1rem}
+        .tab-pane{display:none;animation:fadeIn .4s ease forwards;opacity:0}
+        .tab-pane.active{display:block}
+        @@keyframes fadeIn{to{opacity:1}}
+        .grid-stat{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.2rem;margin:2rem 0}
+        .s-card{background:var(--surface);border:1px solid var(--border);padding:1.6rem;border-radius:14px;transition:all .2s;position:relative;overflow:hidden}
+        .s-card:hover{transform:translateY(-3px);border-color:rgba(167,139,250,.3)}
+        .s-card .lbl{display:block;color:var(--text2);font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.6rem;font-weight:600}
+        .s-card .val{font-family:var(--fm);font-size:2rem;color:var(--text)}
+        .s-card .sub{display:inline-block;margin-top:.4rem;font-size:.75rem;color:var(--accent);background:var(--accent2);padding:2px 8px;border-radius:4px}
+        .panel-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.8rem;margin-bottom:1.5rem}
+        .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem}
+        .panel-title{font-family:var(--fh);font-size:1.5rem;color:var(--accent);font-weight:600}
+        table{width:100%;border-collapse:collapse;text-align:left}
+        thead{background:var(--surfaceH);font-size:.8rem;color:var(--text2)}
+        th{padding:.8rem 1.2rem;font-weight:600}
+        td{padding:.9rem 1.2rem;border-bottom:1px solid var(--border);font-size:.9rem}
+        tr:hover{background:rgba(255,255,255,.02)}
+        .btn-a{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;background:var(--accent);color:#000;font-weight:700;font-size:.82rem;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
+        .btn-a:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(167,139,250,.3)}
+        .btn-a.outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+        .btn-a.outline:hover{background:var(--surface)}
+        .btn-a.danger{background:rgba(255,90,90,.15);color:var(--red);border:1px solid rgba(255,90,90,.2)}
+        .btn-a.danger:hover{background:rgba(255,90,90,.25)}
+        .btn-a.mint{background:rgba(61,255,192,.15);color:var(--mint);border:1px solid rgba(61,255,192,.2)}
+        .btn-a.copper{background:rgba(232,146,74,.15);color:var(--copper);border:1px solid rgba(232,146,74,.2)}
+        .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700}
+        .badge-green{background:rgba(61,255,192,.1);color:var(--mint)}
+        .badge-yellow{background:rgba(232,146,74,.1);color:var(--copper)}
+        .badge-purple{background:var(--accent2);color:var(--accent)}
+        .form-group{margin-bottom:1.2rem}
+        .form-label{display:block;margin-bottom:.5rem;font-weight:600;color:var(--text2);font-size:.85rem}
+        .form-control{width:100%;padding:.8rem 1rem;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,.2);color:var(--text);font-family:var(--fs);font-size:.9rem;transition:all .2s}
+        .form-control:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent2)}
+        textarea.form-control{resize:vertical;min-height:80px}
+        .alert{padding:1rem 1.5rem;border-radius:10px;margin-bottom:1.5rem;font-weight:500;font-size:.9rem}
+        .alert-ok{background:rgba(61,255,192,.1);border:1px solid rgba(61,255,192,.3);color:var(--mint)}
+        .alert-err{background:rgba(255,90,90,.1);border:1px solid rgba(255,90,90,.3);color:var(--red)}
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <a href="/" class="logo">Edu<em>Verse</em></a>
+        <ul class="nav-menu">
+            <li><a class="nav-item active" data-tab="tab-dash">📊 Dashboard</a></li>
+            <li><a class="nav-item" data-tab="tab-kat">📁 Kategoriler</a></li>
+            <li><a class="nav-item" data-tab="tab-users">👥 Kullanıcılar</a></li>
+            <li><a class="nav-item" data-tab="tab-kurs">🎓 Kurslar</a></li>
+            <li><a class="nav-item" data-tab="tab-bagis">💝 Bağışlar</a></li>
+            <li style="margin-top:auto;">
+                <div class="theme-toggle" title="Tema değiştir" style="padding:0.5rem 1rem;">
+                    <span class="theme-toggle-icon">🌙</span>
+                    <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+                    <span class="theme-toggle-label">Koyu</span>
+                </div>
+            </li>
+            <li><a href="/Hesap/Cikis" class="nav-item" style="color:var(--red);">← Çıkış Yap</a></li>
+        </ul>
+    </aside>
 
-            @if (Model.DuzenlenenKategori is not null)
-            {
-                <input type="hidden" name="id" value="@Model.DuzenlenenKategori.Id" />
-            }
+    <main class="main">
+        <div class="wrap">
+            <button id="sidebarToggle" class="btn-a outline" style="margin-bottom:1.5rem;padding:6px 10px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
 
-            <label class="alan">
-                <span>Kategori Adi</span>
-                <input class="girdi" name="ad" value="@Model.DuzenlenenKategori?.Ad" required />
-            </label>
+            @if (TempData["Mesaj"] != null) { <div class="alert alert-ok">✓ @TempData["Mesaj"]</div> }
+            @if (TempData["Hata"] != null) { <div class="alert alert-err">⚠ @TempData["Hata"]</div> }
 
-            <label class="alan">
-                <span>Aciklama</span>
-                <textarea class="girdi" name="aciklama" rows="4" required>@Model.DuzenlenenKategori?.Aciklama</textarea>
-            </label>
+            <!-- DASHBOARD -->
+            <div id="tab-dash" class="tab-pane active">
+                <header class="header"><h1>Yönetim <em>Paneli</em></h1><p>Platform istatistiklerini izleyin, kullanıcıları ve kursları yönetin.</p></header>
+                <div class="grid-stat">
+                    <div class="s-card"><span class="lbl">Toplam Kullanıcı</span><strong class="val">@Model.Kullanicilar.Count</strong><span class="sub">Bu ay: +@Model.BuAyKayitSayisi</span></div>
+                    <div class="s-card"><span class="lbl">Toplam Kurs</span><strong class="val">@Model.Kurslar.Count</strong><span class="sub">@yayinliKurs Yayında</span></div>
+                    <div class="s-card"><span class="lbl">Toplam Gelir</span><strong class="val">₺@Model.ToplamGelir.ToString("N2")</strong><span class="sub">Kurs Satışları</span></div>
+                    <div class="s-card"><span class="lbl">Bağış Havuzu</span><strong class="val">₺@Model.HavuzBakiyesi.ToString("N2")</strong><span class="sub" style="color:var(--mint);background:rgba(61,255,192,.1);">@Model.ToplamBagisSayisi Bağış</span></div>
+                    <div class="s-card"><span class="lbl">Yorumlar</span><strong class="val">@Model.ToplamYorumSayisi</strong><span class="sub" style="color:var(--copper);background:rgba(232,146,74,.1);">Toplam</span></div>
+                    <div class="s-card"><span class="lbl">Eğitmen / Öğrenci</span><strong class="val">@egitmenSayisi / @ogrenciSayisi</strong><span class="sub">Dağılım</span></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+                    <div class="panel-box"><div class="panel-head"><h2 class="panel-title">Son Bağışlar</h2></div>
+                        @if(Model.Bagislar.Any()){
+                            <table><thead><tr><th>Bağışçı</th><th>Tutar</th><th>Tarih</th></tr></thead><tbody>
+                            @foreach(var b in Model.Bagislar.Take(5)){<tr><td>@b.BagisciAdSoyad</td><td style="color:var(--mint);font-family:var(--fm);">₺@b.Tutar.ToString("N2")</td><td style="color:var(--text2);font-size:.82rem;">@b.Tarih</td></tr>}
+                            </tbody></table>
+                        } else { <p style="color:var(--text2);text-align:center;padding:2rem;">Henüz bağış yok.</p> }
+                    </div>
+                    <div class="panel-box"><div class="panel-head"><h2 class="panel-title">Son Kurslar</h2></div>
+                        @if(Model.Kurslar.Any()){
+                            <table><thead><tr><th>Kurs</th><th>Eğitmen</th><th>Durum</th></tr></thead><tbody>
+                            @foreach(var k in Model.Kurslar.Take(5)){<tr><td>@k.Kurs.Baslik</td><td style="color:var(--text2);">@k.EgitmenAdi</td><td>@if(k.Kurs.YayinlandiMi){<span class="badge badge-green">Yayında</span>}else{<span class="badge badge-yellow">Taslak</span>}</td></tr>}
+                            </tbody></table>
+                        } else { <p style="color:var(--text2);text-align:center;padding:2rem;">Henüz kurs yok.</p> }
+                    </div>
+                </div>
+            </div>
 
-            <button type="submit" class="buton birincil tam">Kaydet</button>
-        </form>
-    </div>
+            <!-- KATEGORİLER -->
+            <div id="tab-kat" class="tab-pane">
+                <header class="header"><h1>Kategori <em>Yönetimi</em></h1><p>Platformdaki kurs kategorilerini ekleyin, düzenleyin veya kaldırın.</p></header>
+                <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;">
+                    <div class="panel-box">
+                        <h3 style="font-family:var(--fh);font-size:1.3rem;color:var(--accent);margin-bottom:1rem;">@(Model.DuzenlenenKategori is null ? "Yeni Kategori" : "Kategori Güncelle")</h3>
+                        <form asp-action="@(Model.DuzenlenenKategori is null ? "KategoriEkle" : "KategoriGuncelle")" method="post">
+                            @Html.AntiForgeryToken()
+                            @if(Model.DuzenlenenKategori is not null){<input type="hidden" name="id" value="@Model.DuzenlenenKategori.Id" />}
+                            <div class="form-group"><label class="form-label">Kategori Adı</label><input class="form-control" name="ad" value="@Model.DuzenlenenKategori?.Ad" required /></div>
+                            <div class="form-group"><label class="form-label">Açıklama</label><textarea class="form-control" name="aciklama" rows="3" required>@Model.DuzenlenenKategori?.Aciklama</textarea></div>
+                            <button type="submit" class="btn-a" style="width:100%;justify-content:center;">Kaydet</button>
+                        </form>
+                    </div>
+                    <div class="panel-box"><div class="panel-head"><h2 class="panel-title">Mevcut Kategoriler</h2><span class="badge badge-purple">@Model.Kategoriler.Count adet</span></div>
+                        <table><thead><tr><th>Ad</th><th>Açıklama</th><th style="width:180px;">İşlem</th></tr></thead><tbody>
+                        @foreach(var kat in Model.Kategoriler){
+                            <tr><td style="font-weight:600;">@kat.Ad</td><td style="color:var(--text2);">@kat.Aciklama</td>
+                            <td><div style="display:flex;gap:6px;">
+                                <a class="btn-a outline" asp-action="Panel" asp-route-kategoriId="@kat.Id" style="font-size:.78rem;padding:.4rem .8rem;">Düzenle</a>
+                                <form asp-action="KategoriSil" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@kat.Id" /><button type="submit" class="btn-a danger" style="font-size:.78rem;padding:.4rem .8rem;" onclick="return confirm('Silmek istediğinize emin misiniz?')">Sil</button></form>
+                            </div></td></tr>}
+                        </tbody></table>
+                    </div>
+                </div>
+            </div>
 
-    <div class="liste-karti">
-        @* Bu alan mevcut kategorileri listeler. *@
-        <h2>Kategoriler</h2>
-        <div class="tablo-kapsayici">
-            <table class="tablo">
-                <thead>
-                    <tr>
-                        <th>Ad</th>
-                        <th>Aciklama</th>
-                        <th>Islem</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var kategori in Model.Kategoriler)
-                    {
-                        <tr>
-                            <td>@kategori.Ad</td>
-                            <td>@kategori.Aciklama</td>
-                            <td class="islem-alani">
-                                <a class="buton kucuk ikincil" asp-action="Panel" asp-route-kategoriId="@kategori.Id">Duzenle</a>
-                                <form asp-action="KategoriSil" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@kategori.Id" />
-                                    <button type="submit" class="buton kucuk tehlike">Sil</button>
-                                </form>
+            <!-- KULLANICILAR -->
+            <div id="tab-users" class="tab-pane">
+                <header class="header"><h1>Kullanıcı <em>Yönetimi</em></h1><p>Sistemdeki tüm kullanıcıları görüntüleyin ve yönetin.</p></header>
+                <div class="panel-box"><div class="panel-head"><h2 class="panel-title">Tüm Kullanıcılar</h2><span class="badge badge-purple">@Model.Kullanicilar.Count kişi</span></div>
+                    <table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Rol</th><th>Kayıt Tarihi</th><th style="width:100px;">İşlem</th></tr></thead><tbody>
+                    @foreach(var u in Model.Kullanicilar){
+                        <tr><td style="font-weight:600;">@u.AdSoyad</td><td style="color:var(--text2);font-family:var(--fm);font-size:.82rem;">@u.Eposta</td>
+                        <td>@if(u.Rol=="Admin"){<span class="badge badge-purple">Admin</span>}else if(u.Rol=="Egitmen"){<span class="badge badge-green">Eğitmen</span>}else{<span class="badge badge-yellow">Öğrenci</span>}</td>
+                        <td style="color:var(--text2);font-size:.82rem;">@(u.KayitTarihi.Length>10?u.KayitTarihi.Substring(0,10):u.KayitTarihi)</td>
+                        <td>@if(u.Rol!="Admin"){<form asp-action="KullaniciSil" method="post" style="display:inline;">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@u.Id"/><button type="submit" class="btn-a danger" style="font-size:.75rem;padding:.35rem .7rem;" onclick="return confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')">Sil</button></form>}else{<span style="color:var(--text2);font-size:.75rem;">—</span>}</td></tr>}
+                    </tbody></table>
+                </div>
+            </div>
+
+            <!-- KURSLAR -->
+            <div id="tab-kurs" class="tab-pane">
+                <header class="header"><h1>Kurs <em>Yönetimi</em></h1><p>Platformdaki tüm kursları inceleyin, yayın durumlarını değiştirin.</p></header>
+                
+                <div style="margin-bottom: 20px;">
+                    <form asp-action="Panel" method="get" style="display: flex; gap: 10px;">
+                        <input type="hidden" name="kategoriId" value="@Context.Request.Query["kategoriId"]" />
+                        <input type="text" name="arama" class="form-control" placeholder="Kurs başlığı veya açıklamasıyla ara..." value="@Context.Request.Query["arama"]" style="flex: 1;" />
+                        <button type="submit" class="btn-a mint" style="padding: 0 20px;">Ara</button>
+                    </form>
+                </div>
+
+                <div class="panel-box"><div class="panel-head"><h2 class="panel-title">Tüm Kurslar</h2><span class="badge badge-purple">@Model.Kurslar.Count kurs</span></div>
+                    <table><thead><tr><th>Kurs Adı</th><th>Eğitmen</th><th>Kategori</th><th>Fiyat</th><th>Durum</th><th style="width:120px;">İşlem</th></tr></thead><tbody>
+                    @foreach(var k in Model.Kurslar){
+                        <tr><td style="font-weight:600;">@k.Kurs.Baslik</td><td style="color:var(--text2);">@k.EgitmenAdi</td><td>@k.KategoriAdi</td>
+                        <td style="font-family:var(--fm);color:var(--mint);">₺@k.Kurs.Fiyat.ToString("N2")</td>
+                        <td>@if(k.Kurs.YayinlandiMi){<span class="badge badge-green">Yayında</span>}else{<span class="badge badge-yellow">Taslak</span>}</td>
+                        <td><form asp-action="KursYayinToggle" method="post" style="display:inline;">@Html.AntiForgeryToken()<input type="hidden" name="kursId" value="@k.Kurs.Id"/>
+                            @if(k.Kurs.YayinlandiMi){<button type="submit" class="btn-a copper" style="font-size:.75rem;padding:.35rem .7rem;">Taslağa Al</button>}
+                            else{<button type="submit" class="btn-a mint" style="font-size:.75rem;padding:.35rem .7rem;">Yayınla</button>}
+                        </form></td></tr>}
+                    </tbody></table>
+                </div>
+            </div>
+
+            <!-- BAĞIŞLAR -->
+            <div id="tab-bagis" class="tab-pane">
+                <header class="header"><h1>Bağış <em>Geçmişi</em></h1><p>Platformdaki tüm bağışları takip edin. (Onaylanmış Toplam: ₺@Model.ToplamBagisTutari.ToString("N2"))</p></header>
+                <div class="panel-box"><div class="panel-head"><h2 class="panel-title">Tüm Bağışlar</h2></div>
+                    @if(Model.Bagislar.Any()){
+                        <table><thead><tr><th>Bağışçı</th><th>Tutar</th><th>Tarih</th><th>Durum</th><th style="width:100px;">İşlem</th></tr></thead><tbody>
+                        @foreach(var b in Model.Bagislar){<tr>
+                            <td style="font-weight:600;">@b.BagisciAdSoyad</td>
+                            <td style="color:var(--mint);font-family:var(--fm);font-size:1.05rem;">₺@b.Tutar.ToString("N2")</td>
+                            <td style="color:var(--text2);">@b.Tarih</td>
+                            <td>@if(b.OnaylandiMi){<span class="badge badge-green">Onaylandı</span>}else{<span class="badge badge-yellow">Bekliyor</span>}</td>
+                            <td>
+                                @if(!b.OnaylandiMi){
+                                    <form asp-action="BagisOnayla" method="post" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="bagisId" value="@b.Id" />
+                                        <button type="submit" class="btn-a mint" style="font-size:.75rem;padding:.35rem .7rem;">Onayla</button>
+                                    </form>
+                                } else { <span style="color:var(--text2);font-size:.75rem;">—</span> }
                             </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                        </tr>}
+                        </tbody></table>
+                    } else { <p style="color:var(--text2);text-align:center;padding:3rem;">Henüz hiç bağış yapılmamış.</p> }
+                </div>
+            </div>
         </div>
-    </div>
-</section>
+    </main>
 
-<section class="iki-sutun">
-    <div class="liste-karti">
-        @* Bu alan sistemdeki kullanicilari listeler. *@
-        <h2>Kullanicilar</h2>
-        <div class="tablo-kapsayici">
-            <table class="tablo">
-                <thead>
-                    <tr>
-                        <th>Ad Soyad</th>
-                        <th>Eposta</th>
-                        <th>Rol</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var kullanici in Model.Kullanicilar)
-                    {
-                        <tr>
-                            <td>@kullanici.AdSoyad</td>
-                            <td>@kullanici.Eposta</td>
-                            <td>@kullanici.Rol</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+    @await Html.PartialAsync("_AssistantWidget")
 
-    <div class="liste-karti">
-        @* Bu alan kurslarin genel durumunu listeler. *@
-        <h2>Kurslar</h2>
-        <div class="tablo-kapsayici">
-            <table class="tablo">
-                <thead>
-                    <tr>
-                        <th>Kurs</th>
-                        <th>Kategori</th>
-                        <th>Egitmen</th>
-                        <th>Durum</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var kursKart in Model.Kurslar)
-                    {
-                        <tr>
-                            <td>@kursKart.Kurs.Baslik</td>
-                            <td>@kursKart.KategoriAdi</td>
-                            <td>@kursKart.EgitmenAdi</td>
-                            <td>@(kursKart.Kurs.YayinlandiMi ? "Yayinda" : "Taslak")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-</section>
+    <script>
+        const navItems=document.querySelectorAll('.nav-item[data-tab]');
+        const tabPanes=document.querySelectorAll('.tab-pane');
+        navItems.forEach(item=>{item.addEventListener('click',()=>{navItems.forEach(i=>i.classList.remove('active'));tabPanes.forEach(p=>p.classList.remove('active'));item.classList.add('active');document.getElementById(item.dataset.tab).classList.add('active');});});
+        document.getElementById('sidebarToggle')?.addEventListener('click',()=>{document.querySelector('.sidebar').classList.toggle('collapsed');});
+        if(window.location.hash) {
+            let targetTab = window.location.hash.substring(1);
+            let targetNavItem = document.querySelector(`.nav-item[data-tab="${targetTab}"]`);
+            if(targetNavItem) { targetNavItem.click(); }
+        } else if (window.location.search.includes('arama=')) {
+            let targetNavItem = document.querySelector(`.nav-item[data-tab="tab-kurs"]`);
+            if(targetNavItem) { targetNavItem.click(); }
+        }
+    </script>
+    <script src="~/js/assistant.js" asp-append-version="true"></script>
+</body>
+</html>

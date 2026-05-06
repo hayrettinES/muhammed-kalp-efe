@@ -57,8 +57,8 @@ public class VeritabaniHazirlayici
                 Baslik TEXT NOT NULL,
                 Aciklama TEXT NOT NULL,
                 VideoUrl TEXT NOT NULL DEFAULT '',
-                OnizlemeVideoUrl TEXT NOT NULL DEFAULT '',
                 DokumanUrl TEXT NOT NULL,
+                ThumbnailUrl TEXT NOT NULL DEFAULT '',
                 Fiyat REAL NOT NULL,
                 YayinlandiMi INTEGER NOT NULL DEFAULT 0,
                 OlusturmaTarihi TEXT NOT NULL,
@@ -97,6 +97,17 @@ public class VeritabaniHazirlayici
                 UNIQUE (OgrenciId, KursId)
             );
 
+            CREATE TABLE IF NOT EXISTS SepetOgesi (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                KullaniciId INTEGER NOT NULL,
+                KursId INTEGER NOT NULL,
+                EklenmeTarihi TEXT NOT NULL,
+                OdemeYontemi TEXT NOT NULL DEFAULT 'Bakiye',
+                FOREIGN KEY (KullaniciId) REFERENCES Kullanicilar(Id),
+                FOREIGN KEY (KursId) REFERENCES Kurslar(Id),
+                UNIQUE (KullaniciId, KursId)
+            );
+
             CREATE TABLE IF NOT EXISTS KursYorumlari (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 KursId INTEGER NOT NULL,
@@ -119,6 +130,16 @@ public class VeritabaniHazirlayici
                 FOREIGN KEY (KullaniciId) REFERENCES Kullanicilar(Id)
             );
 
+            CREATE TABLE IF NOT EXISTS BolumYorumlari (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                KursBolumuId INTEGER NOT NULL,
+                KullaniciId INTEGER NOT NULL,
+                Yorum TEXT NOT NULL,
+                Tarih TEXT NOT NULL,
+                FOREIGN KEY (KursBolumuId) REFERENCES KursBolumleri(Id),
+                FOREIGN KEY (KullaniciId) REFERENCES Kullanicilar(Id)
+            );
+
             CREATE TABLE IF NOT EXISTS BolumIlerlemeleri (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 OgrenciId INTEGER NOT NULL,
@@ -130,6 +151,32 @@ public class VeritabaniHazirlayici
                 FOREIGN KEY (KursId) REFERENCES Kurslar(Id),
                 FOREIGN KEY (KursBolumuId) REFERENCES KursBolumleri(Id),
                 UNIQUE (OgrenciId, KursBolumuId)
+            );
+
+            CREATE TABLE IF NOT EXISTS AiApiAnahtarlari (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ApiKey TEXT NOT NULL UNIQUE,
+                Aktif INTEGER NOT NULL DEFAULT 1,
+                KullanmaSayisi INTEGER NOT NULL DEFAULT 0,
+                EklenmeTarihi TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS AiSohbetleri (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                KullaniciId INTEGER NOT NULL,
+                Baslik TEXT NOT NULL DEFAULT 'Yeni Sohbet',
+                OlusturmaTarihi TEXT NOT NULL,
+                SonGuncellemeTarihi TEXT NOT NULL,
+                FOREIGN KEY (KullaniciId) REFERENCES Kullanicilar(Id)
+            );
+
+            CREATE TABLE IF NOT EXISTS AiMesajlari (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                SohbetId INTEGER NOT NULL,
+                Rol TEXT NOT NULL,
+                Icerik TEXT NOT NULL,
+                Tarih TEXT NOT NULL,
+                FOREIGN KEY (SohbetId) REFERENCES AiSohbetleri(Id)
             );
             """);
 
@@ -148,10 +195,13 @@ public class VeritabaniHazirlayici
         KolonYoksaEkle("Kullanicilar", "UzmanlikAlanlari", "TEXT NOT NULL DEFAULT ''");
         KolonYoksaEkle("Kullanicilar", "LinkedinProfili", "TEXT NOT NULL DEFAULT ''");
         KolonYoksaEkle("Kullanicilar", "KursFormati", "TEXT NOT NULL DEFAULT ''");
-        KolonYoksaEkle("Kullanicilar", "FiyatlandirmaTercihi", "TEXT NOT NULL DEFAULT ''");
         KolonYoksaEkle("Kurslar", "VideoUrl", "TEXT NOT NULL DEFAULT ''");
         KolonYoksaEkle("Kurslar", "OnizlemeVideoUrl", "TEXT NOT NULL DEFAULT ''");
+        KolonYoksaEkle("Kurslar", "ThumbnailUrl", "TEXT NOT NULL DEFAULT ''");
         KolonYoksaEkle("KursBolumleri", "DokumanUrl", "TEXT NOT NULL DEFAULT ''");
+        KolonYoksaEkle("Bagislar", "OnaylandiMi", "INTEGER NOT NULL DEFAULT 0");
+        KolonYoksaEkle("BolumYorumlari", "ParentId", "INTEGER NOT NULL DEFAULT 0");
+        KolonYoksaEkle("SepetOgesi", "OdemeYontemi", "TEXT NOT NULL DEFAULT 'Bakiye'");
 
         // Bu metod ornek kullanicilari ekler.
         OrnekKullanicilariEkle();
@@ -161,6 +211,9 @@ public class VeritabaniHazirlayici
 
         // Bu metod ornek kurslari ekler.
         OrnekKurslariEkle();
+
+        // Bu metod API key havuzunu doldurur.
+        ApiKeyHavuzunuDoldur();
     }
 
     // Bu metod demo kullanicilarini sadece bir kez ekler.
@@ -261,7 +314,7 @@ public class VeritabaniHazirlayici
 
         // Bu blok ilk ornek kursu ekler.
         _sqlite.KomutCalistir($"""
-            INSERT INTO Kurslar (EgitmenId, KategoriId, Baslik, Aciklama, VideoUrl, OnizlemeVideoUrl, DokumanUrl, Fiyat, YayinlandiMi, OlusturmaTarihi)
+            INSERT INTO Kurslar (EgitmenId, KategoriId, Baslik, Aciklama, VideoUrl, OnizlemeVideoUrl, DokumanUrl, ThumbnailUrl, Fiyat, YayinlandiMi, OlusturmaTarihi)
             VALUES (
                 {egitmenId},
                 {kategoriId},
@@ -270,6 +323,7 @@ public class VeritabaniHazirlayici
                 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
                 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
                 'https://example.com/ornek-dokuman.pdf',
+                'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
                 450,
                 1,
                 '{tarih}'
@@ -302,5 +356,30 @@ public class VeritabaniHazirlayici
 
         // Bu satir yeni kolonu tabloya ekler.
         _sqlite.KomutCalistir($"ALTER TABLE {tabloAdi} ADD COLUMN {kolonAdi} {kolonTanimi};");
+    }
+
+    // Bu metod API key havuzuna seed verileri ekler.
+    private void ApiKeyHavuzunuDoldur()
+    {
+        var anahtarlar = new[]
+        {
+            "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",
+            "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",
+            "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",
+            "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",
+            "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",
+            "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"
+        };
+
+        var tarih = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        foreach (var key in anahtarlar)
+        {
+            var guvenliKey = _sqlite.MetinGuvenli(key);
+            var varMi = _sqlite.SorguCalistir($"SELECT COUNT(*) AS Toplam FROM AiApiAnahtarlari WHERE ApiKey = '{guvenliKey}';").FirstOrDefault();
+            if (int.TryParse(varMi?["Toplam"], out var sayi) && sayi == 0)
+            {
+                _sqlite.KomutCalistir($"INSERT INTO AiApiAnahtarlari (ApiKey, Aktif, KullanmaSayisi, EklenmeTarihi) VALUES ('{guvenliKey}', 1, 0, '{tarih}');");
+            }
+        }
     }
 }

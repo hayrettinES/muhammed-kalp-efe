@@ -5,77 +5,422 @@
     @* Bu alan sayfanin temel meta bilgilerini tanimlar. *@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Udemy Bagis Sistemi</title>
+    <title>@ViewData["Title"] - EduVerse</title>
 
-    @* Bu satir Bootstrap stil dosyasini ekler. *@
+    @* Bootstrap ve özel stiller *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-    @* Bu satir uygulamaya ozel stil dosyasini ekler. *@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/assistant.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
     <script src="~/js/theme.js" asp-append-version="true"></script>
+
+    <style>
+        /* ═══════════════════════════════════════
+           SIDEBAR LAYOUT
+        ═══════════════════════════════════════ */
+        :root {
+            --sidebar-w: 260px;
+            --sidebar-collapsed-w: 0px;
+            --topbar-h: 0px;
+            --transition-speed: 0.32s;
+            --sidebar-bg: rgba(17, 24, 39, 0.97);
+            --sidebar-border: rgba(255,255,255,0.07);
+            --sidebar-text: #a0aec0;
+            --sidebar-text-active: #e2e8f4;
+            --sidebar-accent: #e8924a;
+            --sidebar-accent-bg: rgba(232,146,74,0.10);
+        }
+
+        /* Global reset for layout */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding-left: var(--sidebar-w);
+            transition: padding-left var(--transition-speed) cubic-bezier(.4,0,.2,1);
+            min-height: 100vh;
+        }
+        body.sidebar-closed {
+            padding-left: 0;
+        }
+
+        /* ── Overlay (mobile / when open) ── */
+        #sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 1040;
+            backdrop-filter: blur(2px);
+        }
+        #sidebar-overlay.visible { display: block; }
+
+        /* ── SIDEBAR ── */
+        #app-sidebar {
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            width: var(--sidebar-w);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--sidebar-border);
+            backdrop-filter: blur(20px);
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(0);
+            transition: transform var(--transition-speed) cubic-bezier(.4,0,.2,1);
+            overflow: hidden;
+        }
+        #app-sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        /* ── Sidebar Header ── */
+        .sb-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.4rem 1.2rem 1rem;
+            border-bottom: 1px solid var(--sidebar-border);
+            flex-shrink: 0;
+        }
+        .sb-logo {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: var(--sidebar-accent);
+            text-decoration: none;
+            letter-spacing: -0.01em;
+            line-height: 1;
+        }
+        .sb-logo em {
+            font-style: italic;
+            color: #e2e8f4;
+        }
+        .sb-close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--sidebar-text);
+            padding: 6px;
+            border-radius: 8px;
+            line-height: 1;
+            font-size: 1.25rem;
+            transition: color .2s, background .2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .sb-close-btn:hover {
+            color: var(--sidebar-text-active);
+            background: rgba(255,255,255,0.07);
+        }
+
+        /* ── Sidebar Nav ── */
+        .sb-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .sb-nav::-webkit-scrollbar { width: 4px; }
+        .sb-nav::-webkit-scrollbar-track { background: transparent; }
+        .sb-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+        .sb-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.72rem 0.9rem;
+            border-radius: 10px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            transition: color .2s, background .2s;
+            border: none;
+            background: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+        .sb-link:hover {
+            color: var(--sidebar-text-active);
+            background: rgba(255,255,255,0.06);
+        }
+        .sb-link.sb-link--accent {
+            color: var(--sidebar-accent);
+        }
+        .sb-link.sb-link--accent:hover {
+            background: var(--sidebar-accent-bg);
+            color: var(--sidebar-accent);
+        }
+        .sb-link-icon {
+            width: 28px;
+            height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.05rem;
+            flex-shrink: 0;
+        }
+
+        /* User-specific links */
+        .sb-divider {
+            height: 1px;
+            background: var(--sidebar-border);
+            margin: 0.5rem 0;
+        }
+        .sb-section-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(160,174,192,0.5);
+            padding: 0.5rem 0.9rem 0.2rem;
+            font-weight: 700;
+        }
+
+        /* ── Sidebar Footer (theme toggle) ── */
+        .sb-footer {
+            padding: 0.9rem 1rem 1.2rem;
+            border-top: 1px solid var(--sidebar-border);
+            flex-shrink: 0;
+        }
+
+        /* ── Sidebar Theme Toggle (inside sidebar) ── */
+        .sb-theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            padding: 0.5rem 0.2rem;
+        }
+        .sb-theme-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--sidebar-text);
+        }
+        .sb-theme-track {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 999px;
+            transition: background .3s, border-color .3s;
+            flex-shrink: 0;
+        }
+        [data-theme="light"] .sb-theme-track {
+            background: rgba(0,0,0,0.08);
+            border-color: rgba(0,0,0,0.12);
+        }
+        .sb-theme-thumb {
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: #e8924a;
+            transition: transform .3s, background .3s;
+        }
+        [data-theme="light"] .sb-theme-thumb {
+            transform: translateX(18px);
+            background: #c47820;
+        }
+        .sb-theme-icon { font-size: 1rem; line-height: 1; }
+
+        /* ── Hamburger / Toggle Button ── */
+        #sidebar-toggle-btn {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1060;
+            background: rgba(17,24,39,0.9);
+            border: 1px solid rgba(255,255,255,0.10);
+            backdrop-filter: blur(12px);
+            border-radius: 10px;
+            width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            color: #e2e8f4;
+            transition: background .2s, transform .2s, left var(--transition-speed) cubic-bezier(.4,0,.2,1);
+            font-size: 1.1rem;
+        }
+        #sidebar-toggle-btn:hover {
+            background: rgba(232,146,74,0.15);
+            color: #e8924a;
+        }
+        /* Move hamburger when sidebar is open */
+        body:not(.sidebar-closed) #sidebar-toggle-btn {
+            left: calc(var(--sidebar-w) + 0.75rem);
+        }
+
+        /* ── Main content wrapper ── */
+        #layout-main {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #layout-main .ana-icerik {
+            flex: 1;
+        }
+
+        /* ── Light theme sidebar overrides ── */
+        html[data-theme="light"] #app-sidebar {
+            --sidebar-bg: rgba(240,235,224,0.97);
+            --sidebar-border: rgba(0,0,0,0.09);
+            --sidebar-text: #5a5a7a;
+            --sidebar-text-active: #1a1a2e;
+            background: rgba(240,235,224,0.97);
+        }
+        html[data-theme="light"] #sidebar-toggle-btn {
+            background: rgba(255,255,255,0.9);
+            border-color: rgba(0,0,0,0.10);
+            color: #1a1a2e;
+        }
+
+        html[data-theme="light"] #top-theme-container {
+            background: rgba(255,255,255,0.9) !important;
+            border-color: rgba(0,0,0,0.10) !important;
+        }
+
+        /* Basket badge */
+        .sepet-badge {
+            background: var(--sidebar-accent);
+            color: #fff;
+            border-radius: 10px;
+            padding: 2px 7px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: auto;
+        }
+
+        /* ── Footer ── */
+        .alt-bilgi {
+            padding: 22px 0;
+            border-top: 1px solid var(--kenar, rgba(255,255,255,0.08));
+            background: rgba(18, 91, 80, 0.05);
+        }
+
+        @@media (max-width: 768px) {
+            body { padding-left: 0 !important; }
+            body:not(.sidebar-closed) #sidebar-overlay { display: block; }
+        }
+    </style>
 </head>
-<body>
+<body class="sidebar-closed">
+
     <div class="custom-global-cursor" id="global-cursor"></div>
 
-    @* Bu alan ust menuyu cizer. *@
-    <header class="ust-bar">
-        <div class="sayfa-genislik menu-icerik">
-            <a asp-controller="Home" asp-action="Index" class="logo">UdemyBagis</a>
+    @* ── Overlay ── *@
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-            <nav class="menu-linkleri">
-                <a asp-controller="Home" asp-action="Index">Anasayfa</a>
-                <a asp-controller="Home" asp-action="Bagis">Bagis Yap</a>
+    @* ── Sidebar ── *@
+    <aside id="app-sidebar" class="collapsed" role="navigation" aria-label="Ana Menü">
+        <div class="sb-header">
+            <a asp-controller="Home" asp-action="Index" class="sb-logo">Edu<em>Verse</em></a>
+            <button class="sb-close-btn" onclick="closeSidebar()" title="Menüyü Kapat" aria-label="Kapat">✕</button>
+        </div>
 
-                <div class="theme-toggle" title="Tema değiştir">
-                    <span class="theme-toggle-icon">🌙</span>
-                    <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
-                    <span class="theme-toggle-label">Koyu</span>
+        <nav class="sb-nav">
+            @* ── Temel linkler ── *@
+            @if (User.Identity?.IsAuthenticated != true)
+            {
+                <a class="sb-link" asp-controller="Hesap" asp-action="Giris">
+                    <span class="sb-link-icon">🔑</span> Giriş Yap
+                </a>
+                <a class="sb-link" asp-controller="Hesap" asp-action="Kayit">
+                    <span class="sb-link-icon">✍️</span> Kayıt Ol
+                </a>
+            }
+
+            <a class="sb-link sb-link--accent" asp-controller="Bagisci" asp-action="BagisPanel">
+                <span class="sb-link-icon">💝</span> Bağış Yap
+            </a>
+
+            @* ── Kimliği doğrulanmış kullanıcı linkleri ── *@
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="sb-divider"></div>
+                <div class="sb-section-label">Hesabım</div>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="sb-link" asp-controller="Admin" asp-action="Panel">
+                        <span class="sb-link-icon">🛡️</span> Admin Paneli
+                    </a>
+                }
+                @if (User.IsInRole("Egitmen"))
+                {
+                    <a class="sb-link" asp-controller="Egitmen" asp-action="Panel">
+                        <span class="sb-link-icon">🏆</span> Eğitmen Paneli
+                    </a>
+                }
+                @if (User.IsInRole("Ogrenci"))
+                {
+                    <a class="sb-link" asp-controller="Ogrenci" asp-action="Panel">
+                        <span class="sb-link-icon">🎓</span> Öğrenci Paneli
+                    </a>
+                }
+
+                <a class="sb-link" asp-controller="Sepet" asp-action="Index">
+                    <span class="sb-link-icon">🛒</span> Sepet
+                    <span class="sepet-badge" id="sepet-badge">0</span>
+                </a>
+
+                <a class="sb-link" asp-controller="Profil" asp-action="Index">
+                    <span class="sb-link-icon">👤</span> Profilim
+                </a>
+
+                <div class="sb-divider"></div>
+                <span class="sb-section-label">@User.Identity!.Name</span>
+
+                <a class="sb-link" asp-controller="Hesap" asp-action="Cikis">
+                    <span class="sb-link-icon">🚪</span> Çıkış
+                </a>
+            }
+        </nav>
+
+        <div class="sb-footer">
+            <div class="sb-theme-toggle" id="sb-theme-toggle" title="Tema değiştir">
+                <span class="sb-theme-icon" id="sb-theme-icon">🌙</span>
+                <div class="sb-theme-track">
+                    <div class="sb-theme-thumb"></div>
                 </div>
-
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    @* Bu blok rola gore ilgili panele giden baglantiyi gosterir. *@
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <a asp-controller="Admin" asp-action="Panel">Admin Paneli</a>
-                    }
-                    @if (User.IsInRole("Egitmen"))
-                    {
-                        <a asp-controller="Egitmen" asp-action="Panel">Egitmen Paneli</a>
-                    }
-                    @if (User.IsInRole("Ogrenci"))
-                    {
-                        <a asp-controller="Ogrenci" asp-action="Panel">Ogrenci Paneli</a>
-                    }
-
-                    <a asp-controller="Profil" asp-action="Index">Profilim</a>
-                    <span class="kullanici-bilgi">@User.Identity.Name</span>
-                    <a asp-controller="Hesap" asp-action="Cikis">Cikis</a>
-                }
-                else
-                {
-                    <a asp-controller="Hesap" asp-action="Giris">Giris</a>
-                    <a asp-controller="Hesap" asp-action="Kayit">Kayit</a>
-                }
-            </nav>
+                <span class="sb-theme-label" id="sb-theme-label">Koyu Mod</span>
+            </div>
         </div>
-    </header>
+    </aside>
 
-    @* Bu alan sayfanin asil icerigini cizer. *@
-    <main class="sayfa-genislik ana-icerik">
-        @RenderBody()
-    </main>
+    @* ── Hamburger Toggle Button ── *@
+    <button id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Menüyü Aç/Kapat" aria-label="Menüyü Aç/Kapat">
+        ☰
+    </button>
 
-    @* Bu alan sayfa alt bilgisini cizer. *@
-    <footer class="alt-bilgi">
-        <div class="sayfa-genislik">
-            <span>ASP.NET Core MVC + SQLite demo proje</span>
+    @* ── Global Theme Toggle (Top Right) ── *@
+    <div style="position:fixed; top:1rem; right:1.5rem; z-index:1060; background:rgba(17,24,39,0.9); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:6px 12px; backdrop-filter:blur(10px);" id="top-theme-container">
+        <div class="theme-toggle" id="top-theme-toggle" title="Tema değiştir">
+            <span class="theme-toggle-icon" id="top-theme-icon">🌙</span>
+            <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
         </div>
-    </footer>
+    </div>
 
-    @* Bu satir ortak javascript kutuphanelerini ekler. *@
+    @* ── Sayfa içeriği ── *@
+    <div id="layout-main">
+        <main class="sayfa-genislik ana-icerik">
+            @RenderBody()
+        </main>
+
+        <footer class="alt-bilgi">
+            <div class="sayfa-genislik" style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.85rem; opacity:0.7;">© 2026 EduVerse — Tüm Hakları Saklıdır</span>
+                @if (!(User.Identity?.IsAuthenticated == true))
+                {
+                    <a asp-controller="Hesap" asp-action="AdminGiris" style="font-size:0.8rem; opacity:0.4; text-decoration:none; color:inherit;" title="Admin Girişi">🔐 Yönetim</a>
+                }
+            </div>
+        </footer>
+    </div>
+
+    @* Scripts *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
@@ -83,7 +428,88 @@
     @await Html.PartialAsync("_AssistantWidget")
     <script src="~/js/assistant.js" asp-append-version="true"></script>
 
-    @* Bu satir sayfaya ozel script alanina izin verir. *@
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                fetch('/Sepet/Sayi')
+                    .then(res => res.json())
+                    .then(data => {
+                        const badge = document.getElementById('sepet-badge');
+                        if (badge) badge.innerText = data.sayi;
+                    })
+                    .catch(err => console.error("Sepet sayısı alınamadı", err));
+            });
+        </script>
+    }
+
+    <script>
+        /* ── Sidebar state ── */
+        const SIDEBAR_KEY = 'eduverse_sidebar_open';
+
+        function openSidebar() {
+            document.getElementById('app-sidebar').classList.remove('collapsed');
+            document.body.classList.remove('sidebar-closed');
+            document.getElementById('sidebar-overlay').classList.add('visible');
+            sessionStorage.setItem(SIDEBAR_KEY, '1');
+        }
+        function closeSidebar() {
+            document.getElementById('app-sidebar').classList.add('collapsed');
+            document.body.classList.add('sidebar-closed');
+            document.getElementById('sidebar-overlay').classList.remove('visible');
+            sessionStorage.removeItem(SIDEBAR_KEY);
+        }
+        function toggleSidebar() {
+            const sb = document.getElementById('app-sidebar');
+            if (sb.classList.contains('collapsed')) openSidebar();
+            else closeSidebar();
+        }
+
+        /* Restore state */
+        if (sessionStorage.getItem(SIDEBAR_KEY) === '1') openSidebar();
+
+        /* ── Custom Cursor ── */
+        const cur = document.getElementById('global-cursor');
+        if (cur) {
+            document.addEventListener('mousemove', e => {
+                cur.style.left = e.clientX + 'px';
+                cur.style.top = e.clientY + 'px';
+            });
+            document.querySelectorAll('a, button, .course-card, .role-card, .bilgi-kart').forEach(el => {
+                el.addEventListener('mouseenter', () => cur.classList.add('grow'));
+                el.addEventListener('mouseleave', () => cur.classList.remove('grow'));
+            });
+        }
+
+        /* ── Sidebar Theme Toggle ── */
+        const sbThemeToggle = document.getElementById('sb-theme-toggle');
+        const sbThemeIcon   = document.getElementById('sb-theme-icon');
+        const sbThemeLabel  = document.getElementById('sb-theme-label');
+        const topThemeIcon  = document.getElementById('top-theme-icon');
+
+        function syncSbThemeUI() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (sbThemeIcon)  sbThemeIcon.textContent  = isLight ? '☀️' : '🌙';
+            if (sbThemeLabel) sbThemeLabel.textContent = isLight ? 'Açık Mod' : 'Koyu Mod';
+            if (topThemeIcon) topThemeIcon.textContent = isLight ? '☀️' : '🌙';
+        }
+        syncSbThemeUI();
+
+        if (sbThemeToggle) {
+            sbThemeToggle.addEventListener('click', () => {
+                const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+                const next = isLight ? 'dark' : 'light';
+                if (window.EduVerseTheme) {
+                    window.EduVerseTheme.apply(next);
+                } else {
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('eduverse-theme', next);
+                }
+                syncSbThemeUI();
+            });
+        }
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

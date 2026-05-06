@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UdemyBagisSistemi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1c15796ed85de28c971899a949ec11cbb82c3e8d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+987217b77b8a152fdfb706313c4fbb95d4adde2b")]
 [assembly: System.Reflection.AssemblyProductAttribute("UdemyBagisSistemi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UdemyBagisSistemi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

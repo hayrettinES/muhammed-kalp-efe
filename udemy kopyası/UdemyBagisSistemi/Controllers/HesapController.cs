@@ -22,6 +22,47 @@ public class HesapController : Controller
         _platformServisi = platformServisi;
     }
 
+    // Bu aksiyon admin giriş ekranını gösterir.
+    [HttpGet]
+    public IActionResult AdminGiris()
+    {
+        return View(new GirisViewModel());
+    }
+
+    // Bu aksiyon admin giriş formunu işler.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AdminGiris(GirisViewModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        var kullanici = _platformServisi.GirisYap(model.Eposta, model.Sifre);
+        if (kullanici is null)
+        {
+            ModelState.AddModelError(string.Empty, "E-posta veya şifre hatalı.");
+            return View(model);
+        }
+
+        if (kullanici.Rol != "Admin")
+        {
+            ModelState.AddModelError(string.Empty, "Bu giriş yalnızca yöneticiler içindir.");
+            return View(model);
+        }
+
+        var claimler = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, kullanici.Id.ToString()),
+            new(ClaimTypes.Name, kullanici.AdSoyad),
+            new(ClaimTypes.Email, kullanici.Eposta),
+            new(ClaimTypes.Role, kullanici.Rol)
+        };
+
+        var kimlik = new ClaimsIdentity(claimler, CookieAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(kimlik));
+
+        return RedirectToAction("Panel", "Admin");
+    }
+
     // Bu aksiyon giris ekranini gosterir.
     [HttpGet]
     public IActionResult Giris()

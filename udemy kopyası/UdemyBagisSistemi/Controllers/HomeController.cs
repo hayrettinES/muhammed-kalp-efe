@@ -23,7 +23,7 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         // View klasöründeki basic altındaki index gösterilir.
-        return View("~/Views/basic/index.cshtml");
+        return View("~/Views/basic/index.cshtml", _platformServisi.AnasayfaVerisiniGetir());
     }
 
     // Bu aksiyon herkese acik bagis sayfasini gosterir.

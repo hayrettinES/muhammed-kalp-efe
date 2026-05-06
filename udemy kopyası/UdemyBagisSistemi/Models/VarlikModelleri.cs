@@ -116,6 +116,9 @@ public class Kurs
 
     // Bu alan kursun olusturulma zamanini tutar.
     public string OlusturmaTarihi { get; set; } = string.Empty;
+
+    // Bu alan kursun küçük resmini tutar.
+    public string ThumbnailUrl { get; set; } = string.Empty;
 }
 
 // Bu model kurs icindeki her bir video bolumunu temsil eder.
@@ -160,6 +163,9 @@ public class Bagis
 
     // Bu alan bagisin yapildigi tarihi tutar.
     public string Tarih { get; set; } = string.Empty;
+
+    // Bu alan bagisin onaylanip onaylanmadigini belirtir.
+    public bool OnaylandiMi { get; set; }
 }
 
 // Bu model ogrencinin kurs kaydini temsil eder.
@@ -182,6 +188,9 @@ public class KursKaydi
 
     // Bu alan satin alma tarihini tutar.
     public string Tarih { get; set; } = string.Empty;
+
+    // Bu alan bagisin onaylanip onaylanmadigini belirtir.
+    public bool OnaylandiMi { get; set; }
 }
 
 // Bu model liste ekranlarinda zenginlestirilmis kurs bilgisini tasir.
@@ -207,6 +216,9 @@ public class KursKart
 
     // Bu alan kursun toplam video bolumu sayisini tutar.
     public int BolumSayisi { get; set; }
+
+    // Bu alan sepet ozelinde odeme yontemini tutar ("Bakiye" veya "Havuz").
+    public string OdemeYontemi { get; set; } = "Bakiye";
 }
 
 // Bu model ogrencinin kurs icin yaptigi yorumu temsil eder.
@@ -229,6 +241,9 @@ public class KursYorumu
 
     // Bu alan yorum tarihini tutar.
     public string Tarih { get; set; } = string.Empty;
+
+    // Bu alan bagisin onaylanip onaylanmadigini belirtir.
+    public bool OnaylandiMi { get; set; }
 
     // Bu alan yorumu yapan ogrencinin gorunen adini tutar.
     public string OgrenciAdi { get; set; } = string.Empty;
@@ -254,6 +269,9 @@ public class YorumYaniti
 
     // Bu alan yanit tarihini tutar.
     public string Tarih { get; set; } = string.Empty;
+
+    // Bu alan bagisin onaylanip onaylanmadigini belirtir.
+    public bool OnaylandiMi { get; set; }
 
     // Bu alan yaniti yapan kisinin gorunen adini tutar.
     public string KullaniciAdi { get; set; } = string.Empty;
@@ -340,6 +358,28 @@ public class AktiviteOgesi
     // Aktivitenin gerceklestigi tarih
     public string Tarih { get; set; } = string.Empty;
 
+    // Bu alan bagisin onaylanip onaylanmadigini belirtir.
+    public bool OnaylandiMi { get; set; }
+
     // CSS tasarimi icin verilebilecek renk/tip degeri (orn: "copper")
     public string IkonRengi { get; set; } = string.Empty;
+}
+
+// Bu model kullanicinin sepetine ekledigi kurs ogesini temsil eder.
+public class SepetOgesi
+{
+    // Veritabanindaki birincil anahtar
+    public int Id { get; set; }
+
+    // Sepete ekleyen kullanicinin kimligi
+    public int KullaniciId { get; set; }
+
+    // Sepete eklenen kursun kimligi
+    public int KursId { get; set; }
+
+    // Sepete eklenme tarihi
+    public string EklenmeTarihi { get; set; } = string.Empty;
+
+    // Ödeme yöntemi: "Bakiye" veya "Havuz"
+    public string OdemeYontemi { get; set; } = "Bakiye";
 }

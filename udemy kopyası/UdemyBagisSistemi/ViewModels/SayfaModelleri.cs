@@ -21,6 +21,30 @@ public class AnasayfaViewModel
 
     // Bu alan toplam bagis sayisini tutar.
     public int ToplamBagisSayisi { get; set; }
+
+    // Bu ay sisteme katilan ogrenci sayisi.
+    public int BuAyKatilanOgrenciSayisi { get; set; }
+
+    // Toplam aktif ogrenci sayisi.
+    public int AktifOgrenciSayisi { get; set; }
+
+    // Toplam uzman egitmen sayisi.
+    public int UzmanEgitmenSayisi { get; set; }
+
+    // Toplam tamamlanan kurs (satin alinan kurs) sayisi.
+    public int TamamlananKursSayisi { get; set; }
+
+    // Egitmenlerin aylik ortalama kazanci.
+    public decimal OrtalamaAylikKazanc { get; set; }
+
+    // Son bağış yapan kişinin adı.
+    public string SonBagisciAdi { get; set; } = string.Empty;
+
+    // Son bağış yapan kişinin bağış tutarı.
+    public decimal SonBagisTutari { get; set; }
+
+    // Veritabanındaki tüm kategoriler
+    public List<Kategori> Kategoriler { get; set; } = [];
 }
 
 // Bu model giris formunu tasir.
@@ -111,6 +135,21 @@ public class AdminPanelViewModel
 
     // Bu alan toplam yorum sayisini tutar.
     public int ToplamYorumSayisi { get; set; }
+
+    // Tüm kurs satışlarından elde edilen toplam gelir
+    public decimal ToplamGelir { get; set; }
+
+    // Yapılmış toplam bağış sayısı
+    public int ToplamBagisSayisi { get; set; }
+
+    // Tüm bağışların toplam tutarı
+    public decimal ToplamBagisTutari { get; set; }
+
+    // Bu ay sisteme kaydolan yeni kullanıcı sayısı
+    public int BuAyKayitSayisi { get; set; }
+
+    // Son bağışlar listesi
+    public List<Bagis> Bagislar { get; set; } = [];
 }
 
 // Bu model egitmen panel verilerini tasir.
@@ -292,4 +331,17 @@ public class OgrenciKursIzlemeViewModel
 
     // Öğrencinin bu kursa ait hangi bölümleri tamamladığı vb. durumu.
     public List<BolumIlerlemesi> Ilerlemeler { get; set; } = [];
+
+    // Kursa ait tüm videolara yapılmış yorumlar listesi.
+    public List<BolumYorumu> BolumYorumlari { get; set; } = [];
+}
+
+// Bu model öğrencinin sepet sayfasındaki verilerini taşır.
+public class SepetViewModel
+{
+    // Sepetteki kurslar listesi
+    public List<KursKart> SepettekiKurslar { get; set; } = [];
+
+    // Sepetteki tüm kursların toplam fiyatı
+    public decimal ToplamTutar => SepettekiKurslar.Sum(k => k.Kurs?.Fiyat ?? 0);
 }

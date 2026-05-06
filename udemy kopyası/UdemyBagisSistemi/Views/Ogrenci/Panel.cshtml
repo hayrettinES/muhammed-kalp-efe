@@ -164,6 +164,59 @@
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 3rem; }
         .grid-4 { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;}
 
+        /* ── MAĞAZA ARAMA ── */
+        .magaza-arama {
+            position: relative;
+            max-width: 480px;
+            margin-bottom: 2rem;
+        }
+        .arama-ikon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        .arama-input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 44px 14px 44px;
+            color: var(--text);
+            font-family: var(--fs);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color .3s, box-shadow .3s;
+        }
+        .arama-input:focus {
+            border-color: var(--copper);
+            box-shadow: 0 0 0 3px rgba(232,146,74,.12);
+        }
+        .arama-input::placeholder { color: var(--text2); }
+        .arama-temizle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--surfaceH);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            color: var(--text2);
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s, color .2s;
+        }
+        .arama-temizle:hover { background: var(--copper); color: #111; }
+        .course-card.gizli { display: none; }
+
         /* STAT CARDS */
         .stat-card {
             background: var(--surface);
@@ -272,6 +325,7 @@
             <li><a class="nav-item active" data-tab="tab-dashboard">Dashboard</a></li>
             <li><a class="nav-item" data-tab="tab-kurslarim">Eğitimlerim</a></li>
             <li><a class="nav-item" data-tab="tab-magaza">Kurs Mağazası</a></li>
+            <li><a class="nav-item" data-tab="tab-sepet">🛒 Sepetim <span id="sepet-badge-panel" style="background:var(--copper);color:#111;border-radius:10px;padding:2px 8px;font-size:0.75rem;margin-left:6px;">0</span></a></li>
             <li><a class="nav-item" data-tab="tab-profil">Profil Ayarları</a></li>
             <li style="margin-top:auto;">
                 <div class="theme-toggle" title="Tema değiştir" style="padding:0.5rem 1rem;">
@@ -354,7 +408,7 @@
                             var ilerleme = Model.Ilerlemeler.FirstOrDefault(x => x.KursId == kurs.Kurs.Id);
                             <div class="course-card">
                                 <div class="course-thumb">
-                                    <img src="@kurs.Kurs.OnizlemeVideoUrl" alt="Kurs" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80'" />
+                                    <img src="@(string.IsNullOrEmpty(kurs.Kurs.ThumbnailUrl) ? "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80" : kurs.Kurs.ThumbnailUrl)" alt="Kurs" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80'" />
                                     <span class="course-badge">Eğitim</span>
                                 </div>
                                 <div class="course-body">
@@ -392,13 +446,19 @@
                 <p>Sahip olduğunuz tüm kurslar burada. Bir kursa tıklayarak derslere başlayabilir kalıp yorum yapabilirsiniz.</p>
             </header>
 
-            <div class="grid-4">
+            <div class="magaza-arama">
+                <span class="arama-ikon">🔍</span>
+                <input type="text" id="kurslarimArama" class="arama-input" placeholder="Eğitimlerimde ara... (örn: Python, Web, Tasarım)" autocomplete="off" />
+                <button class="arama-temizle" id="kurslarimTemizle" style="display:none;" onclick="temizleKurslarim()">✕</button>
+            </div>
+
+            <div class="grid-4" id="kurslarimGrid">
                 @foreach (var kurs in Model.AldigiKurslar)
                 {
                      var ilerleme = Model.Ilerlemeler.FirstOrDefault(x => x.KursId == kurs.Kurs.Id);
-                     <div class="course-card">
+                     <div class="course-card" data-baslik="@kurs.Kurs.Baslik.ToLowerInvariant()" data-kategori="@kurs.KategoriAdi.ToLowerInvariant()">
                         <div class="course-thumb">
-                            <img src="@kurs.Kurs.OnizlemeVideoUrl" alt="Kurs" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80'" />
+                            <img src="@(string.IsNullOrEmpty(kurs.Kurs.ThumbnailUrl) ? "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" : kurs.Kurs.ThumbnailUrl)" alt="Kurs" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80'" />
                         </div>
                         <div class="course-body">
                             <h3>@kurs.Kurs.Baslik</h3>
@@ -417,6 +477,9 @@
                     </div>
                 }
             </div>
+            <div id="kurslarimSonucYok" style="display:none; padding:3rem; text-align:center; border:1px dashed var(--borderH); border-radius:16px; color:var(--text2);">
+                🔍 Aramanızla eşleşen eğitim bulunamadı.
+            </div>
             
             @if(!Model.AldigiKurslar.Any()) {
                 <div style="padding: 4rem; text-align: center; border: 1px dashed var(--borderH); border-radius: 16px;">Kütüphaneniz şu an boş.</div>
@@ -430,25 +493,34 @@
                 <p>Yetkinliklerinizi artıracak en seçkin eğitimleri bularak cüzdanınızla veya havuz desteğiyle satın alın.</p>
             </header>
 
-             <div class="grid-4">
+            <div class="magaza-arama">
+                <span class="arama-ikon">🔍</span>
+                <input type="text" id="magazaArama" class="arama-input" placeholder="Kurs ara... (örn: Python, Web, Tasarım)" autocomplete="off" />
+                <button class="arama-temizle" id="aramaTemizle" style="display:none;" onclick="temizleArama()">✕</button>
+            </div>
+
+             <div class="grid-4" id="magazaGrid">
                 @foreach (var kurs in alinmayanKurslar)
                 {
-                     <div class="course-card">
+                     <div class="course-card" data-baslik="@kurs.Kurs.Baslik.ToLowerInvariant()" data-kategori="@kurs.KategoriAdi.ToLowerInvariant()" data-egitmen="@kurs.EgitmenAdi.ToLowerInvariant()">
                         <div class="course-thumb">
-                            <img src="@kurs.Kurs.OnizlemeVideoUrl" alt="Kurs" onerror="this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80'" />
+                            <img src="@(string.IsNullOrEmpty(kurs.Kurs.ThumbnailUrl) ? "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80" : kurs.Kurs.ThumbnailUrl)" alt="Kurs" onerror="this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80'" />
                             <span class="course-badge" style="background:var(--copper); color:#111">@kurs.Kurs.Fiyat.ToString("N2") ₺</span>
                         </div>
                         <div class="course-body">
                             <h3>@kurs.Kurs.Baslik</h3>
                             <p>Eğitmen: @kurs.EgitmenAdi / Kategori: @kurs.KategoriAdi</p>
                             
-                            <form asp-action="KursAl" method="post" style="margin-top:auto;" onsubmit="return confirm('Bu kurs hesaptaki/havuzdaki bakiye kullanılarak satın alınacaktır. Onaylıyor musunuz?');">
-                                <input type="hidden" name="kursId" value="@kurs.Kurs.Id" />
-                                <button type="submit" class="btn outline" style="width:100%; border-color:var(--copper); color:var(--copper);">Hemen Satın Al</button>
-                            </form>
+                            <div style="display:flex; flex-direction:column; gap:8px; margin-top:auto;">
+                                <button type="button" class="btn outline sepete-ekle-btn" style="width:100%; border-color:var(--copper); color:var(--copper); font-size:0.85rem; padding: 10px;" data-kurs-id="@kurs.Kurs.Id" data-yontem="Bakiye" onclick="sepeteEkleAjax(this)">🛒 Sepete Ekle (Bakiye)</button>
+                                <button type="button" class="btn mint sepete-ekle-btn" style="width:100%; font-size:0.85rem; padding: 10px;" data-kurs-id="@kurs.Kurs.Id" data-yontem="Havuz" onclick="sepeteEkleAjax(this)">🛒 Sepete Ekle (Askıdan)</button>
+                            </div>
                         </div>
                     </div>
                 }
+            </div>
+            <div id="aramaSonucYok" style="display:none; padding:3rem; text-align:center; border:1px dashed var(--borderH); border-radius:16px; color:var(--text2);">
+                🔍 Aramanızla eşleşen kurs bulunamadı.
             </div>
             @if(!alinmayanKurslar.Any()) {
                 <div style="padding: 4rem; text-align: center; border: 1px dashed var(--borderH); border-radius: 16px;">Şu anda mağazada satın alabileceğiniz yeni bir kurs bulunmuyor.</div>
@@ -513,6 +585,17 @@
             </div>
         </div>
 
+        <!-- TAB: SEPETİM -->
+        <div id="tab-sepet" class="st-pane">
+            <header class="header">
+                <h1>Sepetim</h1>
+                <p>Beğendiğiniz kursları sepetinize ekleyin, toplu olarak satın alın.</p>
+            </header>
+            <div id="sepet-dinamik-icerik">
+                <p style="color:var(--text2); text-align:center; padding:3rem;">Sepet yükleniyor...</p>
+            </div>
+        </div>
+
     </main>
 
     <!-- AI ASISTAN WIDGET -->
@@ -523,18 +606,30 @@
         const tabs = document.querySelectorAll('.nav-item[data-tab]');
         const panes = document.querySelectorAll('.st-pane');
 
+        function sekmeyeGec(hedefTab) {
+            tabs.forEach(t => t.classList.remove('active'));
+            panes.forEach(p => p.classList.remove('active'));
+            const tabEl = document.querySelector(`[data-tab="${hedefTab}"]`);
+            if (tabEl) tabEl.classList.add('active');
+            const paneEl = document.getElementById(hedefTab);
+            if (paneEl) paneEl.classList.add('active');
+            if (hedefTab === 'tab-sepet') sepetYukle();
+        }
+
         tabs.forEach(tab => {
             tab.addEventListener('click', (e) => {
                 e.preventDefault();
-                const target = tab.dataset.tab;
-                
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                panes.forEach(p => p.classList.remove('active'));
-                document.getElementById(target).classList.add('active');
+                sekmeyeGec(tab.dataset.tab);
             });
         });
+
+        // Sepet onay sonrası eğitimlere yönlendirme
+        @if (TempData["SepetOnay"] != null)
+        {
+            <text>
+            document.addEventListener('DOMContentLoaded', () => sekmeyeGec('tab-kurslarim'));
+            </text>
+        }
 
         // PREVIEW IMAGE LOGIC
         const uploadInput = document.getElementById('profilFotoInput');
@@ -565,6 +660,122 @@
             document.querySelector('.sidebar').classList.toggle('collapsed');
         });
 
+        // ── SEPET FONKSİYONLARI ──
+        function sepetSayisiGuncelle() {
+            fetch('/Sepet/Sayi').then(r => r.json()).then(d => {
+                const b = document.getElementById('sepet-badge-panel');
+                if (b) b.innerText = d.sayi;
+            }).catch(() => {});
+        }
+        sepetSayisiGuncelle();
+
+        function sepeteEkleAjax(btn) {
+            const kursId = parseInt(btn.dataset.kursId);
+            const yontem = btn.dataset.yontem || 'Bakiye';
+            btn.disabled = true;
+            btn.textContent = 'Ekleniyor...';
+            fetch('/Sepet/EkleAjax', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ kursId, odemeYontemi: yontem })
+            }).then(r => r.json()).then(d => {
+                if (d.basarili) {
+                    btn.textContent = '✓ Sepete Eklendi';
+                    btn.style.opacity = '0.6';
+                    sepetSayisiGuncelle();
+                    bildirimGoster(d.mesaj, 'basari');
+                } else {
+                    btn.textContent = yontem === 'Havuz' ? '🛒 Sepete Ekle (Askıdan)' : '🛒 Sepete Ekle (Bakiye)';
+                    btn.disabled = false;
+                    bildirimGoster(d.mesaj, 'hata');
+                }
+            }).catch(() => {
+                btn.textContent = yontem === 'Havuz' ? '🛒 Sepete Ekle (Askıdan)' : '🛒 Sepete Ekle (Bakiye)';
+                btn.disabled = false;
+            });
+        }
+
+        function sepetYukle() {
+            const c = document.getElementById('sepet-dinamik-icerik');
+            c.innerHTML = '<p style="color:var(--text2);text-align:center;padding:3rem;">Yükleniyor...</p>';
+            fetch('/Sepet/Index').then(r => r.text()).then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const bolum = doc.querySelector('.bolum');
+                if (bolum) {
+                    c.innerHTML = bolum.innerHTML;
+                    c.querySelectorAll('form[action*="Cikar"]').forEach(f => {
+                        f.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            const kid = this.querySelector('input[name="kursId"]').value;
+                            sepettenCikarAjax(parseInt(kid));
+                        });
+                    });
+                    const onayF = c.querySelector('form[action*="Onayla"]');
+                    if (onayF) onayF.addEventListener('submit', function(e) { e.preventDefault(); sepetOnaylaAjax(); });
+                } else {
+                    c.innerHTML = '<div style="padding:4rem;text-align:center;border:1px dashed var(--borderH);border-radius:16px;color:var(--text2);">🛒 Sepetiniz boş.</div>';
+                }
+            }).catch(() => { c.innerHTML = '<p style="color:var(--text2);text-align:center;padding:3rem;">Yüklenemedi.</p>'; });
+        }
+
+        function sepettenCikarAjax(kursId) {
+            fetch('/Sepet/CikarAjax', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({kursId}) })
+            .then(r => r.json()).then(d => { if(d.basarili){sepetSayisiGuncelle();sepetYukle();bildirimGoster(d.mesaj,'basari');}else{bildirimGoster(d.mesaj,'hata');} });
+        }
+
+        function sepetOnaylaAjax() {
+            fetch('/Sepet/OnaylaAjax', { method:'POST', headers:{'Content-Type':'application/json'} })
+            .then(r => r.json()).then(d => {
+                if(d.basarili){bildirimGoster(d.mesaj,'basari');sepetSayisiGuncelle();setTimeout(()=>{window.location.href='/Ogrenci/Panel';},1200);}
+                else{bildirimGoster(d.mesaj,'hata');sepetYukle();}
+            });
+        }
+
+        function bildirimGoster(mesaj, tip) {
+            const m = document.querySelector('.toast-bildirim'); if(m) m.remove();
+            const el = document.createElement('div');
+            el.className = 'toast-bildirim';
+            el.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;padding:16px 24px;border-radius:14px;font-size:.95rem;font-weight:600;animation:fadeIn .4s;max-width:400px;backdrop-filter:blur(10px);';
+            el.style.background = tip==='basari'?'rgba(61,255,192,.15)':'rgba(255,90,90,.15)';
+            el.style.border = tip==='basari'?'1px solid rgba(61,255,192,.4)':'1px solid rgba(255,90,90,.4)';
+            el.style.color = tip==='basari'?'var(--mint)':'#ff5a5a';
+            el.textContent = mesaj;
+            document.body.appendChild(el);
+            setTimeout(()=>el.remove(), 3500);
+        }
+
+        document.querySelector('[data-tab="tab-sepet"]')?.addEventListener('click', () => sepetYukle());
+
+        // ── EĞİTİMLERİM ARAMA ──
+        const kurslarimArama = document.getElementById('kurslarimArama');
+        const kurslarimTemizle = document.getElementById('kurslarimTemizle');
+        const kurslarimSonucYok = document.getElementById('kurslarimSonucYok');
+        if (kurslarimArama) kurslarimArama.addEventListener('input', filtreleKurslarim);
+        function filtreleKurslarim() {
+            const q = kurslarimArama.value.toLowerCase().trim();
+            const g = document.getElementById('kurslarimGrid'); if(!g) return;
+            const k = g.querySelectorAll('.course-card'); let v = 0;
+            kurslarimTemizle.style.display = q.length>0?'flex':'none';
+            k.forEach(c=>{const b=c.dataset.baslik||'';const ka=c.dataset.kategori||'';if(!q||b.includes(q)||ka.includes(q)){c.classList.remove('gizli');v++;}else{c.classList.add('gizli');}});
+            kurslarimSonucYok.style.display = (q&&v===0)?'block':'none';
+        }
+        function temizleKurslarim(){kurslarimArama.value='';filtreleKurslarim();kurslarimArama.focus();}
+
+        // ── MAĞAZA ARAMA ──
+        const magazaArama = document.getElementById('magazaArama');
+        const aramaTemizle = document.getElementById('aramaTemizle');
+        const aramaSonucYok = document.getElementById('aramaSonucYok');
+        if (magazaArama) magazaArama.addEventListener('input', filtreleMagaza);
+        function filtreleMagaza() {
+            const q = magazaArama.value.toLowerCase().trim();
+            const g = document.getElementById('magazaGrid'); if(!g) return;
+            const k = g.querySelectorAll('.course-card'); let v = 0;
+            aramaTemizle.style.display = q.length>0?'flex':'none';
+            k.forEach(c=>{const b=c.dataset.baslik||'';const ka=c.dataset.kategori||'';const e=c.dataset.egitmen||'';if(!q||b.includes(q)||ka.includes(q)||e.includes(q)){c.classList.remove('gizli');v++;}else{c.classList.add('gizli');}});
+            aramaSonucYok.style.display = (q&&v===0)?'block':'none';
+        }
+        function temizleArama(){magazaArama.value='';filtreleMagaza();magazaArama.focus();}
     </script>
     <script src="~/js/assistant.js" asp-append-version="true"></script>
 </body>
